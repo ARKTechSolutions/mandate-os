@@ -64,10 +64,7 @@ export function readMandateOsOpenClawBridgeConfig(
       env.MANDATE_OS_REQUEST_TIMEOUT_MS,
       20_000,
     ),
-    maxRetries: parseNonNegativeInteger(
-      env.MANDATE_OS_REQUEST_MAX_RETRIES,
-      1,
-    ),
+    maxRetries: parseNonNegativeInteger(env.MANDATE_OS_REQUEST_MAX_RETRIES, 1),
   };
 }
 

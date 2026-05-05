@@ -26,7 +26,12 @@ export async function runHookGatewayCommand(
 ) {
   const [host, event] = argv as [
     SupportedHost | undefined,
-    SupportedCursorEvent | SupportedClaudeEvent | SupportedCodexEvent | undefined,
+    (
+      | SupportedCursorEvent
+      | SupportedClaudeEvent
+      | SupportedCodexEvent
+      | undefined
+    ),
   ];
 
   const isSupportedCursorEvent =
@@ -36,7 +41,11 @@ export async function runHookGatewayCommand(
     (event === 'pre-tool-bash' || event === 'pre-tool-mcp');
   const isSupportedCodexEvent = host === 'codex' && event === 'pre-tool-bash';
 
-  if (!isSupportedCursorEvent && !isSupportedClaudeEvent && !isSupportedCodexEvent) {
+  if (
+    !isSupportedCursorEvent &&
+    !isSupportedClaudeEvent &&
+    !isSupportedCodexEvent
+  ) {
     throw new Error(
       'Usage: hook-gateway.js cursor before-shell|before-mcp | claude pre-tool-bash|pre-tool-mcp | codex pre-tool-bash',
     );
@@ -180,12 +189,12 @@ if (isInvokedAsEntrypoint(import.meta.url)) {
               userMessage: 'MandateOS hook execution failed.',
               agentMessage: message,
             })
-        : toCursorHookResponse({
-            permission: 'deny',
-            decision: 'misconfigured',
-            userMessage: 'MandateOS hook execution failed.',
-            agentMessage: message,
-          });
+          : toCursorHookResponse({
+              permission: 'deny',
+              decision: 'misconfigured',
+              userMessage: 'MandateOS hook execution failed.',
+              agentMessage: message,
+            });
     process.stdout.write(`${JSON.stringify(response)}\n`);
     process.exit(1);
   });

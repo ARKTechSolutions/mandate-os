@@ -33,7 +33,9 @@
         </nav>
       </details>
 
-      <a class="header-cta" [href]="content.headerCtaHref">{{ content.headerCta }}</a>
+      <a class="header-cta" [href]="content.headerCtaHref"
+        >{{ content.headerCta }}</a
+      >
     </div>
   </header>
 
@@ -364,8 +366,8 @@
         <div class="boundary-diagram" aria-label="MandateOS trust boundary">
           <span class="mini-label">{{ content.boundary.diagram.title }}</span>
           <div class="diagram-track">
-            @for (node of content.boundary.diagram.nodes; track node; let isLast =
-            $last) {
+            @for (node of content.boundary.diagram.nodes; track node; let isLast
+            = $last) {
             <div class="diagram-node">{{ node }}</div>
             @if (!isLast) {
             <div class="diagram-arrow" aria-hidden="true"></div>
@@ -408,7 +410,9 @@
           </article>
 
           <article class="card quickstart-card">
-            <span class="mini-label">{{ content.deploy.fastestPathTitle }}</span>
+            <span class="mini-label"
+              >{{ content.deploy.fastestPathTitle }}</span
+            >
             <p>{{ content.deploy.fastestPathBody }}</p>
             <ul class="checklist-list">
               @for (item of content.deploy.fastestPathSteps; track item) {
@@ -418,7 +422,9 @@
           </article>
 
           <article class="card quickstart-card">
-            <span class="mini-label">{{ content.deploy.afterInstallTitle }}</span>
+            <span class="mini-label"
+              >{{ content.deploy.afterInstallTitle }}</span
+            >
             <p>{{ content.deploy.afterInstallBody }}</p>
             <ul class="checklist-list">
               @for (item of content.deploy.afterInstallItems; track item) {

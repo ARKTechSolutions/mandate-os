@@ -159,8 +159,14 @@ export function installMandateOsIntoCodex(
   }
 
   if (normalized.updateGitInfoExclude && normalized.gitInfoExcludePath) {
-    ensureGitInfoExcludeEntry(normalized.gitInfoExcludePath, '.codex/config.toml');
-    ensureGitInfoExcludeEntry(normalized.gitInfoExcludePath, '.codex/hooks.json');
+    ensureGitInfoExcludeEntry(
+      normalized.gitInfoExcludePath,
+      '.codex/config.toml',
+    );
+    ensureGitInfoExcludeEntry(
+      normalized.gitInfoExcludePath,
+      '.codex/hooks.json',
+    );
   }
 
   return {

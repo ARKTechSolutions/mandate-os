@@ -79,18 +79,22 @@ type ResolvedPolicyGatewayRule = Omit<MandateOsPolicyGatewayRule, 'matcher'> & {
   pattern: RegExp;
 };
 
-export const readOnlyShellPatterns = [
-  /^\s*(ls|pwd|cat|sed|rg|find)\b/i,
-  /^\s*git\s+(status|diff|log|show)\b/i,
-  /^\s*(pnpm|npm)\s+(test|lint|build)\b/i,
-  /^\s*(vitest|jest|tsc|eslint)\b/i,
+export const readOnlyShellCommands = [
+  'cat',
+  'find',
+  'git',
+  'ls',
+  'pwd',
+  'rg',
+  'sed',
 ] as const;
 
 export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
   {
     id: 'github.issue.label.command',
     channel: 'shell',
-    matcher: '^gh\\s+issue\\s+edit\\b(?=.*(?:--add-label|--remove-label)\\b)',
+    matcher:
+      '(^|[\\n;&|]+)\\s*gh\\s+issue\\s+edit\\b(?=.*(?:--add-label|--remove-label)\\b)',
     flags: 'i',
     tool: 'issue.label',
     title: 'Change GitHub issue labels',
@@ -103,7 +107,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
   {
     id: 'github.pr.draft.command',
     channel: 'shell',
-    matcher: '^gh\\s+pr\\s+ready\\b(?=.*--undo\\b)',
+    matcher: '(^|[\\n;&|]+)\\s*gh\\s+pr\\s+ready\\b(?=.*--undo\\b)',
     flags: 'i',
     tool: 'pr.draft',
     title: 'Convert a GitHub pull request to draft',
@@ -116,7 +120,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
   {
     id: 'github.repo.read.command',
     channel: 'shell',
-    matcher: '^gh\\s+(issue|pr|repo)\\s+(view|list|status)\\b',
+    matcher: '(^|[\\n;&|]+)\\s*gh\\s+(issue|pr|repo)\\s+(view|list|status)\\b',
     flags: 'i',
     tool: 'repo.read',
     title: 'Read GitHub repository state',
@@ -128,7 +132,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
   {
     id: 'git.push.command',
     channel: 'shell',
-    matcher: '^git\\s+push\\b',
+    matcher: '(^|[\\n;&|]+)\\s*git\\s+push\\b',
     flags: 'i',
     tool: 'pr.draft',
     title: 'Push code changes to a remote branch',
@@ -140,7 +144,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
   {
     id: 'release.publish.command',
     channel: 'shell',
-    matcher: '^(npm|pnpm)\\s+publish\\b',
+    matcher: '(^|[\\n;&|]+)\\s*(npm|pnpm)\\s+publish\\b',
     flags: 'i',
     tool: 'deploy.prod',
     title: 'Publish a package or release artifact',
@@ -154,7 +158,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
     id: 'kubernetes.mutation.command',
     channel: 'shell',
     matcher:
-      '^(kubectl|helm)\\s+(apply|delete|patch|scale|rollout|set|replace|upgrade|uninstall)\\b',
+      '(^|[\\n;&|]+)\\s*(kubectl|helm)\\s+(apply|delete|patch|scale|rollout|set|replace|upgrade|uninstall)\\b',
     flags: 'i',
     tool: 'deploy.prod',
     title: 'Mutate cluster state',
@@ -166,7 +170,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
   {
     id: 'terraform.mutation.command',
     channel: 'shell',
-    matcher: '^terraform\\s+(apply|destroy)\\b',
+    matcher: '(^|[\\n;&|]+)\\s*terraform\\s+(apply|destroy)\\b',
     flags: 'i',
     tool: 'deploy.prod',
     title: 'Mutate infrastructure with Terraform',
@@ -179,7 +183,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
     id: 'cloud.mutation.command',
     channel: 'shell',
     matcher:
-      '^(aws|gcloud|az)\\b.*\\b(create|delete|deploy|apply|start|stop|update|put|run|invoke)\\b',
+      '(^|[\\n;&|]+)\\s*(aws|gcloud|az)\\b.*\\b(create|delete|deploy|apply|start|stop|update|put|run|invoke)\\b',
     flags: 'i',
     tool: 'deploy.prod',
     title: 'Mutate cloud infrastructure',
@@ -697,7 +701,51 @@ export function summarizeJson(value: unknown) {
 }
 
 export function isReadOnlyShellCommand(command: string) {
-  return readOnlyShellPatterns.some((pattern) => pattern.test(command.trim()));
+  const words = parseSimpleShellWords(command);
+
+  if (!words) {
+    return false;
+  }
+
+  const [executable, subcommand, ...rest] = words;
+  const args = words.slice(1);
+
+  switch (executable) {
+    case 'cat':
+    case 'ls':
+    case 'pwd':
+    case 'rg':
+      return true;
+    case 'sed':
+      return !hasAnyShellWord(
+        args,
+        (word) =>
+          word === '-i' ||
+          word.startsWith('-i') ||
+          word === '--in-place' ||
+          word.startsWith('--in-place='),
+      );
+    case 'find':
+      return !hasAnyShellWord(
+        args,
+        (word) =>
+          word === '-delete' ||
+          word === '-exec' ||
+          word === '-execdir' ||
+          word === '-ok' ||
+          word === '-okdir',
+      );
+    case 'git':
+      return (
+        ['status', 'diff', 'log', 'show'].includes(subcommand || '') &&
+        !hasAnyShellWord(
+          rest,
+          (word) => word === '--output' || word.startsWith('--output='),
+        )
+      );
+    default:
+      return false;
+  }
 }
 
 export function isPolicyGatewayChannel(
@@ -748,6 +796,77 @@ export function truncate(value: string, maxLength: number) {
   return value.length <= maxLength
     ? value
     : `${value.slice(0, maxLength - 3)}...`;
+}
+
+function parseSimpleShellWords(command: string) {
+  const trimmed = command.trim();
+
+  if (!trimmed || hasShellControlSyntax(trimmed)) {
+    return null;
+  }
+
+  const words: string[] = [];
+  let current = '';
+  let quote: "'" | '"' | null = null;
+  let escaping = false;
+
+  for (const character of trimmed) {
+    if (escaping) {
+      current += character;
+      escaping = false;
+      continue;
+    }
+
+    if (character === '\\') {
+      escaping = true;
+      continue;
+    }
+
+    if (quote) {
+      if (character === quote) {
+        quote = null;
+      } else {
+        current += character;
+      }
+      continue;
+    }
+
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+
+    if (/\s/.test(character)) {
+      if (current) {
+        words.push(current);
+        current = '';
+      }
+      continue;
+    }
+
+    current += character;
+  }
+
+  if (quote || escaping) {
+    return null;
+  }
+
+  if (current) {
+    words.push(current);
+  }
+
+  return words.length > 0 ? words : null;
+}
+
+function hasShellControlSyntax(command: string) {
+  return /[\n;&|<>`]/.test(command) || command.includes('$(');
+}
+
+function hasAnyShellWord(
+  words: string[],
+  predicate: (word: string) => boolean,
+) {
+  return words.some(predicate);
 }
 
 function formatReceiptReasons(receipt: ReceiptRecord) {

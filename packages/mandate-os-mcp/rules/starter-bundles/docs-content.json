@@ -5,7 +5,7 @@
     {
       "id": "docs.publish.command.pnpm",
       "channel": "shell",
-      "matcher": "^pnpm\\s+(docs:publish|publish:docs|content:publish|marketing:publish)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*pnpm\\s+(docs:publish|publish:docs|content:publish|marketing:publish)\\b",
       "flags": "i",
       "tool": "docs.publish",
       "title": "Publish docs or content",
@@ -16,7 +16,7 @@
     {
       "id": "docs.publish.command.npm",
       "channel": "shell",
-      "matcher": "^npm\\s+run\\s+(docs:publish|publish:docs|content:publish|marketing:publish)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*npm\\s+run\\s+(docs:publish|publish:docs|content:publish|marketing:publish)\\b",
       "flags": "i",
       "tool": "docs.publish",
       "title": "Publish docs or content",
@@ -27,7 +27,7 @@
     {
       "id": "sanity.content.command",
       "channel": "shell",
-      "matcher": "^sanity\\b.*\\b(create|patch|delete|publish)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*sanity\\b.*\\b(create|patch|delete|publish)\\b",
       "flags": "i",
       "tool": "docs.publish",
       "title": "Mutate Sanity content",

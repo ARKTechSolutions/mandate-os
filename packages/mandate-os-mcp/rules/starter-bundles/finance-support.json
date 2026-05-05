@@ -5,7 +5,7 @@
     {
       "id": "stripe.refund.command",
       "channel": "shell",
-      "matcher": "^stripe\\s+refunds\\s+create\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*stripe\\s+refunds\\s+create\\b",
       "flags": "i",
       "tool": "support.refund",
       "title": "Issue a Stripe refund",
@@ -16,7 +16,7 @@
     {
       "id": "stripe.capture.command",
       "channel": "shell",
-      "matcher": "^stripe\\s+payment_intents\\s+capture\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*stripe\\s+payment_intents\\s+capture\\b",
       "flags": "i",
       "tool": "payment.execute",
       "title": "Capture a Stripe payment",
@@ -27,7 +27,7 @@
     {
       "id": "payment.capture.command",
       "channel": "shell",
-      "matcher": "^pnpm\\s+(payment:capture|invoice:pay)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*pnpm\\s+(payment:capture|invoice:pay)\\b",
       "flags": "i",
       "tool": "payment.execute",
       "title": "Capture a payment or pay an invoice",
@@ -38,7 +38,7 @@
     {
       "id": "support.refund.command",
       "channel": "shell",
-      "matcher": "^pnpm\\s+refund:issue\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*pnpm\\s+refund:issue\\b",
       "flags": "i",
       "tool": "support.refund",
       "title": "Issue a support refund",
@@ -49,7 +49,7 @@
     {
       "id": "quote.request.command",
       "channel": "shell",
-      "matcher": "^pnpm\\s+vendor:quote\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*pnpm\\s+vendor:quote\\b",
       "flags": "i",
       "tool": "quote.request",
       "title": "Request a vendor quote",
@@ -60,7 +60,7 @@
     {
       "id": "contract.draft.command",
       "channel": "shell",
-      "matcher": "^pnpm\\s+contract:draft\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*pnpm\\s+contract:draft\\b",
       "flags": "i",
       "tool": "contract.draft",
       "title": "Draft a contract or agreement",

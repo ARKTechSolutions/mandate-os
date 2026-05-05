@@ -969,7 +969,7 @@ function collectStatus(api, runtimeInput) {
       readOptionalString(runtimeConfig.unmatchedPermission) || 'ask',
     defaultMandateIdConfigured: Boolean(
       readOptionalString(runtimeConfig.defaultMandateId) ||
-        readOptionalString(bridgeEnv().MANDATE_OS_MCP_DEFAULT_MANDATE_ID),
+      readOptionalString(bridgeEnv().MANDATE_OS_MCP_DEFAULT_MANDATE_ID),
     ),
     guardedAgentConfigured: Boolean(guardedAgent),
     agentSandboxMode,

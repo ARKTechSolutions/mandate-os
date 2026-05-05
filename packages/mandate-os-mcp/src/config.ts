@@ -59,20 +59,14 @@ function normalizeOptionalText(value: string | undefined) {
   return value?.trim() || '';
 }
 
-function parsePositiveInteger(
-  value: string | undefined,
-  fallback: number,
-) {
+function parsePositiveInteger(value: string | undefined, fallback: number) {
   const normalized = normalizeOptionalText(value);
   const parsed = Number.parseInt(normalized, 10);
 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
-function parseNonNegativeInteger(
-  value: string | undefined,
-  fallback: number,
-) {
+function parseNonNegativeInteger(value: string | undefined, fallback: number) {
   const normalized = normalizeOptionalText(value);
   const parsed = Number.parseInt(normalized, 10);
 
