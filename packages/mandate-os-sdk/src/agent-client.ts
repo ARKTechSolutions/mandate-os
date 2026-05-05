@@ -207,10 +207,9 @@ export class MandateOsAgentClient {
     },
   ): Promise<MandateOsClientResponse<T>> {
     const method = (init.method || 'GET').toUpperCase();
-    const idempotencyKey =
-      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
-        ? init.idempotencyKey || createIdempotencyKey()
-        : undefined;
+    const idempotencyKey = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
+      ? init.idempotencyKey || createIdempotencyKey()
+      : undefined;
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt += 1) {
       const headers = new Headers(init.headers);
@@ -241,10 +240,7 @@ export class MandateOsAgentClient {
           | (ApiSuccessPayload<T> & ApiErrorPayload)
           | null;
 
-        if (
-          shouldRetryResponse(response.status) &&
-          attempt < this.maxRetries
-        ) {
+        if (shouldRetryResponse(response.status) && attempt < this.maxRetries) {
           await delay(this.retryDelayMs);
           continue;
         }
@@ -274,7 +270,11 @@ export class MandateOsAgentClient {
         };
       } catch (error) {
         if (
-          shouldRetryTransportError(error, requestSignal.timedOut, init.signal) &&
+          shouldRetryTransportError(
+            error,
+            requestSignal.timedOut,
+            init.signal,
+          ) &&
           attempt < this.maxRetries
         ) {
           await delay(this.retryDelayMs);
@@ -319,7 +319,9 @@ function createTimedRequestSignal(
 
   const timeoutHandle = setTimeout(() => {
     timedOut = true;
-    controller.abort(new Error(`MandateOS request timed out after ${timeoutMs} ms.`));
+    controller.abort(
+      new Error(`MandateOS request timed out after ${timeoutMs} ms.`),
+    );
   }, timeoutMs);
 
   const abortFromUpstream = () => {

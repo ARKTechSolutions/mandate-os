@@ -95,6 +95,64 @@ describe('MandateOsHostGateway', () => {
     expect(evaluateActions).not.toHaveBeenCalled();
   });
 
+  it('does not locally allow compound shell commands that contain a risky segment', async () => {
+    const evaluateActions = vi.fn().mockResolvedValue({
+      data: {
+        batchId: 'sim_123',
+        receipts: [receipt('allowed')],
+      },
+    });
+    const gateway = createGateway(evaluateActions);
+
+    const result = await gateway.evaluateShellCommand({
+      command: 'git status && gh issue edit 42 --add-label bug',
+    });
+
+    expect(result).toMatchObject({
+      permission: 'deny',
+      decision: 'redirect_enforced',
+      ruleId: 'github.issue.label.command',
+      recommendedTool: 'mandateos_execute_enforced_action',
+    });
+    expect(evaluateActions).toHaveBeenCalledOnce();
+  });
+
+  it('does not locally allow read-like commands when they mutate files', async () => {
+    const evaluateActions = vi.fn();
+    const gateway = createGateway(evaluateActions, {
+      client: {
+        evaluateActions,
+      } as never,
+      unmatchedPermission: 'deny',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'sed -i "" s/MandateOS/Test/g README.md',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'unmatched',
+    });
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'find . -name "*.tmp" -delete',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'unmatched',
+    });
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'cat README.md > copied-readme.md',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'unmatched',
+    });
+    expect(evaluateActions).not.toHaveBeenCalled();
+  });
+
   it('evaluates generic shell mutations through MandateOS and allows when approved by policy', async () => {
     const evaluateActions = vi.fn().mockResolvedValue({
       data: {
@@ -205,7 +263,10 @@ describe('MandateOsHostGateway', () => {
     const localWorkspaceRules = parseHostGatewayRules(
       JSON.parse(
         readFileSync(
-          path.resolve(rootDir, '../rules/starter-bundles/local-workspace.json'),
+          path.resolve(
+            rootDir,
+            '../rules/starter-bundles/local-workspace.json',
+          ),
           'utf8',
         ),
       ),
@@ -243,6 +304,50 @@ describe('MandateOsHostGateway', () => {
         }),
       ],
     });
+  });
+
+  it('evaluates local package scripts instead of treating them as read-only', async () => {
+    const evaluateActions = vi.fn().mockResolvedValue({
+      data: {
+        batchId: 'sim_123',
+        receipts: [
+          {
+            ...receipt('allowed'),
+            tool: 'shell.exec',
+          },
+        ],
+      },
+    });
+    const localWorkspaceRules = parseHostGatewayRules(
+      JSON.parse(
+        readFileSync(
+          path.resolve(
+            rootDir,
+            '../rules/starter-bundles/local-workspace.json',
+          ),
+          'utf8',
+        ),
+      ),
+    );
+    const gateway = createGateway(evaluateActions, {
+      client: {
+        evaluateActions,
+      } as never,
+      rules: localWorkspaceRules,
+    });
+
+    const result = await gateway.evaluateShellCommand({
+      command: 'pnpm test',
+      cwd: '/repo',
+    });
+
+    expect(result).toMatchObject({
+      permission: 'allow',
+      decision: 'policy_allowed',
+      ruleId: 'workspace.package.script.command',
+      route: 'generic',
+    });
+    expect(evaluateActions).toHaveBeenCalledOnce();
   });
 
   it('allows MandateOS MCP tool calls without re-evaluating them', async () => {

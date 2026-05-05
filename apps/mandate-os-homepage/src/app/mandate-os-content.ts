@@ -13,8 +13,7 @@ export const MANDATE_OS_CONTENT = {
   hero: {
     eyebrow: 'MandateOS / runtime guardrails for AI agents',
     title: 'Install approvals, guardrails, and receipts into agent workflows.',
-    lede:
-      'MandateOS gives teams using Codex, Cursor, Claude Code, OpenClaw, and MCP-based workflows a concrete operating loop: define a mandate, intercept risky actions, escalate when needed, and keep signed evidence behind what ran.',
+    lede: 'MandateOS gives teams using Codex, Cursor, Claude Code, OpenClaw, and MCP-based workflows a concrete operating loop: define a mandate, intercept risky actions, escalate when needed, and keep signed evidence behind what ran.',
     practical:
       'When an agent wants to run a shell command, push code, or call an external tool, MandateOS evaluates the request before it runs, shows operators what was requested, and records the outcome as approval events, receipts, and evidence.',
     audience:
@@ -86,8 +85,7 @@ export const MANDATE_OS_CONTENT = {
   heroPanel: {
     eyebrow: 'What happens after install',
     title: 'The product becomes visible immediately.',
-    body:
-      'MandateOS should feel tangible within minutes, not after a long setup project.',
+    body: 'MandateOS should feel tangible within minutes, not after a long setup project.',
     steps: [
       'Install into an existing repository without cloning this repo first.',
       'MandateOS writes the local MCP and hook config for the selected host.',
@@ -103,13 +101,12 @@ export const MANDATE_OS_CONTENT = {
   proof: {
     eyebrow: 'How it looks in practice',
     title: 'Inspectable proof beats abstract claims.',
-    body:
-      'MandateOS is easiest to trust when you can see the local files it writes, the approval event it creates, and the evidence operators keep after the run.',
+    body: 'MandateOS is easiest to trust when you can see the local files it writes, the approval event it creates, and the evidence operators keep after the run.',
     media: {
       label: 'Product preview',
-      title: 'Approval review, receipts, and verification in one operating loop',
-      body:
-        'This is the part first-time visitors need to picture quickly: a risky request reaches the runtime before it executes, an operator sees the exact request and mandate context, and the resulting receipt stays attached to the action for later review.',
+      title:
+        'Approval review, receipts, and verification in one operating loop',
+      body: 'This is the part first-time visitors need to picture quickly: a risky request reaches the runtime before it executes, an operator sees the exact request and mandate context, and the resulting receipt stays attached to the action for later review.',
       hint: 'Click the preview to inspect it at a larger size.',
       imageSrc: '/proof/operator-review-preview.svg',
       imageAlt:
@@ -126,14 +123,14 @@ export const MANDATE_OS_CONTENT = {
       {
         label: 'Install Preview',
         title: 'Writes host-scoped files into the workspace you already use',
-        body:
-          'The installer configures the host locally instead of asking teams to copy files around by hand.',
+        body: 'The installer configures the host locally instead of asking teams to copy files around by hand.',
         windowTitle: 'Workspace bootstrap',
         windowMeta: 'project-scoped config',
         rows: [
           {
             title: '.codex/config.toml',
-            detail: 'Registers the `mandateos` MCP server and runtime env vars.',
+            detail:
+              'Registers the `mandateos` MCP server and runtime env vars.',
           },
           {
             title: '.codex/hooks.json',
@@ -150,8 +147,7 @@ export const MANDATE_OS_CONTENT = {
       {
         label: 'Approval Preview',
         title: 'Shows the exact action, mandate, and escalation path',
-        body:
-          'When an agent asks for something higher risk, operators get a concrete event to review instead of a vague chat summary.',
+        body: 'When an agent asks for something higher risk, operators get a concrete event to review instead of a vague chat summary.',
         windowTitle: 'Approval event',
         windowMeta: 'runtime decision',
         rows: [
@@ -174,8 +170,7 @@ export const MANDATE_OS_CONTENT = {
       {
         label: 'Evidence Preview',
         title: 'Receipts and audit events stay attached to the action itself',
-        body:
-          'After execution, teams can review the signed record instead of reconstructing what happened from logs and screenshots.',
+        body: 'After execution, teams can review the signed record instead of reconstructing what happened from logs and screenshots.',
         windowTitle: 'Receipt & audit view',
         windowMeta: 'verifiable evidence',
         rows: [
@@ -185,7 +180,8 @@ export const MANDATE_OS_CONTENT = {
           },
           {
             title: 'Approval event',
-            detail: 'Operator review and any execution grant stay in the chain.',
+            detail:
+              'Operator review and any execution grant stay in the chain.',
           },
           {
             title: 'Audit verification',
@@ -208,46 +204,39 @@ export const MANDATE_OS_CONTENT = {
     ],
     example: {
       title: 'One realistic end-to-end flow',
-      body:
-        'A platform team installs MandateOS into a repo, defines a mandate for allowed tools and escalation thresholds, lets the agent request a production-sensitive action, stops that action for approval, then reviews the receipt and audit chain afterward.',
+      body: 'A platform team installs MandateOS into a repo, defines a mandate for allowed tools and escalation thresholds, lets the agent request a production-sensitive action, stops that action for approval, then reviews the receipt and audit chain afterward.',
       steps: [
         {
           id: '01',
           title: 'Install into the repo',
-          body:
-            'Run the host installer for Codex, Cursor, Claude Code, or OpenClaw against an existing workspace path.',
+          body: 'Run the host installer for Codex, Cursor, Claude Code, or OpenClaw against an existing workspace path.',
           artifact:
             'Result: local MCP and hook files are written for that host.',
         },
         {
           id: '02',
           title: 'Define the mandate',
-          body:
-            'Set allowed tools, budgets, risk zones, approval thresholds, and receipt requirements.',
+          body: 'Set allowed tools, budgets, risk zones, approval thresholds, and receipt requirements.',
           artifact:
             'Result: the runtime has a concrete policy boundary to evaluate.',
         },
         {
           id: '03',
           title: 'Agent requests action',
-          body:
-            'The agent proposes a risky command before touching the shell or other sensitive tools.',
+          body: 'The agent proposes a risky command before touching the shell or other sensitive tools.',
           artifact:
             'Example: `run migration against production` reaches the runtime first.',
         },
         {
           id: '04',
           title: 'Approve or escalate',
-          body:
-            'Routine work continues. Higher-risk work stops for explicit approval or a grant.',
-          artifact:
-            'Result: an approval event is created for operator review.',
+          body: 'Routine work continues. Higher-risk work stops for explicit approval or a grant.',
+          artifact: 'Result: an approval event is created for operator review.',
         },
         {
           id: '05',
           title: 'Keep the evidence',
-          body:
-            'The action record stays attached to receipts, approval events, and audit verification.',
+          body: 'The action record stays attached to receipts, approval events, and audit verification.',
           artifact:
             'Result: operators can review what was requested, approved, and executed later.',
         },
@@ -257,66 +246,61 @@ export const MANDATE_OS_CONTENT = {
   adoption: {
     eyebrow: 'Why teams adopt this',
     title: 'Practical operator benefits matter more than abstract governance.',
-    body:
-      'MandateOS is useful when teams need runtime guardrails, shared approvals, and evidence they can review after the agent run finishes.',
+    body: 'MandateOS is useful when teams need runtime guardrails, shared approvals, and evidence they can review after the agent run finishes.',
     items: [
       {
         label: 'Approvals',
         title: 'Stop sensitive work for explicit operator review',
-        body:
-          'Teams do not have to rely on prompt instructions or chat etiquette when an action needs approval before it continues.',
+        body: 'Teams do not have to rely on prompt instructions or chat etiquette when an action needs approval before it continues.',
       },
       {
         label: 'Visibility',
         title: 'See what the agent asked to do before and after execution',
-        body:
-          'Operators can review the requested action, the runtime decision, the approval event, and the final receipt in one place.',
+        body: 'Operators can review the requested action, the runtime decision, the approval event, and the final receipt in one place.',
       },
       {
         label: 'Auditability',
         title: 'Keep retained evidence instead of reconstructing history later',
-        body:
-          'Receipts, grants, and audit events stay attached to the action so review does not depend on scattered logs or screenshots.',
+        body: 'Receipts, grants, and audit events stay attached to the action so review does not depend on scattered logs or screenshots.',
       },
     ],
   },
   useCases: {
     eyebrow: 'Best first use cases',
     title: 'Start where runtime guardrails are immediately valuable.',
-    body:
-      'MandateOS works best when teams begin with narrow, high-consequence workflows rather than trying to govern every agent action on day one.',
+    body: 'MandateOS works best when teams begin with narrow, high-consequence workflows rather than trying to govern every agent action on day one.',
     items: [
       {
         title: 'Production-sensitive shell commands',
-        body:
-          'Require approval before commands that touch production data, migrations, or higher-risk environments.',
-        outcome: 'Outcome: risky commands stop for operator review instead of slipping through normal agent flow.',
+        body: 'Require approval before commands that touch production data, migrations, or higher-risk environments.',
+        outcome:
+          'Outcome: risky commands stop for operator review instead of slipping through normal agent flow.',
       },
       {
         title: 'Repository write controls',
-        body:
-          'Gate specific repo-changing workflows so teams can separate routine edits from higher-risk changes.',
-        outcome: 'Outcome: one operating model across Codex, Cursor, Claude Code, and future GitHub-side enforcement.',
+        body: 'Gate specific repo-changing workflows so teams can separate routine edits from higher-risk changes.',
+        outcome:
+          'Outcome: one operating model across Codex, Cursor, Claude Code, and future GitHub-side enforcement.',
       },
       {
         title: 'External tool escalation',
-        body:
-          'Use receipts and approval thresholds when agents move beyond local edits into external systems and managed tools.',
-        outcome: 'Outcome: the runtime boundary stays explicit as integrations grow.',
+        body: 'Use receipts and approval thresholds when agents move beyond local edits into external systems and managed tools.',
+        outcome:
+          'Outcome: the runtime boundary stays explicit as integrations grow.',
       },
       {
         title: 'Early multi-team rollouts',
-        body:
-          'Start with the open packages locally, then add the managed control plane when teams need shared approvals and retained evidence.',
-        outcome: 'Outcome: adoption can begin small without hiding the trust layer.',
+        body: 'Start with the open packages locally, then add the managed control plane when teams need shared approvals and retained evidence.',
+        outcome:
+          'Outcome: adoption can begin small without hiding the trust layer.',
       },
     ],
   },
   boundary: {
     eyebrow: 'Trust boundary',
-    title: 'The open-source trust layer and the managed control plane do different jobs.',
-    body:
-      'MandateOS is easier to evaluate when the boundary is explicit. The public packages handle local host integration and runtime enforcement. The managed control plane handles shared operator workflows, approvals, workspace administration, and retained evidence.',
+    title:
+      'The open-source trust layer and the managed control plane do different jobs.',
+    body: 'MandateOS is easier to evaluate when the boundary is explicit. The public packages handle local host integration and runtime enforcement. The managed control plane handles shared operator workflows, approvals, workspace administration, and retained evidence.',
     columns: [
       {
         label: 'Open-source trust layer',
@@ -374,9 +358,9 @@ export const MANDATE_OS_CONTENT = {
   },
   integrations: {
     eyebrow: 'Where it fits',
-    title: 'Use one approval and evidence model across the host tools your team already runs.',
-    body:
-      'MandateOS sits between the agent and the actions that matter: shell execution, code changes, approvals, and higher-risk tool use.',
+    title:
+      'Use one approval and evidence model across the host tools your team already runs.',
+    body: 'MandateOS sits between the agent and the actions that matter: shell execution, code changes, approvals, and higher-risk tool use.',
     statusSummary: [
       'Available today: Codex, Cursor, Claude Code, OpenClaw, and managed MCP flows',
       'Same mandate, approval, and receipt model across local hosts',
@@ -442,9 +426,9 @@ export const MANDATE_OS_CONTENT = {
   },
   deploy: {
     eyebrow: 'Install without cloning',
-    title: 'The shortest path is: export two values, run one installer, open your shell.',
-    body:
-      'MandateOS is already packaged for Codex, Cursor, Claude Code, and OpenClaw. You do not need to clone this repository to try it.',
+    title:
+      'The shortest path is: export two values, run one installer, open your shell.',
+    body: 'MandateOS is already packaged for Codex, Cursor, Claude Code, and OpenClaw. You do not need to clone this repository to try it.',
     quickStartTitle: 'Before you start',
     quickStartBody:
       'You only need the basics that connect the local host to the runtime and a repo path where you want the guardrails installed.',
@@ -482,20 +466,17 @@ export const MANDATE_OS_CONTENT = {
       {
         step: 'A',
         title: 'Export your MandateOS connection values',
-        body:
-          'Set your base URL and agent token in the shell where you plan to run an installer. Add a default mandate id only when you want one project mandate preselected.',
+        body: 'Set your base URL and agent token in the shell where you plan to run an installer. Add a default mandate id only when you want one project mandate preselected.',
       },
       {
         step: 'B',
         title: 'Run the host installer',
-        body:
-          'Use the package entrypoint or download the shell script for Codex, Cursor, Claude Code, or OpenClaw. Each installer writes the local files that host needs.',
+        body: 'Use the package entrypoint or download the shell script for Codex, Cursor, Claude Code, or OpenClaw. Each installer writes the local files that host needs.',
       },
       {
         step: 'C',
         title: 'Open the shell and verify the host',
-        body:
-          'Start the guarded workspace, approve the MandateOS MCP if the host asks, and confirm the status command before you move into sensitive work.',
+        body: 'Start the guarded workspace, approve the MandateOS MCP if the host asks, and confirm the status command before you move into sensitive work.',
       },
     ],
     envTitle: 'Shell environment',
@@ -627,8 +608,7 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
   security: {
     eyebrow: 'Trust, security, and evidence',
     title: 'Security claims should end in artifacts operators can review.',
-    body:
-      'MandateOS is stronger when the security story is tied to receipts, approval events, execution grants, and a tamper-evident audit chain rather than broad promises alone.',
+    body: 'MandateOS is stronger when the security story is tied to receipts, approval events, execution grants, and a tamper-evident audit chain rather than broad promises alone.',
     evidencePoints: [
       'Verifiable receipts for meaningful actions',
       'Approval events attached to the request path',
@@ -638,39 +618,34 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
     items: [
       {
         label: 'Signed payloads',
-        title: 'Mandates, receipts, and grants are signed when they are created',
-        body:
-          'The runtime signs mandates, receipts, and execution grants so teams can verify integrity and keep older signatures valid through key rotation.',
+        title:
+          'Mandates, receipts, and grants are signed when they are created',
+        body: 'The runtime signs mandates, receipts, and execution grants so teams can verify integrity and keep older signatures valid through key rotation.',
       },
       {
         label: 'Encrypted secrets',
         title: 'Sensitive tokens are encrypted before storage',
-        body:
-          'At-rest credential storage uses authenticated encryption so the control plane can protect secrets and detect tampering.',
+        body: 'At-rest credential storage uses authenticated encryption so the control plane can protect secrets and detect tampering.',
       },
       {
         label: 'Hashed credentials',
         title: 'API keys are stored as hashes, not raw secrets',
-        body:
-          'Key verification uses timing-safe comparison so the runtime does not have to keep plain-text secrets on disk.',
+        body: 'Key verification uses timing-safe comparison so the runtime does not have to keep plain-text secrets on disk.',
       },
       {
         label: 'Tamper-evident audit',
         title: 'Audit events are chained so later modification is visible',
-        body:
-          'A SHA-256 audit chain makes review stronger because historical edits break verification instead of staying invisible.',
+        body: 'A SHA-256 audit chain makes review stronger because historical edits break verification instead of staying invisible.',
       },
       {
         label: 'Verified requests',
         title: 'Inter-service requests are signed and scoped',
-        body:
-          'Service-to-service calls are authenticated across method, path, body, and expiry. Mutating requests also require idempotency keys.',
+        body: 'Service-to-service calls are authenticated across method, path, body, and expiry. Mutating requests also require idempotency keys.',
       },
       {
         label: 'Operator review',
         title: 'Evidence is organized for approval and later review',
-        body:
-          'The security model becomes practical when operators can see the request, the escalation decision, and the receipt together.',
+        body: 'The security model becomes practical when operators can see the request, the escalation decision, and the receipt together.',
       },
     ],
     links: [
@@ -691,8 +666,7 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
   faq: {
     eyebrow: 'FAQ',
     title: 'Questions teams ask before they trust agent guardrails.',
-    body:
-      'Direct answers for teams evaluating MandateOS for approvals, runtime visibility, auditability, and inspectable host integration.',
+    body: 'Direct answers for teams evaluating MandateOS for approvals, runtime visibility, auditability, and inspectable host integration.',
     items: [
       {
         question: 'What is MandateOS?',
@@ -738,9 +712,9 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
   },
   finalCta: {
     eyebrow: 'Start with a concrete workflow',
-    title: 'Install MandateOS into one repo, then watch the first approval and receipt happen.',
-    body:
-      'The fastest way to evaluate MandateOS is to wire one host into one real repo, define one clear mandate, and inspect the evidence trail yourself.',
+    title:
+      'Install MandateOS into one repo, then watch the first approval and receipt happen.',
+    body: 'The fastest way to evaluate MandateOS is to wire one host into one real repo, define one clear mandate, and inspect the evidence trail yourself.',
     primaryLabel: 'Open Install Guide',
     primaryHref: '#deploy',
     secondaryLabel: 'Inspect the Public Repo',

@@ -394,7 +394,7 @@ export function readMandateOsOpenClawStatus(
   const wrapperToolExposureKnown = wrapperToolExposureState !== 'unknown';
   const bridgeScriptPresent = Boolean(
     runtimeConfig?.bridgeScriptPath &&
-      existsSync(runtimeConfig.bridgeScriptPath),
+    existsSync(runtimeConfig.bridgeScriptPath),
   );
   const diagnosticCode = classifyStatusDiagnostic({
     pluginEnabled: pluginEntry?.enabled === true,
@@ -403,8 +403,8 @@ export function readMandateOsOpenClawStatus(
     bridgeConfigured: bridgeScriptPresent,
     baseUrlConfigured: Boolean(
       runtimeConfig?.baseUrl ||
-        mcpEntry?.env?.MANDATE_OS_BASE_URL ||
-        process.env.MANDATE_OS_BASE_URL,
+      mcpEntry?.env?.MANDATE_OS_BASE_URL ||
+      process.env.MANDATE_OS_BASE_URL,
     ),
     runtimeTokenAvailable: Boolean(process.env.MANDATE_OS_AGENT_TOKEN?.trim()),
     guardedAgentConfigured: Boolean(guardedAgent),
@@ -445,15 +445,15 @@ export function readMandateOsOpenClawStatus(
     installHealthy: installHealth.state === 'healthy',
     baseUrlConfigured: Boolean(
       runtimeConfig?.baseUrl ||
-        mcpEntry?.env?.MANDATE_OS_BASE_URL ||
-        process.env.MANDATE_OS_BASE_URL,
+      mcpEntry?.env?.MANDATE_OS_BASE_URL ||
+      process.env.MANDATE_OS_BASE_URL,
     ),
     runtimeTokenAvailable: Boolean(process.env.MANDATE_OS_AGENT_TOKEN?.trim()),
     defaultMandateIdConfigured: Boolean(
       runtimeConfig?.defaultMandateId ||
-        mcpEntry?.env?.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
-        process.env.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
-        process.env.MANDATE_OS_DEFAULT_MANDATE_ID,
+      mcpEntry?.env?.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
+      process.env.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
+      process.env.MANDATE_OS_DEFAULT_MANDATE_ID,
     ),
   });
   const diagnosticMessage = describeStatusDiagnostic({
@@ -488,8 +488,8 @@ export function readMandateOsOpenClawStatus(
     guardedAgentConfigured: Boolean(guardedAgent),
     baseUrlConfigured: Boolean(
       runtimeConfig?.baseUrl ||
-        mcpEntry?.env?.MANDATE_OS_BASE_URL ||
-        process.env.MANDATE_OS_BASE_URL,
+      mcpEntry?.env?.MANDATE_OS_BASE_URL ||
+      process.env.MANDATE_OS_BASE_URL,
     ),
     runtimeTokenAvailable: Boolean(process.env.MANDATE_OS_AGENT_TOKEN?.trim()),
     bearerTokenAvailable: Boolean(process.env.MANDATE_OS_AGENT_TOKEN?.trim()),
@@ -498,9 +498,9 @@ export function readMandateOsOpenClawStatus(
     bridgeUnmatchedPermission: runtimeConfig?.unmatchedPermission,
     defaultMandateIdConfigured: Boolean(
       runtimeConfig?.defaultMandateId ||
-        mcpEntry?.env?.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
-        process.env.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
-        process.env.MANDATE_OS_DEFAULT_MANDATE_ID,
+      mcpEntry?.env?.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
+      process.env.MANDATE_OS_MCP_DEFAULT_MANDATE_ID ||
+      process.env.MANDATE_OS_DEFAULT_MANDATE_ID,
     ),
     agentSandboxMode,
     effectiveSandboxMode,
@@ -565,13 +565,13 @@ export async function runMandateOsOpenClawDoctor(
   const runtimeTokenAvailable = Boolean(env.MANDATE_OS_AGENT_TOKEN?.trim());
   const baseUrlConfigured = Boolean(
     options.baseUrl ||
-      env.MANDATE_OS_BASE_URL?.trim() ||
-      status.baseUrlConfigured,
+    env.MANDATE_OS_BASE_URL?.trim() ||
+    status.baseUrlConfigured,
   );
   const defaultMandateIdConfigured = Boolean(
     env.MANDATE_OS_MCP_DEFAULT_MANDATE_ID?.trim() ||
-      env.MANDATE_OS_DEFAULT_MANDATE_ID?.trim() ||
-      status.defaultMandateIdConfigured,
+    env.MANDATE_OS_DEFAULT_MANDATE_ID?.trim() ||
+    status.defaultMandateIdConfigured,
   );
   const installHealthy =
     status.hasConfig &&

@@ -18,11 +18,11 @@ export default [
           depConstraints: [
             {
               sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*']
-            }
-          ]
-        }
-      ]
-    }
-  }
+              onlyDependOnLibsWithTags: ['*'],
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

@@ -5,7 +5,7 @@
     {
       "id": "workspace.fs.touch.command",
       "channel": "shell",
-      "matcher": "(^|\\n)\\s*(touch|mkdir|rmdir|cp|mv|chmod|chown|ln)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*(touch|mkdir|rmdir|cp|mv|chmod|chown|ln)\\b",
       "flags": "im",
       "tool": "shell.exec",
       "title": "Mutate local workspace files",
@@ -16,7 +16,7 @@
     {
       "id": "workspace.fs.delete.command",
       "channel": "shell",
-      "matcher": "(^|\\n)\\s*rm\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*rm\\b",
       "flags": "im",
       "tool": "shell.exec",
       "title": "Delete local files",
@@ -27,7 +27,7 @@
     {
       "id": "workspace.script.command",
       "channel": "shell",
-      "matcher": "(^|\\n)\\s*(node|python|python3|bash|sh|zsh|deno|bun|tsx|ts-node)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*(node|python|python3|bash|sh|zsh|deno|bun|tsx|ts-node)\\b",
       "flags": "im",
       "tool": "shell.exec",
       "title": "Run a local script or interpreter",
@@ -38,11 +38,22 @@
     {
       "id": "workspace.package.install.command",
       "channel": "shell",
-      "matcher": "(^|\\n)\\s*(pnpm|npm|yarn|bun)\\s+(install|add|remove|update|up|dedupe|link|unlink)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*(pnpm|npm|yarn|bun)\\s+(install|add|remove|update|up|dedupe|link|unlink)\\b",
       "flags": "im",
       "tool": "shell.exec",
       "title": "Mutate local dependencies",
       "description": "Mutate local dependencies with command: {command}",
+      "zone": "domestic",
+      "riskLevel": "medium"
+    },
+    {
+      "id": "workspace.package.script.command",
+      "channel": "shell",
+      "matcher": "(^|[\\n;&|]+)\\s*(pnpm|npm|yarn|bun)\\s+(test|lint|build|run\\s+(test|lint|build))\\b|(^|[\\n;&|]+)\\s*(vitest|jest|tsc|eslint)\\b",
+      "flags": "im",
+      "tool": "shell.exec",
+      "title": "Run a local test, lint, or build command",
+      "description": "Run a local test, lint, or build command: {command}",
       "zone": "domestic",
       "riskLevel": "medium"
     }

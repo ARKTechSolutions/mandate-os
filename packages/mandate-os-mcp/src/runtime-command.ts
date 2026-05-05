@@ -84,7 +84,9 @@ export function resolveMandateOsRuntimeFileReference(fileReference: string) {
     return fileReference;
   }
 
-  const relativePath = fileReference.slice(MANDATE_OS_PACKAGE_FILE_PREFIX.length);
+  const relativePath = fileReference.slice(
+    MANDATE_OS_PACKAGE_FILE_PREFIX.length,
+  );
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
   const candidatePaths = [
     path.resolve(currentDir, relativePath),

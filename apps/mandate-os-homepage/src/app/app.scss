@@ -1034,7 +1034,11 @@
   position: relative;
   flex: 0 0 1.4rem;
   height: 1px;
-  background: linear-gradient(90deg, rgba(131, 227, 224, 0.1), rgba(246, 195, 107, 0.7));
+  background: linear-gradient(
+    90deg,
+    rgba(131, 227, 224, 0.1),
+    rgba(246, 195, 107, 0.7)
+  );
 }
 
 .diagram-arrow::after {
@@ -1426,7 +1430,11 @@
     width: 1px;
     height: 1.2rem;
     justify-self: center;
-    background: linear-gradient(180deg, rgba(131, 227, 224, 0.1), rgba(246, 195, 107, 0.7));
+    background: linear-gradient(
+      180deg,
+      rgba(131, 227, 224, 0.1),
+      rgba(246, 195, 107, 0.7)
+    );
   }
 
   .diagram-arrow::after {

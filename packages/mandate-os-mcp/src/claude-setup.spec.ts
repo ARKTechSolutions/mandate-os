@@ -89,24 +89,24 @@ describe('claude setup helpers', () => {
       }),
     );
 
-    expect(nextConfig.projects?.['/tmp/project']?.mcpServers?.mandateos).toEqual(
-      {
-        type: 'stdio',
-        command: 'npx',
-        args: [
-          '--yes',
-          '--prefer-offline',
-          '--package',
-          '@mandate-os/mcp@latest',
-          'mandate-os-mcp',
-        ],
-        env: {
-          MANDATE_OS_BASE_URL: 'http://localhost:4330',
-          MANDATE_OS_AGENT_TOKEN: 'agt_example.secret',
-          MANDATE_OS_MCP_DEFAULT_SOURCE: 'claude.mandateos.local',
-        },
+    expect(
+      nextConfig.projects?.['/tmp/project']?.mcpServers?.mandateos,
+    ).toEqual({
+      type: 'stdio',
+      command: 'npx',
+      args: [
+        '--yes',
+        '--prefer-offline',
+        '--package',
+        '@mandate-os/mcp@latest',
+        'mandate-os-mcp',
+      ],
+      env: {
+        MANDATE_OS_BASE_URL: 'http://localhost:4330',
+        MANDATE_OS_AGENT_TOKEN: 'agt_example.secret',
+        MANDATE_OS_MCP_DEFAULT_SOURCE: 'claude.mandateos.local',
       },
-    );
+    });
   });
 
   it('upserts PreToolUse hooks while preserving unrelated Claude hooks', () => {

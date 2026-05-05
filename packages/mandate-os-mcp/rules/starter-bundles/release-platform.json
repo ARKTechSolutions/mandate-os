@@ -5,7 +5,7 @@
     {
       "id": "vercel.deploy.command",
       "channel": "shell",
-      "matcher": "^vercel\\b.*\\b(--prod|deploy|promote)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*vercel\\b.*\\b(--prod|deploy|promote)\\b",
       "flags": "i",
       "tool": "deploy.prod",
       "title": "Deploy with Vercel",
@@ -16,7 +16,7 @@
     {
       "id": "netlify.deploy.command",
       "channel": "shell",
-      "matcher": "^netlify\\s+deploy\\b(?=.*--prod\\b)",
+      "matcher": "(^|[\\n;&|]+)\\s*netlify\\s+deploy\\b(?=.*--prod\\b)",
       "flags": "i",
       "tool": "deploy.prod",
       "title": "Deploy with Netlify",
@@ -27,7 +27,7 @@
     {
       "id": "fly.deploy.command",
       "channel": "shell",
-      "matcher": "^flyctl\\s+deploy\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*flyctl\\s+deploy\\b",
       "flags": "i",
       "tool": "deploy.prod",
       "title": "Deploy with Fly.io",
@@ -38,7 +38,7 @@
     {
       "id": "railway.deploy.command",
       "channel": "shell",
-      "matcher": "^railway\\s+(up|deploy)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*railway\\s+(up|deploy)\\b",
       "flags": "i",
       "tool": "deploy.prod",
       "title": "Deploy with Railway",
@@ -49,7 +49,7 @@
     {
       "id": "docker.compose.mutation.command",
       "channel": "shell",
-      "matcher": "^docker\\s+compose\\s+(up|restart|down)\\b",
+      "matcher": "(^|[\\n;&|]+)\\s*docker\\s+compose\\s+(up|restart|down)\\b",
       "flags": "i",
       "tool": "deploy.prod",
       "title": "Change running services with Docker Compose",
