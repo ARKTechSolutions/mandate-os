@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: 'site-header',
+  selector: 'app-site-header',
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './site-header.component.html',

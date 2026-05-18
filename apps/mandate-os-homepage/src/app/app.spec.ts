@@ -17,9 +17,9 @@ describe('App', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('site-header')).not.toBeNull();
+    expect(compiled.querySelector('app-site-header')).not.toBeNull();
     expect(compiled.querySelector('main router-outlet')).not.toBeNull();
-    expect(compiled.querySelector('site-footer')).not.toBeNull();
+    expect(compiled.querySelector('app-site-footer')).not.toBeNull();
     expect(compiled.querySelector('.brand-name')?.textContent).toContain('MandateOS');
   });
 });

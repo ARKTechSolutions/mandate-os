@@ -1,22 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HostContent, HOSTS } from '../../../content/integrations.content';
 import { SeoService } from '../../../shared/seo.service';
 
 @Component({
-  selector: 'host-page',
+  selector: 'app-host-page',
   standalone: true,
   templateUrl: './host-page.component.html',
   styleUrl: './host-page.component.scss',
 })
 export class HostPageComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly seo = inject(SeoService);
+
   protected host!: HostContent;
   protected planned = false;
-
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly seo: SeoService,
-  ) {}
 
   ngOnInit(): void {
     const data = this.route.snapshot.data;

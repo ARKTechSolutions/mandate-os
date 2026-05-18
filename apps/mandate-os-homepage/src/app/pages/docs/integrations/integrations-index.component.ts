@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   HOST_ORDER,
@@ -8,17 +8,17 @@ import {
 import { SeoService } from '../../../shared/seo.service';
 
 @Component({
-  selector: 'integrations-index',
+  selector: 'app-integrations-index',
   standalone: true,
   imports: [RouterLink],
   templateUrl: './integrations-index.component.html',
   styleUrl: './integrations-index.component.scss',
 })
 export class IntegrationsIndexComponent implements OnInit {
+  private readonly seo = inject(SeoService);
+
   protected readonly meta = INTEGRATIONS_INDEX;
   protected readonly hosts = HOST_ORDER.map((slug) => HOSTS[slug]);
-
-  constructor(private readonly seo: SeoService) {}
 
   ngOnInit(): void {
     this.seo.setMeta({

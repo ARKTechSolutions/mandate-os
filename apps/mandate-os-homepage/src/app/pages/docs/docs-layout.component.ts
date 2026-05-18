@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { HOST_ORDER, HOSTS } from '../../content/integrations.content';
 
 @Component({
-  selector: 'docs-layout',
+  selector: 'app-docs-layout',
   standalone: true,
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './docs-layout.component.html',

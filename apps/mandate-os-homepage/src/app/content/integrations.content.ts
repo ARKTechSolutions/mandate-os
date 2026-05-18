@@ -22,10 +22,23 @@ export interface HostContent {
 const integrationItems = MANDATE_OS_CONTENT.integrations.items;
 const installers = MANDATE_OS_CONTENT.deploy.installers;
 
+function requireFound<T>(value: T | undefined, label: string): T {
+  if (value === undefined) {
+    throw new Error(`Missing ${label}`);
+  }
+  return value;
+}
+
 const findItem = (name: string) =>
-  integrationItems.find((item) => item.name === name)!;
+  requireFound(
+    integrationItems.find((item) => item.name === name),
+    `integration item: ${name}`,
+  );
 const findInstaller = (name: string) =>
-  installers.find((item) => item.name === name)!;
+  requireFound(
+    installers.find((item) => item.name === name),
+    `installer: ${name}`,
+  );
 
 export const INTEGRATIONS_INDEX = {
   eyebrow: MANDATE_OS_CONTENT.integrations.eyebrow,

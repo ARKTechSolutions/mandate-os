@@ -1,21 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit, signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HOME_CONTENT } from '../../content/home.content';
 import { SeoService } from '../../shared/seo.service';
 
 @Component({
-  selector: 'home-page',
+  selector: 'app-home-page',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
 })
 export class HomePageComponent implements OnInit {
+  private readonly seo = inject(SeoService);
+
   protected readonly content = HOME_CONTENT;
   protected readonly isProofPreviewOpen = signal(false);
-
-  constructor(private readonly seo: SeoService) {}
 
   ngOnInit(): void {
     this.seo.setMeta({

@@ -1,17 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { INSTALL_CONTENT } from '../../../content/install.content';
 import { SeoService } from '../../../shared/seo.service';
 
 @Component({
-  selector: 'install-page',
+  selector: 'app-install-page',
   standalone: true,
   templateUrl: './install-page.component.html',
   styleUrl: './install-page.component.scss',
 })
 export class InstallPageComponent implements OnInit {
-  protected readonly content = INSTALL_CONTENT;
+  private readonly seo = inject(SeoService);
 
-  constructor(private readonly seo: SeoService) {}
+  protected readonly content = INSTALL_CONTENT;
 
   ngOnInit(): void {
     this.seo.setMeta({

@@ -1,17 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { EVIDENCE_CONTENT } from '../../../content/evidence.content';
 import { SeoService } from '../../../shared/seo.service';
 
 @Component({
-  selector: 'evidence-page',
+  selector: 'app-evidence-page',
   standalone: true,
   templateUrl: './evidence-page.component.html',
   styleUrl: './evidence-page.component.scss',
 })
 export class EvidencePageComponent implements OnInit {
-  protected readonly content = EVIDENCE_CONTENT;
+  private readonly seo = inject(SeoService);
 
-  constructor(private readonly seo: SeoService) {}
+  protected readonly content = EVIDENCE_CONTENT;
 
   ngOnInit(): void {
     this.seo.setMeta({

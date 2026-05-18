@@ -1,4 +1,4 @@
-import { DOCUMENT, Inject, Injectable } from '@angular/core';
+import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
 const SITE_ORIGIN = 'https://getmandateos.com';
@@ -13,11 +13,9 @@ export interface SeoInput {
 
 @Injectable({ providedIn: 'root' })
 export class SeoService {
-  constructor(
-    private readonly title: Title,
-    private readonly meta: Meta,
-    @Inject(DOCUMENT) private readonly document: Document,
-  ) {}
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
+  private readonly document = inject(DOCUMENT);
 
   setMeta(input: SeoInput): void {
     const canonicalPath = input.path === '/' ? '' : input.path.replace(/\/$/, '');

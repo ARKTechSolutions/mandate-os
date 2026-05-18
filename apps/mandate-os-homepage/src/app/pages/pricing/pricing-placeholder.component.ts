@@ -1,16 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../shared/seo.service';
 
 @Component({
-  selector: 'pricing-placeholder',
+  selector: 'app-pricing-placeholder',
   standalone: true,
   imports: [RouterLink],
   templateUrl: './pricing-placeholder.component.html',
   styleUrl: './pricing-placeholder.component.scss',
 })
 export class PricingPlaceholderComponent implements OnInit {
-  constructor(private readonly seo: SeoService) {}
+  private readonly seo = inject(SeoService);
 
   ngOnInit(): void {
     this.seo.setMeta({

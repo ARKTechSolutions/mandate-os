@@ -1,15 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../shared/seo.service';
 
 @Component({
-  selector: 'docs-index',
+  selector: 'app-docs-index',
   standalone: true,
   imports: [RouterLink],
   templateUrl: './docs-index.component.html',
   styleUrl: './docs-index.component.scss',
 })
 export class DocsIndexComponent implements OnInit {
+  private readonly seo = inject(SeoService);
+
   protected readonly cards = [
     { title: 'Install', description: 'Bring guardrails into an existing repo without cloning.', path: '/docs/install' },
     { title: 'Security', description: 'How the trust boundary separates open-source layer from managed plane.', path: '/docs/security' },
@@ -17,8 +19,6 @@ export class DocsIndexComponent implements OnInit {
     { title: 'FAQ', description: 'Direct answers for teams evaluating MandateOS.', path: '/docs/faq' },
     { title: 'Integrations', description: 'Codex, Cursor, Claude Code, OpenClaw — and GitHub (planned).', path: '/docs/integrations' },
   ];
-
-  constructor(private readonly seo: SeoService) {}
 
   ngOnInit(): void {
     this.seo.setMeta({
