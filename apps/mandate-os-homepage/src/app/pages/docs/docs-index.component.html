@@ -1,0 +1,16 @@
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">Documentation</p>
+    <h1>MandateOS docs</h1>
+    <p>Inspect the trust layer, install path, and evidence model.</p>
+  </div>
+
+  <div class="card-grid two-col">
+    @for (card of cards; track card.path) {
+      <a class="card doc-card" [routerLink]="card.path">
+        <h3>{{ card.title }}</h3>
+        <p>{{ card.description }}</p>
+      </a>
+    }
+  </div>
+</section>

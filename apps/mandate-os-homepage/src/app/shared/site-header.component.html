@@ -1,0 +1,29 @@
+<header class="site-header">
+  <a class="brand" routerLink="/">
+    <img src="/logo-mark.png" alt="MandateOS logo" width="38" height="38" />
+    <span class="brand-copy">
+      <span class="brand-name">MandateOS</span>
+      <span class="brand-tagline">Guardrails, approvals, and receipts for agent action</span>
+    </span>
+  </a>
+
+  <nav class="site-nav desktop-nav" aria-label="MandateOS sections">
+    @for (link of navLinks; track link.path) {
+      <a [routerLink]="link.path" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: link.path === '/docs' }">{{ link.label }}</a>
+    }
+  </nav>
+
+  <div class="header-actions">
+    <details class="mobile-nav">
+      <summary aria-label="Open page navigation">Menu</summary>
+      <nav class="mobile-nav-panel" aria-label="Mobile MandateOS sections">
+        @for (link of navLinks; track link.path) {
+          <a [routerLink]="link.path">{{ link.label }}</a>
+        }
+        <a [href]="signInHref">Sign In</a>
+      </nav>
+    </details>
+
+    <a class="header-cta" [href]="signInHref">Sign In</a>
+  </div>
+</header>

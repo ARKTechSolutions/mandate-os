@@ -1,0 +1,28 @@
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">{{ meta.eyebrow }}</p>
+    <h1>{{ meta.title }}</h1>
+    <p>{{ meta.body }}</p>
+  </div>
+
+  <div class="integration-summary">
+    @for (item of meta.statusSummary; track item) {
+      <span class="summary-pill">{{ item }}</span>
+    }
+  </div>
+
+  <div class="card-grid two-col">
+    @for (host of hosts; track host.slug) {
+      <a class="card integration-card" [routerLink]="['/docs/integrations', host.slug]">
+        <div class="integration-head">
+          <h3>{{ host.name }}</h3>
+          <span class="status-pill">{{ host.status }}</span>
+        </div>
+        <p>{{ host.summary }}</p>
+        <ul>
+          @for (detail of host.details; track detail) { <li>{{ detail }}</li> }
+        </ul>
+      </a>
+    }
+  </div>
+</section>

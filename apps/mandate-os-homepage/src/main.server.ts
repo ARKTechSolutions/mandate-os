@@ -1,18 +1,8 @@
-import { provideZonelessChangeDetection } from '@angular/core';
-import {
-  BootstrapContext,
-  bootstrapApplication,
-} from '@angular/platform-browser';
-import { provideServerRendering } from '@angular/platform-server';
+import { BootstrapContext, bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
+import { appServerConfig } from './app/app.server.config';
 
 const bootstrap = (context: BootstrapContext) =>
-  bootstrapApplication(
-    App,
-    {
-      providers: [provideServerRendering(), provideZonelessChangeDetection()],
-    },
-    context,
-  );
+  bootstrapApplication(App, appServerConfig, context);
 
 export default bootstrap;

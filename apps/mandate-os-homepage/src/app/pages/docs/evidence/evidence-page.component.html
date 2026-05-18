@@ -1,0 +1,29 @@
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">{{ content.eyebrow }}</p>
+    <h1>{{ content.title }}</h1>
+    <p>{{ content.body }}</p>
+  </div>
+
+  <div class="integration-summary evidence-summary">
+    @for (item of content.evidencePoints; track item) {
+      <span class="summary-pill">{{ item }}</span>
+    }
+  </div>
+
+  <div class="card-grid two-col security-grid">
+    @for (item of content.items; track item.title) {
+      <article class="card security-card">
+        <span class="mini-label">{{ item.label }}</span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.body }}</p>
+      </article>
+    }
+  </div>
+
+  <div class="package-actions proof-links">
+    @for (link of content.links; track link.href) {
+      <a class="script-link" [href]="link.href" target="_blank" rel="noreferrer noopener">{{ link.label }}</a>
+    }
+  </div>
+</section>

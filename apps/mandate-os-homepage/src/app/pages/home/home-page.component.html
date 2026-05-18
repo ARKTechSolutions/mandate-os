@@ -1,0 +1,133 @@
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">{{ content.hero.eyebrow }}</p>
+    <h1>{{ content.hero.title }}</h1>
+    <p class="hero-lede">{{ content.hero.lede }}</p>
+    <p class="hero-practical">{{ content.hero.practical }}</p>
+    <p class="hero-audience">{{ content.hero.audience }}</p>
+
+    <div class="hero-actions">
+      <a class="cta is-primary" routerLink="/docs/install">Install Guardrails in a Repo</a>
+      <a class="cta is-secondary" routerLink="/docs/evidence">See Approval Flow</a>
+      <a class="cta is-ghost" [href]="content.hero.signInHref">{{ content.hero.signInLabel }}</a>
+    </div>
+
+    <p class="cta-note">{{ content.hero.ctaNote }}</p>
+
+    <nav class="trust-link-row" aria-label="MandateOS trust resources">
+      @for (link of content.hero.trustLinks; track link.href) {
+        <a class="trust-link" [href]="link.href" target="_blank" rel="noreferrer noopener">{{ link.label }}</a>
+      }
+    </nav>
+
+    <div class="public-proof">
+      <span class="mini-label">{{ content.hero.publicProofLabel }}</span>
+      <div class="integration-summary public-proof-pills">
+        @for (item of content.hero.publicProof; track item) {
+          <span class="summary-pill">{{ item }}</span>
+        }
+      </div>
+    </div>
+
+    <p class="hero-verification">
+      {{ content.hero.verification }}
+      <a routerLink="/docs/evidence">{{ content.hero.verificationLinkLabel }}</a>
+    </p>
+  </div>
+
+  <aside class="hero-panel card">
+    <p class="eyebrow">{{ content.heroPanel.eyebrow }}</p>
+    <h2 class="panel-title">{{ content.heroPanel.title }}</h2>
+    <p class="panel-body">{{ content.heroPanel.body }}</p>
+
+    <ul class="question-list">
+      @for (step of content.heroPanel.steps; track step) {
+        <li>{{ step }}</li>
+      }
+    </ul>
+
+    <div class="panel-note">
+      <span>{{ content.heroPanel.noteLabel }}</span>
+      <strong>{{ content.heroPanel.noteTitle }}</strong>
+      <p>{{ content.heroPanel.noteBody }}</p>
+    </div>
+  </aside>
+</section>
+
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">Public proof</p>
+    <h2>What gets written, checked, kept, and inspected.</h2>
+  </div>
+  <div class="card-grid four-col proof-strip">
+    @for (item of content.proofStrip; track item.label) {
+      <article class="proof-card">
+        <span>{{ item.label }}</span>
+        <strong>{{ item.value }}</strong>
+        <p>{{ item.detail }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">Product preview</p>
+    <h2>See it running</h2>
+    <p>Real screenshots from the MandateOS control plane.</p>
+  </div>
+  <div class="card-grid two-col">
+    <figure class="screenshot-slot">
+      <!-- W13: screenshot slot — dashboard overview -->
+    </figure>
+    <figure class="screenshot-slot">
+      <!-- W13: screenshot slot — mandate composer review tab -->
+    </figure>
+    <figure class="screenshot-slot">
+      <!-- W13: screenshot slot — mandate detail page -->
+    </figure>
+    <figure class="screenshot-slot">
+      <!-- W13: screenshot slot — evidence ledger -->
+    </figure>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">{{ content.integrationsSummary.eyebrow }}</p>
+    <h2>{{ content.integrationsSummary.title }}</h2>
+    <p>{{ content.integrationsSummary.body }}</p>
+  </div>
+
+  <div class="integration-summary">
+    @for (item of content.integrationsSummary.statusSummary; track item) {
+      <span class="summary-pill">{{ item }}</span>
+    }
+  </div>
+
+  <div class="card-grid two-col">
+    @for (integration of content.integrationsSummary.items; track integration.name) {
+      <a class="card integration-card" [routerLink]="['/docs/integrations', hostSlug(integration.name)]">
+        <div class="integration-head">
+          <h3>{{ integration.name }}</h3>
+          <span class="status-pill">{{ integration.status }}</span>
+        </div>
+        <p>{{ integration.summary }}</p>
+      </a>
+    }
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="card">
+    <p class="eyebrow">{{ content.finalCta.eyebrow }}</p>
+    <h2>{{ content.finalCta.title }}</h2>
+    <p>{{ content.finalCta.body }}</p>
+    <div class="hero-actions">
+      <a class="cta is-primary" routerLink="/docs/install">{{ content.finalCta.primaryLabel }}</a>
+      <a class="cta is-secondary" [href]="content.finalCta.secondaryHref" target="_blank" rel="noreferrer noopener">
+        {{ content.finalCta.secondaryLabel }}
+      </a>
+    </div>
+  </div>
+</section>

@@ -1,30 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, HostListener, signal } from '@angular/core';
-import { MANDATE_OS_CONTENT } from './mandate-os-content';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { SiteFooterComponent } from './shared/site-footer.component';
+import { SiteHeaderComponent } from './shared/site-header.component';
 
 @Component({
-  imports: [CommonModule],
   selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, SiteHeaderComponent, SiteFooterComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
-  protected readonly content = MANDATE_OS_CONTENT;
-  protected readonly year = new Date().getFullYear();
-  protected readonly isProofPreviewOpen = signal(false);
-
-  protected openProofPreview() {
-    this.isProofPreviewOpen.set(true);
-  }
-
-  protected closeProofPreview() {
-    this.isProofPreviewOpen.set(false);
-  }
-
-  @HostListener('document:keydown.escape')
-  protected handleEscape() {
-    if (this.isProofPreviewOpen()) {
-      this.closeProofPreview();
-    }
-  }
-}
+export class App {}

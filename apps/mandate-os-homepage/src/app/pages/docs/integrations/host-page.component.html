@@ -1,0 +1,35 @@
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">Integration</p>
+    <h1>{{ host.name }}</h1>
+    <span class="status-pill" [class.planned]="planned">{{ planned ? 'Planned' : 'Available today' }}</span>
+    <p>{{ host.summary }}</p>
+  </div>
+
+  <article class="card host-detail">
+    <ul>
+      @for (detail of host.details; track detail) { <li>{{ detail }}</li> }
+    </ul>
+  </article>
+
+  @if (host.installer) {
+    <article class="card host-installer">
+      <span class="mini-label">Install command</span>
+      <pre class="command-block"><code>{{ host.installer.command }}</code></pre>
+      <div class="installer-actions">
+        <a class="script-link" [href]="host.installer.scriptHref" [attr.download]="host.installer.scriptFileName">{{ host.installer.scriptLabel }}</a>
+        <a class="script-link" [href]="host.installer.packageHref" target="_blank" rel="noreferrer">{{ host.installer.packageLinkLabel }}</a>
+      </div>
+      <ul>
+        @for (note of host.installer.notes; track note) { <li>{{ note }}</li> }
+      </ul>
+    </article>
+  }
+
+  @if (planned) {
+    <aside class="card planned-note">
+      <span class="mini-label">Roadmap</span>
+      <p>This integration is on the roadmap. The same mandate, approval, and receipt model will apply once available.</p>
+    </aside>
+  }
+</section>

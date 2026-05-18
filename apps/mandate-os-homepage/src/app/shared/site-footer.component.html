@@ -1,0 +1,15 @@
+<footer class="site-footer">
+  <p>&copy; {{ year }} MandateOS</p>
+  <p>{{ content.footer }}</p>
+  <nav class="footer-links" aria-label="MandateOS resources">
+    @for (link of content.footerLinks; track link.href) {
+      <a
+        [href]="link.href"
+        [attr.target]="link.href.startsWith('http') ? '_blank' : null"
+        [attr.rel]="link.href.startsWith('http') ? 'noreferrer noopener' : null"
+      >
+        {{ link.label }}
+      </a>
+    }
+  </nav>
+</footer>

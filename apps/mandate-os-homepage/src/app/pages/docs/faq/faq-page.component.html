@@ -1,0 +1,19 @@
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">{{ content.eyebrow }}</p>
+    <h1>{{ content.title }}</h1>
+    <p>{{ content.body }}</p>
+  </div>
+
+  <div class="faq-stack">
+    @for (item of content.items; track item.question; let isFirst = $first, index = $index) {
+      <details class="faq-item" [attr.open]="isFirst ? '' : null">
+        <summary>
+          <span class="faq-number">{{ index + 1 }}</span>
+          <span class="faq-question">{{ item.question }}</span>
+        </summary>
+        <p>{{ item.answer }}</p>
+      </details>
+    }
+  </div>
+</section>

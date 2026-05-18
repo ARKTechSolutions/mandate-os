@@ -1,3 +1,5 @@
+// TODO(W15): consumers now import from `./content/*.content.ts`. Cleanup this
+// monolithic blob and migrate remaining slices once docs polish lands.
 export const MANDATE_OS_CONTENT = {
   brandTagline: 'Guardrails, approvals, and receipts for agent action',
   headerCta: 'Sign In',

@@ -1,0 +1,31 @@
+<div class="docs-shell">
+  <aside class="docs-sidebar" aria-label="Documentation navigation">
+    <nav>
+      <p class="mini-label">Docs</p>
+      <ul>
+        @for (link of mainNav; track link.path) {
+          <li>
+            <a [routerLink]="link.path" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: link.path === '/docs/integrations' }">
+              {{ link.label }}
+            </a>
+          </li>
+        }
+      </ul>
+      <p class="mini-label">Hosts</p>
+      <ul>
+        @for (host of hosts; track host.slug) {
+          <li>
+            <a [routerLink]="['/docs/integrations', host.slug]" routerLinkActive="is-active">
+              {{ host.name }}
+              @if (host.planned) { <span class="status-pill planned">Planned</span> }
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="docs-main">
+    <router-outlet />
+  </main>
+</div>

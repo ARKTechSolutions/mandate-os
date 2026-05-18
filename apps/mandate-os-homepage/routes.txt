@@ -1,1 +1,13 @@
 /
+/docs
+/docs/install
+/docs/security
+/docs/evidence
+/docs/faq
+/docs/integrations
+/docs/integrations/codex
+/docs/integrations/cursor
+/docs/integrations/claude-code
+/docs/integrations/openclaw
+/docs/integrations/github
+/pricing

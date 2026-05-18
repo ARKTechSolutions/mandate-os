@@ -1,0 +1,17 @@
+:host { display: block; }
+
+.screenshot-slot {
+  margin: 0;
+  aspect-ratio: 16 / 10;
+  background: rgba(131, 227, 224, 0.05);
+  border: 1px dashed rgba(131, 227, 224, 0.2);
+  border-radius: 16px;
+}
+
+a.integration-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+a.integration-card:hover { border-color: rgba(131, 227, 224, 0.4); }
