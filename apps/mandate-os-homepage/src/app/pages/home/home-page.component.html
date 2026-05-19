@@ -51,6 +51,22 @@
   </aside>
 </section>
 
+<section class="section video-walkthrough">
+  <div class="section-heading">
+    <p class="eyebrow">60-second tour</p>
+    <h2>Watch one approval and receipt happen end to end.</h2>
+    <p>Installer, mandate, runtime decision, signed receipt, and audit verification — without leaving the workspace.</p>
+  </div>
+
+  <div class="video-frame">
+    <!-- Replace <video> src and poster with the recorded Loom / YouTube / MP4 URL once available. -->
+    <div class="video-placeholder" role="status">
+      <strong>Walkthrough recording coming soon</strong>
+      <span>Recording planned next sprint. Script is committed in <code>docs/walkthrough-script.md</code>.</span>
+    </div>
+  </div>
+</section>
+
 <section class="section">
   <div class="section-heading">
     <p class="eyebrow">How it works</p>
@@ -67,7 +83,35 @@
   </div>
 </section>
 
-<!-- W13: "See it running" product screenshot section lives here once captures land. -->
+<section class="section see-it-running">
+  <div class="section-heading">
+    <p class="eyebrow">See it running</p>
+    <h2>From mandate to receipt in one operating loop.</h2>
+    <p>Real screenshots from the MandateOS control plane — the workspace overview, mandate composer, signed mandate detail, and audit ledger.</p>
+  </div>
+
+  <div class="card-grid two-col screenshot-grid">
+    @for (shot of screenshots; track shot.slug) {
+      <figure class="screenshot-figure">
+        <picture>
+          <source [srcset]="'/screenshots/' + shot.slug + '.webp'" type="image/webp" />
+          <img
+            [src]="'/screenshots/' + shot.slug + '.jpg'"
+            [alt]="shot.alt"
+            width="1440"
+            height="900"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
+        <figcaption>
+          <strong>{{ shot.title }}</strong>
+          <span>{{ shot.caption }}</span>
+        </figcaption>
+      </figure>
+    }
+  </div>
+</section>
 
 <section class="section">
   <div class="section-heading">
