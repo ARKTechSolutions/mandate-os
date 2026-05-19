@@ -3,13 +3,10 @@
     <p class="eyebrow">{{ content.hero.eyebrow }}</p>
     <h1>{{ content.hero.title }}</h1>
     <p class="hero-lede">{{ content.hero.lede }}</p>
-    <p class="hero-practical">{{ content.hero.practical }}</p>
-    <p class="hero-audience">{{ content.hero.audience }}</p>
 
     <div class="hero-actions">
       <a class="cta is-primary" routerLink="/docs/install">Install Guardrails in a Repo</a>
       <a class="cta is-secondary" routerLink="/docs/evidence">See Approval Flow</a>
-      <a class="cta is-ghost" [href]="content.hero.signInHref">{{ content.hero.signInLabel }}</a>
     </div>
 
     <p class="cta-note">{{ content.hero.ctaNote }}</p>
@@ -56,7 +53,7 @@
 
 <section class="section">
   <div class="section-heading">
-    <p class="eyebrow">Public proof</p>
+    <p class="eyebrow">How it works</p>
     <h2>What gets written, checked, kept, and inspected.</h2>
   </div>
   <div class="card-grid four-col proof-strip">
@@ -70,27 +67,7 @@
   </div>
 </section>
 
-<section class="section">
-  <div class="section-heading">
-    <p class="eyebrow">Product preview</p>
-    <h2>See it running</h2>
-    <p>Real screenshots from the MandateOS control plane.</p>
-  </div>
-  <div class="card-grid two-col">
-    <figure class="screenshot-slot">
-      <!-- W13: screenshot slot — dashboard overview -->
-    </figure>
-    <figure class="screenshot-slot">
-      <!-- W13: screenshot slot — mandate composer review tab -->
-    </figure>
-    <figure class="screenshot-slot">
-      <!-- W13: screenshot slot — mandate detail page -->
-    </figure>
-    <figure class="screenshot-slot">
-      <!-- W13: screenshot slot — evidence ledger -->
-    </figure>
-  </div>
-</section>
+<!-- W13: "See it running" product screenshot section lives here once captures land. -->
 
 <section class="section">
   <div class="section-heading">
@@ -110,7 +87,7 @@
       <a class="card integration-card" [routerLink]="['/docs/integrations', hostSlug(integration.name)]">
         <div class="integration-head">
           <h3>{{ integration.name }}</h3>
-          <span class="status-pill">{{ integration.status }}</span>
+          <span class="status-pill" [class.planned]="integration.status === 'Planned'">{{ integration.status }}</span>
         </div>
         <p>{{ integration.summary }}</p>
       </a>

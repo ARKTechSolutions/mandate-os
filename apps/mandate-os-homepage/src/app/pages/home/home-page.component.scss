@@ -1,13 +1,5 @@
 :host { display: block; }
 
-.screenshot-slot {
-  margin: 0;
-  aspect-ratio: 16 / 10;
-  background: rgba(131, 227, 224, 0.05);
-  border: 1px dashed rgba(131, 227, 224, 0.2);
-  border-radius: 16px;
-}
-
 a.integration-card {
   text-decoration: none;
   color: inherit;
@@ -15,3 +7,9 @@ a.integration-card {
 }
 
 a.integration-card:hover { border-color: rgba(131, 227, 224, 0.4); }
+
+.status-pill.planned {
+  background: rgba(246, 195, 107, 0.18);
+  color: #f6c36b;
+  border: 1px solid rgba(246, 195, 107, 0.4);
+}
