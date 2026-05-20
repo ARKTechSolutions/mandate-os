@@ -59,11 +59,18 @@
   </div>
 
   <div class="video-frame">
-    <!-- Replace <video> src and poster with the recorded Loom / YouTube / MP4 URL once available. -->
-    <div class="video-placeholder" role="status">
-      <strong>Walkthrough recording coming soon</strong>
-      <span>Recording planned next sprint. Script is committed in <code>docs/walkthrough-script.md</code>.</span>
-    </div>
+    <video
+      controls
+      preload="metadata"
+      poster="/walkthrough-poster.jpg"
+      width="1280"
+      height="720"
+      playsinline
+    >
+      <source src="/walkthrough.webm" type="video/webm" />
+      <source src="/walkthrough.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
   </div>
 </section>
 
