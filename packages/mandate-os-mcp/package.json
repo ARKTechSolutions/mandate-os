@@ -1,6 +1,6 @@
 {
   "name": "@mandate-os/mcp",
-  "version": "0.1.12",
+  "version": "0.1.15",
   "description": "MandateOS MCP server and installer CLIs for Codex, Cursor, and Claude Code.",
   "author": "Robin Sjøvoll",
   "license": "MIT",

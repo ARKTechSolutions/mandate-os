@@ -1,6 +1,6 @@
 {
   "name": "@mandate-os/openclaw",
-  "version": "0.1.15",
+  "version": "0.1.18",
   "description": "MandateOS bridge, plugin bundle, and installer for OpenClaw.",
   "author": "Robin Sjøvoll",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "@mandate-os/sdk",
-  "version": "0.1.9",
+  "version": "0.1.12",
   "description": "TypeScript SDK for MandateOS agent integrations.",
   "author": "Robin Sjøvoll",
   "license": "MIT",
