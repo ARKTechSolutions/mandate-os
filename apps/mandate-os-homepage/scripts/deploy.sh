@@ -29,7 +29,7 @@ read_infra_parameter() {
 INFRA_SWA_NAME="$(read_infra_parameter "staticWebAppName" "${INFRA_PARAMETERS_FILE}")"
 INFRA_RESOURCE_GROUP="$(read_infra_parameter "resourceGroupName" "${INFRA_PARAMETERS_FILE}")"
 
-SWA_NAME="${MANDATE_OS_HOMEPAGE_AZURE_STATIC_WEB_APP_NAME:-${SWA_NAME:-${INFRA_SWA_NAME:-swa-mandate-os-homepage-westeurope}}}"
+SWA_NAME="${MANDATE_OS_HOMEPAGE_AZURE_STATIC_WEB_APP_NAME:-${SWA_NAME:-${INFRA_SWA_NAME:-swa-mandate-os-homepage-eastus2}}}"
 SWA_RESOURCE_GROUP="${MANDATE_OS_HOMEPAGE_AZURE_STATIC_WEB_APP_RESOURCE_GROUP:-${SWA_RESOURCE_GROUP:-${INFRA_RESOURCE_GROUP:-}}}"
 
 resolve_deploy_token() {

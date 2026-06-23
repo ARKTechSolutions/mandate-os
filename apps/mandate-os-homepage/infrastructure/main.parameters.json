@@ -3,13 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "resourceGroupName": {
-      "value": "rg-mandate-os-homepage-westeurope"
+      "value": "rg-mandate-os-homepage-eastus2"
     },
     "location": {
-      "value": "westeurope"
+      "value": "eastus2"
     },
     "staticWebAppName": {
-      "value": "swa-mandate-os-homepage-westeurope"
+      "value": "swa-mandate-os-homepage-eastus2"
     },
     "staticWebAppSkuName": {
       "value": "Free"
