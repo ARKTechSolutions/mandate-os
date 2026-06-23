@@ -14,10 +14,10 @@ MandateOS is open core.
 ## Public source and docs
 
 - Homepage: https://getmandateos.com/
-- GitHub repo: https://github.com/robinsjovoll/mandate-os
-- README: https://github.com/robinsjovoll/mandate-os/blob/main/README.md
-- Open-source boundary: https://github.com/robinsjovoll/mandate-os/blob/main/OPEN_SOURCE_BOUNDARY.md
-- Releases: https://github.com/robinsjovoll/mandate-os/releases
+- GitHub repo: https://github.com/ARKTechSolutions/mandate-os
+- README: https://github.com/ARKTechSolutions/mandate-os/blob/main/README.md
+- Open-source boundary: https://github.com/ARKTechSolutions/mandate-os/blob/main/OPEN_SOURCE_BOUNDARY.md
+- Releases: https://github.com/ARKTechSolutions/mandate-os/releases
 
 ## Public packages
 

@@ -11,13 +11,13 @@
     "typescript",
     "policy"
   ],
-  "homepage": "https://github.com/robinsjovoll/mandate-os/tree/main/packages/mandate-os-sdk#readme",
+  "homepage": "https://github.com/ARKTechSolutions/mandate-os/tree/main/packages/mandate-os-sdk#readme",
   "bugs": {
-    "url": "https://github.com/robinsjovoll/mandate-os/issues"
+    "url": "https://github.com/ARKTechSolutions/mandate-os/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/robinsjovoll/mandate-os.git",
+    "url": "git+https://github.com/ARKTechSolutions/mandate-os.git",
     "directory": "packages/mandate-os-sdk"
   },
   "type": "module",

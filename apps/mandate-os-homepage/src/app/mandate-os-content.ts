@@ -46,7 +46,7 @@ export const MANDATE_OS_CONTENT = {
     trustLinks: [
       {
         label: 'Public Repo',
-        href: 'https://github.com/robinsjovoll/mandate-os',
+        href: 'https://github.com/ARKTechSolutions/mandate-os',
       },
       {
         label: 'npm Packages',
@@ -54,7 +54,7 @@ export const MANDATE_OS_CONTENT = {
       },
       {
         label: 'Installer Docs',
-        href: 'https://github.com/robinsjovoll/mandate-os/tree/main/packages/mandate-os-mcp#readme',
+        href: 'https://github.com/ARKTechSolutions/mandate-os/tree/main/packages/mandate-os-mcp#readme',
       },
     ],
   },
@@ -197,7 +197,7 @@ export const MANDATE_OS_CONTENT = {
     links: [
       {
         label: 'View the public repository',
-        href: 'https://github.com/robinsjovoll/mandate-os',
+        href: 'https://github.com/ARKTechSolutions/mandate-os',
       },
       {
         label: 'Browse the published packages',
@@ -346,7 +346,7 @@ export const MANDATE_OS_CONTENT = {
     links: [
       {
         label: 'Open-source repo',
-        href: 'https://github.com/robinsjovoll/mandate-os',
+        href: 'https://github.com/ARKTechSolutions/mandate-os',
       },
       {
         label: 'SDK on npm',
@@ -653,7 +653,7 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
     links: [
       {
         label: 'Inspect the public repo',
-        href: 'https://github.com/robinsjovoll/mandate-os',
+        href: 'https://github.com/ARKTechSolutions/mandate-os',
       },
       {
         label: 'Browse MandateOS packages',
@@ -661,7 +661,7 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
       },
       {
         label: 'Read installer docs',
-        href: 'https://github.com/robinsjovoll/mandate-os/tree/main/packages/mandate-os-mcp#readme',
+        href: 'https://github.com/ARKTechSolutions/mandate-os/tree/main/packages/mandate-os-mcp#readme',
       },
     ],
   },
@@ -720,13 +720,13 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
     primaryLabel: 'Open Install Guide',
     primaryHref: '#deploy',
     secondaryLabel: 'Inspect the Public Repo',
-    secondaryHref: 'https://github.com/robinsjovoll/mandate-os',
+    secondaryHref: 'https://github.com/ARKTechSolutions/mandate-os',
   },
   footer: 'Operational guardrails, approvals, and evidence for AI agents.',
   footerLinks: [
     {
       label: 'GitHub',
-      href: 'https://github.com/robinsjovoll/mandate-os',
+      href: 'https://github.com/ARKTechSolutions/mandate-os',
     },
     {
       label: 'npm packages',

@@ -11,13 +11,13 @@
     "bridge",
     "policy"
   ],
-  "homepage": "https://github.com/robinsjovoll/mandate-os/tree/main/packages/mandate-os-openclaw#readme",
+  "homepage": "https://github.com/ARKTechSolutions/mandate-os/tree/main/packages/mandate-os-openclaw#readme",
   "bugs": {
-    "url": "https://github.com/robinsjovoll/mandate-os/issues"
+    "url": "https://github.com/ARKTechSolutions/mandate-os/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/robinsjovoll/mandate-os.git",
+    "url": "git+https://github.com/ARKTechSolutions/mandate-os.git",
     "directory": "packages/mandate-os-openclaw"
   },
   "type": "module",

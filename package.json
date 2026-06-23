@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
-  "homepage": "https://github.com/robinsjovoll/mandate-os#readme",
+  "homepage": "https://github.com/ARKTechSolutions/mandate-os#readme",
   "bugs": {
-    "url": "https://github.com/robinsjovoll/mandate-os/issues"
+    "url": "https://github.com/ARKTechSolutions/mandate-os/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/robinsjovoll/mandate-os.git"
+    "url": "git+https://github.com/ARKTechSolutions/mandate-os.git"
   },
   "packageManager": "pnpm@10.29.3",
   "engines": {

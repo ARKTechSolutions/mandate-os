@@ -15,6 +15,6 @@ export const HOME_CONTENT = {
   finalCta: {
     ...MANDATE_OS_CONTENT.finalCta,
     primaryHref: '/docs/install',
-    secondaryHref: 'https://github.com/robinsjovoll/mandate-os',
+    secondaryHref: 'https://github.com/ARKTechSolutions/mandate-os',
   },
 } as const;
