@@ -129,17 +129,22 @@ describe('cursor setup helpers', () => {
   });
 
   it('derives both public and realpath approval candidates for Cursor projects', () => {
+    const workspacePath = path.resolve('/tmp/mandate-os-sandbox-test');
+    const cursorHomeDir = path.join(os.homedir(), '.cursor');
     const approvalPaths = getCursorProjectApprovalPaths(
-      '/tmp/mandate-os-sandbox-test',
-      path.join(os.homedir(), '.cursor'),
+      workspacePath,
+      cursorHomeDir,
     );
+    const cursorProjectId = workspacePath
+      .replace(/\\/g, '/')
+      .replace(/^\/+/, '')
+      .replace(/\/+/g, '-');
 
     expect(approvalPaths).toContain(
       path.join(
-        os.homedir(),
-        '.cursor',
+        cursorHomeDir,
         'projects',
-        'tmp-mandate-os-sandbox-test',
+        cursorProjectId,
         'mcp-approvals.json',
       ),
     );

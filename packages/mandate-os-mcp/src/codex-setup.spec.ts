@@ -278,7 +278,7 @@ describe('codex setup helpers', () => {
       installProjectMcp: false,
     });
 
-    expect(result.rulesFiles).toEqual([transientRulePath]);
+    expect(result.rulesFiles).toEqual([path.resolve(transientRulePath)]);
     expect(result.displayRulesFiles).toEqual([
       'package:rules/starter-bundles/local-workspace.json',
     ]);
