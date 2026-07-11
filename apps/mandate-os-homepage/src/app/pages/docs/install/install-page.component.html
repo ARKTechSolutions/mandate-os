@@ -1,5 +1,67 @@
 <section class="section">
   <div class="deploy-shell card">
+    <section class="cursor-install-guide" [attr.id]="content.cursorQuickInstall.id">
+      <div class="section-heading cursor-install-heading">
+        <p class="eyebrow">{{ content.cursorQuickInstall.eyebrow }}</p>
+        <h1>{{ content.cursorQuickInstall.title }}</h1>
+        <p>{{ content.cursorQuickInstall.body }}</p>
+      </div>
+
+      <div class="cursor-guide-steps">
+        @for (step of content.cursorQuickInstall.steps; track step.id) {
+          <article class="cursor-guide-step">
+            <span class="step-id">{{ step.number }}</span>
+            <div class="cursor-step-body">
+              <div class="cursor-step-title">
+                <h2>{{ step.title }}</h2>
+                @if (stepHelp(step); as help) {
+                  <details class="cursor-step-help">
+                    <summary aria-label="More about this step">?</summary>
+                    <p>{{ help }}</p>
+                  </details>
+                }
+              </div>
+              <p>{{ step.body }}</p>
+
+              @if (activeCodeTab(step); as activeTab) {
+                <div class="code-tabs">
+                  <div class="code-tab-bar" role="tablist" [attr.aria-label]="step.title + ' snippets'">
+                    @for (tab of step.codeTabs; track tab.id) {
+                      <button
+                        type="button"
+                        role="tab"
+                        [class.is-active]="activeTab.id === tab.id"
+                        [attr.aria-selected]="activeTab.id === tab.id"
+                        (click)="setActiveCodeTab(step.id, tab.id)"
+                      >
+                        {{ tab.label }}
+                      </button>
+                    }
+                  </div>
+                  <div class="code-tab-panel">
+                    <div class="code-tab-meta">
+                      <span>{{ activeTab.language }}</span>
+                      <button type="button" class="copy-code-button" (click)="copyCode(step.id, activeTab.code)">
+                        {{ copiedCodeId === step.id ? 'Copied' : 'Copy' }}
+                      </button>
+                    </div>
+                    <pre><code>{{ activeTab.code }}</code></pre>
+                  </div>
+                </div>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      <aside class="cursor-complete-card">
+        <span class="mini-label">Setup complete</span>
+        <h2>{{ content.cursorQuickInstall.completion.title }}</h2>
+        <p>{{ content.cursorQuickInstall.completion.body }}</p>
+      </aside>
+    </section>
+
+    <div class="legacy-install-reference">
     <div class="section-heading compact">
       <p class="eyebrow">{{ content.eyebrow }}</p>
       <h1>{{ content.title }}</h1>
@@ -119,5 +181,6 @@
       <span class="mini-label">{{ content.runtimeNoteTitle }}</span>
       <p>{{ content.runtimeNoteBody }}</p>
     </aside>
+    </div>
   </div>
 </section>

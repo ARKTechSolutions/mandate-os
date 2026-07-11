@@ -5,7 +5,7 @@
     <p class="hero-lede">{{ content.hero.lede }}</p>
 
     <div class="hero-actions">
-      <a class="cta is-primary is-hero" [routerLink]="content.hero.primaryHref">{{ content.hero.primaryLabel }}</a>
+      <a class="cta is-primary is-hero" [routerLink]="['/docs/install']" fragment="cursor-install">{{ content.hero.primaryLabel }}</a>
       <a class="cta is-secondary is-hero" [href]="content.hero.secondaryHref">{{ content.hero.secondaryLabel }}</a>
     </div>
 
@@ -168,7 +168,7 @@
     <h2>{{ content.finalCta.title }}</h2>
     <p>{{ content.finalCta.body }}</p>
     <div class="hero-actions">
-      <a class="cta is-primary" routerLink="/docs/install">{{ content.finalCta.primaryLabel }}</a>
+      <a class="cta is-primary" [routerLink]="['/docs/install']" fragment="cursor-install">{{ content.finalCta.primaryLabel }}</a>
       <a class="cta is-secondary" [href]="content.finalCta.secondaryHref" target="_blank" rel="noreferrer noopener">
         {{ content.finalCta.secondaryLabel }}
       </a>

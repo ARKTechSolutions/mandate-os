@@ -1,1 +1,231 @@
-:host { display: block; }
+:host {
+  display: block;
+}
+
+.cursor-install-guide {
+  scroll-margin-top: 7rem;
+}
+
+.cursor-install-heading {
+  max-width: 50rem;
+}
+
+.cursor-install-heading h1 {
+  margin: 0;
+  font-size: clamp(2.45rem, 5vw, 4.55rem);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+  text-wrap: balance;
+}
+
+.cursor-install-heading p:not(.eyebrow) {
+  max-width: 48rem;
+}
+
+.cursor-guide-steps {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+
+.cursor-guide-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.1rem;
+  border: 1px solid rgba(131, 227, 224, 0.1);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.cursor-step-body {
+  min-width: 0;
+}
+
+.cursor-step-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.cursor-step-title h2 {
+  margin: 0;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.cursor-step-body > p,
+.cursor-step-help p,
+.cursor-complete-card p {
+  color: var(--color-muted);
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.cursor-step-body > p {
+  margin: 0.6rem 0 0;
+}
+
+.cursor-step-help {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.cursor-step-help summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(246, 195, 107, 0.32);
+  border-radius: 999px;
+  color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 900;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cursor-step-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.cursor-step-help p {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  width: min(22rem, calc(100vw - 3rem));
+  margin: 0.65rem 0 0;
+  padding: 0.9rem;
+  border: 1px solid rgba(131, 227, 224, 0.14);
+  border-radius: 1rem;
+  background: rgba(4, 13, 22, 0.98);
+  box-shadow: 0 24px 50px -34px rgba(0, 0, 0, 0.95);
+}
+
+.code-tabs {
+  margin-top: 1rem;
+  border: 1px solid rgba(131, 227, 224, 0.1);
+  border-radius: 1.1rem;
+  background: rgba(2, 10, 17, 0.78);
+  overflow: clip;
+}
+
+.code-tab-bar {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  border-bottom: 1px solid rgba(131, 227, 224, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  overflow-x: auto;
+}
+
+.code-tab-bar button,
+.copy-code-button {
+  border: 0;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.code-tab-bar button {
+  flex: 0 0 auto;
+  min-height: 2.35rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  color: var(--color-muted);
+  background: transparent;
+}
+
+.code-tab-bar button.is-active {
+  color: #06131f;
+  background: linear-gradient(135deg, #83e3e0, #4e91ff);
+}
+
+.code-tab-panel {
+  min-width: 0;
+}
+
+.code-tab-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.75rem 0.9rem 0;
+}
+
+.code-tab-meta span {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.copy-code-button {
+  min-height: 2.1rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.copy-code-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.code-tab-panel pre {
+  margin: 0;
+  padding: 0.8rem 0.9rem 1rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-tab-panel code {
+  color: #dbefff;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.cursor-complete-card {
+  margin-top: 1.3rem;
+  padding: 1.15rem;
+  border: 1px solid rgba(246, 195, 107, 0.18);
+  border-radius: 1.25rem;
+  background: linear-gradient(
+    180deg,
+    rgba(246, 195, 107, 0.1),
+    rgba(255, 255, 255, 0.035)
+  );
+}
+
+.cursor-complete-card h2 {
+  margin: 0.55rem 0 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.legacy-install-reference {
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+  padding-top: clamp(1.8rem, 4vw, 2.8rem);
+  border-top: 1px solid rgba(131, 227, 224, 0.12);
+}
+
+@media (max-width: 760px) {
+  .cursor-guide-step {
+    grid-template-columns: 1fr;
+  }
+
+  .cursor-step-title {
+    align-items: flex-start;
+  }
+
+  .cursor-step-help p {
+    right: -0.2rem;
+  }
+}
