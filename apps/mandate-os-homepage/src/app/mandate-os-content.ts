@@ -14,18 +14,13 @@ export const MANDATE_OS_CONTENT = {
   ],
   hero: {
     eyebrow: 'MandateOS / runtime guardrails for AI agents',
-    title: 'Install approvals, guardrails, and receipts into agent workflows.',
+    title: 'Safeguard your AI agents with approvals, guardrails, and receipts.',
     lede: 'MandateOS gives teams using Codex, Cursor, Claude Code, OpenClaw, and MCP-based workflows a concrete operating loop: define a mandate, intercept risky actions, escalate when needed, and keep signed evidence behind what ran.',
     practical:
       'When an agent wants to run a shell command, push code, or call an external tool, MandateOS evaluates the request before it runs, shows operators what was requested, and records the outcome as approval events, receipts, and evidence.',
     audience:
       'For platform, security, and engineering teams running agents inside real repositories, shells, and operator-reviewed workflows.',
-    publicProofLabel: 'Public proof',
-    publicProof: [
-      'Open repo and install path',
-      '3 published npm packages',
-      '4 hosts available today',
-    ],
+    publicProofLabel: 'TRUST & OPEN SOURCE',
     verification:
       'Signed receipts, execution grants, and audit-chain verification are inspectable from the first guarded action.',
     verificationLinkLabel: 'See verification details',
@@ -35,26 +30,27 @@ export const MANDATE_OS_CONTENT = {
       'Managed approvals, workspaces, and audit retention',
       'Codex, Cursor, Claude Code, OpenClaw, and MCP workflows',
     ],
-    primaryLabel: 'Install Guardrails in a Repo',
-    primaryHref: '#deploy',
-    secondaryLabel: 'See Approval Flow',
-    secondaryHref: '#proof',
+    primaryLabel: 'Try for free',
+    primaryHref: '/docs/install',
+    secondaryLabel: 'See how it works',
+    secondaryHref: '#see-how-it-works',
     signInLabel: 'Sign In',
     signInHref: 'https://app.getmandateos.com',
-    ctaNote:
-      'Export your connection values, run the host installer, and MandateOS writes local host config plus a status path into that workspace. No repo clone required.',
     trustLinks: [
       {
-        label: 'Public Repo',
+        label: 'Public Github Repo',
         href: 'https://github.com/ARKTechSolutions/mandate-os',
+        icon: 'github',
       },
       {
-        label: 'npm Packages',
+        label: 'Verified npm Packages',
         href: 'https://www.npmjs.com/search?q=%40mandate-os',
+        icon: 'npm',
       },
       {
-        label: 'Installer Docs',
+        label: 'Installer Documentation',
         href: 'https://github.com/ARKTechSolutions/mandate-os/tree/main/packages/mandate-os-mcp#readme',
+        icon: 'document',
       },
     ],
   },
@@ -85,14 +81,27 @@ export const MANDATE_OS_CONTENT = {
     },
   ],
   heroPanel: {
-    eyebrow: 'What happens after install',
-    title: 'The product becomes visible immediately.',
-    body: 'MandateOS should feel tangible within minutes, not after a long setup project.',
     steps: [
-      'Install into an existing repository without cloning this repo first.',
-      'MandateOS writes the local MCP and hook config for the selected host.',
-      'The agent brings risky actions to the runtime before they continue.',
-      'Operators review approval events, receipts, and retained evidence in the control plane.',
+      {
+        title: 'Instant visibility',
+        body: 'MandateOS should feel tangible within minutes, not after a long project setup.',
+      },
+      {
+        title: 'Automatic hook setup',
+        body: 'The system automatically writes the local MCP and hooks configuration for you.',
+      },
+      {
+        title: 'Instant interception of Agents',
+        body: 'All hooked agent actions goes through the runtime for approval before they can continue.',
+      },
+      {
+        title: 'Async human sign-off',
+        body: 'Operators or team leads receive real-time approval alerts via the control plane to instantly clear or deny blocked actions.',
+      },
+      {
+        title: 'Dashboard for transparency',
+        body: 'With the MandateOS dashboard you can have full control of all your agents actions and possible foul behavior.',
+      },
     ],
     noteLabel: 'Available now',
     noteTitle:

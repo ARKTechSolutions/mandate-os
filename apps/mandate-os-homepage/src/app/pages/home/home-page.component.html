@@ -5,41 +5,57 @@
     <p class="hero-lede">{{ content.hero.lede }}</p>
 
     <div class="hero-actions">
-      <a class="cta is-primary" routerLink="/docs/install">Install Guardrails in a Repo</a>
-      <a class="cta is-secondary" routerLink="/docs/evidence">See Approval Flow</a>
+      <a class="cta is-primary is-hero" [routerLink]="content.hero.primaryHref">{{ content.hero.primaryLabel }}</a>
+      <a class="cta is-secondary is-hero" [href]="content.hero.secondaryHref">{{ content.hero.secondaryLabel }}</a>
     </div>
-
-    <p class="cta-note">{{ content.hero.ctaNote }}</p>
-
-    <nav class="trust-link-row" aria-label="MandateOS trust resources">
-      @for (link of content.hero.trustLinks; track link.href) {
-        <a class="trust-link" [href]="link.href" target="_blank" rel="noreferrer noopener">{{ link.label }}</a>
-      }
-    </nav>
 
     <div class="public-proof">
       <span class="mini-label">{{ content.hero.publicProofLabel }}</span>
-      <div class="integration-summary public-proof-pills">
-        @for (item of content.hero.publicProof; track item) {
-          <span class="summary-pill">{{ item }}</span>
+      <nav class="trust-link-row" aria-label="MandateOS trust resources">
+        @for (link of content.hero.trustLinks; track link.href) {
+          <a class="trust-link" [href]="link.href" target="_blank" rel="noreferrer noopener">
+            @switch (link.icon) {
+              @case ('github') {
+                <svg class="trust-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M12 0.297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.085 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.605-2.665-.303-5.466-1.332-5.466-5.93 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .315.21.694.825.576C20.565 22.092 24 17.592 24 12.297 24 5.67 18.627.297 12 .297z"
+                  />
+                </svg>
+              }
+              @case ('npm') {
+                <svg class="trust-link-icon trust-link-icon-npm" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#CB3837"
+                    d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0H1.763z"
+                  />
+                  <path fill="#FFF" d="M5.432 5.432h13.136v13.136H5.432V5.432z" />
+                  <path fill="#CB3837" d="M10.864 10.864h2.736v2.736h-2.736v-2.736z" />
+                </svg>
+              }
+              @case ('document') {
+                <svg class="trust-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2.5L18.5 9H13V4.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"
+                  />
+                </svg>
+              }
+            }
+            <span>{{ link.label }}</span>
+          </a>
         }
-      </div>
+      </nav>
     </div>
-
-    <p class="hero-verification">
-      {{ content.hero.verification }}
-      <a routerLink="/docs/evidence">{{ content.hero.verificationLinkLabel }}</a>
-    </p>
   </div>
 
   <aside class="hero-panel card">
-    <p class="eyebrow">{{ content.heroPanel.eyebrow }}</p>
-    <h2 class="panel-title">{{ content.heroPanel.title }}</h2>
-    <p class="panel-body">{{ content.heroPanel.body }}</p>
-
     <ul class="question-list">
-      @for (step of content.heroPanel.steps; track step) {
-        <li>{{ step }}</li>
+      @for (step of content.heroPanel.steps; track step.title) {
+        <li>
+          <strong class="question-title">{{ step.title }}</strong>
+          <p class="question-content">{{ step.body }}</p>
+        </li>
       }
     </ul>
 
@@ -51,7 +67,7 @@
   </aside>
 </section>
 
-<section class="section video-walkthrough">
+<section class="section video-walkthrough" id="see-how-it-works">
   <div class="section-heading">
     <p class="eyebrow">60-second tour</p>
     <h2>Watch one approval and receipt happen end to end.</h2>
@@ -93,8 +109,8 @@
 <section class="section see-it-running">
   <div class="section-heading">
     <p class="eyebrow">See it running</p>
-    <h2>From mandate to receipt in one operating loop.</h2>
-    <p>Real screenshots from the MandateOS control plane — the workspace overview, mandate composer, signed mandate detail, and audit ledger.</p>
+    <h2>Centralized visibility and control.</h2>
+    <p>The MandateOS control plane brings full visibility to your agents' hooked actions. Easily draft custom governing rules, deploy smart security presets with the Mandate Composer, and maintain a tamper-proof audit trail of every agent execution—all from a single surface.</p>
   </div>
 
   <div class="card-grid two-col screenshot-grid">

@@ -33,7 +33,8 @@ export class HomePageComponent implements OnInit {
     {
       slug: 'composer',
       title: 'Mandate composer',
-      caption: 'Step through preset, risk, surface, and review before issuing a signed mandate.',
+      caption:
+        'The Mandate Composer includes pre-configured presets that catch common agent risks out of the box. You can also configure your own mandates to tailor your exact need.',
       alt: 'MandateOS mandate composer with Basics, Risk, Surface, and Review tabs active on the Review step.',
     },
     {
