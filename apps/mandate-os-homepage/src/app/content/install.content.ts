@@ -43,9 +43,9 @@ const cursorQuickInstallSteps: readonly CursorQuickInstallStep[] = [
     id: 'connection-values',
     number: '02',
     title: 'Add your MandateOS connection values',
-    body: 'Paste the runtime URL and agent token from your free MandateOS workspace into the same terminal. The mandate id is optional, but useful when you want this repo to start with one preset selected.',
+    body: 'Sign in at app.getmandateos.com, open your workspace, and copy the runtime URL and agent token shown there. The agent token has the form key_id.secret. If you have already issued a mandate in the mandate composer, copy its id (it starts with mdt_) into MANDATE_OS_MCP_DEFAULT_MANDATE_ID to preselect it for this repo. Skip the mandate id line if you have not created one yet.',
     help:
-      'These values are written into the local Cursor MCP and hook config so Cursor can ask MandateOS before risky shell commands or MCP tool calls continue.',
+      'Do not invent these values — both come from your MandateOS control plane. The agent token authenticates the agent\'s calls to MandateOS. The mandate id, when set, is the default policy the agent starts under; without it the agent can still run but must pass a mandate id on each guarded action. The installer writes these into Cursor\'s MCP and hook config so Cursor checks MandateOS before risky shell commands or MCP tool calls continue.',
     codeTabs: [
       {
         id: 'windows',

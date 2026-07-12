@@ -2,6 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { INSTALL_CONTENT } from '../../../content/install.content';
 import { SeoService } from '../../../shared/seo.service';
 
+const OS_TAB_IDS = new Set(['windows', 'mac-linux']);
+
 @Component({
   selector: 'app-install-page',
   standalone: true,
@@ -12,6 +14,7 @@ export class InstallPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
 
   protected readonly content = INSTALL_CONTENT;
+  protected activeOsTabId = '';
   protected activeCodeTabIds: Record<string, string> = {};
   protected copiedCodeId = '';
 
@@ -30,7 +33,10 @@ export class InstallPageComponent implements OnInit {
     },
   ) {
     const tabs = step.codeTabs || [];
-    const activeId = this.activeCodeTabIds[step.id] || tabs[0]?.id;
+    const isOsStep = tabs.some((tab) => OS_TAB_IDS.has(tab.id));
+    const activeId = isOsStep
+      ? this.activeOsTabId || tabs[0]?.id
+      : this.activeCodeTabIds[step.id] || tabs[0]?.id;
     return tabs.find((tab) => tab.id === activeId) || tabs[0];
   }
 
@@ -39,6 +45,10 @@ export class InstallPageComponent implements OnInit {
   }
 
   protected setActiveCodeTab(stepId: string, tabId: string): void {
+    if (OS_TAB_IDS.has(tabId)) {
+      this.activeOsTabId = tabId;
+      return;
+    }
     this.activeCodeTabIds = {
       ...this.activeCodeTabIds,
       [stepId]: tabId,
@@ -46,8 +56,8 @@ export class InstallPageComponent implements OnInit {
   }
 
   protected async copyCode(stepId: string, code: string): Promise<void> {
-    await this.writeClipboard(code);
     this.copiedCodeId = stepId;
+    await this.writeClipboard(code);
     window.setTimeout(() => {
       if (this.copiedCodeId === stepId) {
         this.copiedCodeId = '';

@@ -116,10 +116,11 @@
 
 .code-tab-bar {
   display: flex;
-  gap: 0.35rem;
-  padding: 0.45rem;
-  border-bottom: 1px solid rgba(131, 227, 224, 0.08);
-  background: rgba(255, 255, 255, 0.035);
+  gap: 0.2rem;
+  padding: 0.3rem;
+  margin: 0.4rem 0.4rem 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
   overflow-x: auto;
 }
 
@@ -127,22 +128,25 @@
 .copy-code-button {
   border: 0;
   font: inherit;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .code-tab-bar button {
   flex: 0 0 auto;
-  min-height: 2.35rem;
-  padding: 0 0.85rem;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
   border-radius: 999px;
   color: var(--color-muted);
   background: transparent;
+  font-size: 0.75rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .code-tab-bar button.is-active {
-  color: #06131f;
-  background: linear-gradient(135deg, #83e3e0, #4e91ff);
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .code-tab-panel {
