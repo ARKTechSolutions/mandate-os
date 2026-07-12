@@ -22,6 +22,52 @@
   max-width: 48rem;
 }
 
+.host-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+}
+
+.host-selector-label {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+
+.host-chip-bar {
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.3rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow-x: auto;
+}
+
+.host-chip-bar button {
+  flex: 0 0 auto;
+  min-height: 1.7rem;
+  padding: 0 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  color: var(--color-muted);
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.host-chip-bar button.is-active {
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .cursor-guide-steps {
   display: grid;
   gap: 1rem;
@@ -214,13 +260,11 @@
   letter-spacing: -0.04em;
 }
 
-.legacy-install-reference {
-  margin-top: clamp(2rem, 5vw, 3.5rem);
-  padding-top: clamp(1.8rem, 4vw, 2.8rem);
-  border-top: 1px solid rgba(131, 227, 224, 0.12);
-}
-
 @media (max-width: 760px) {
+  .host-selector {
+    flex-wrap: wrap;
+  }
+
   .cursor-guide-step {
     grid-template-columns: 1fr;
   }

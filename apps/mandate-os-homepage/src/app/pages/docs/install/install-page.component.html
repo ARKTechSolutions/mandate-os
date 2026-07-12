@@ -1,14 +1,31 @@
 <section class="section">
   <div class="deploy-shell card">
-    <section class="cursor-install-guide" [attr.id]="content.cursorQuickInstall.id">
+    <section class="cursor-install-guide" [attr.id]="content.installGuide.id">
       <div class="section-heading cursor-install-heading">
-        <p class="eyebrow">{{ content.cursorQuickInstall.eyebrow }}</p>
-        <h1>{{ content.cursorQuickInstall.title }}</h1>
-        <p>{{ content.cursorQuickInstall.body }}</p>
+        <p class="eyebrow">{{ content.installGuide.eyebrow }}</p>
+        <h1>{{ content.installGuide.title }}</h1>
+        <p>{{ content.installGuide.body }}</p>
+      </div>
+
+      <div class="host-selector">
+        <span class="host-selector-label">Hosts</span>
+        <div class="host-chip-bar" role="tablist" aria-label="Select installation host">
+          @for (host of content.installGuide.hosts; track host.id) {
+            <button
+              type="button"
+              role="tab"
+              [class.is-active]="host.id === activeHostId"
+              [attr.aria-selected]="host.id === activeHostId"
+              (click)="setActiveHost(host.id)"
+            >
+              {{ host.label }}
+            </button>
+          }
+        </div>
       </div>
 
       <div class="cursor-guide-steps">
-        @for (step of content.cursorQuickInstall.steps; track step.id) {
+        @for (step of activeGuide.steps; track step.id) {
           <article class="cursor-guide-step">
             <span class="step-id">{{ step.number }}</span>
             <div class="cursor-step-body">
@@ -56,131 +73,9 @@
 
       <aside class="cursor-complete-card">
         <span class="mini-label">Setup complete</span>
-        <h2>{{ content.cursorQuickInstall.completion.title }}</h2>
-        <p>{{ content.cursorQuickInstall.completion.body }}</p>
+        <h2>{{ activeGuide.completion.title }}</h2>
+        <p>{{ activeGuide.completion.body }}</p>
       </aside>
     </section>
-
-    <div class="legacy-install-reference">
-    <div class="section-heading compact">
-      <p class="eyebrow">{{ content.eyebrow }}</p>
-      <h1>{{ content.title }}</h1>
-      <p>{{ content.body }}</p>
-    </div>
-
-    <div class="card-grid two-col quickstart-grid">
-      <article class="card quickstart-card">
-        <span class="mini-label">{{ content.quickStartTitle }}</span>
-        <p>{{ content.quickStartBody }}</p>
-        <ul class="checklist-list">
-          @for (item of content.quickStartChecklist; track item) { <li>{{ item }}</li> }
-        </ul>
-      </article>
-
-      <article class="card quickstart-card">
-        <span class="mini-label">{{ content.fastestPathTitle }}</span>
-        <p>{{ content.fastestPathBody }}</p>
-        <ul class="checklist-list">
-          @for (item of content.fastestPathSteps; track item) { <li>{{ item }}</li> }
-        </ul>
-      </article>
-
-      <article class="card quickstart-card">
-        <span class="mini-label">{{ content.afterInstallTitle }}</span>
-        <p>{{ content.afterInstallBody }}</p>
-        <ul class="checklist-list">
-          @for (item of content.afterInstallItems; track item) { <li>{{ item }}</li> }
-        </ul>
-      </article>
-
-      <article class="card quickstart-card">
-        <span class="mini-label">{{ content.splitTitle }}</span>
-        <p>{{ content.splitBody }}</p>
-        <ul class="checklist-list">
-          @for (item of content.splitItems; track item) { <li>{{ item }}</li> }
-        </ul>
-      </article>
-    </div>
-
-    <div class="card-grid three-col">
-      @for (item of content.steps; track item.step) {
-        <article class="deploy-step">
-          <span class="step-id">{{ item.step }}</span>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.body }}</p>
-        </article>
-      }
-    </div>
-
-    <article class="setup-card env-card">
-      <div class="setup-heading">
-        <span class="mini-label">{{ content.envTitle }}</span>
-        <p>{{ content.envBody }}</p>
-      </div>
-      <pre class="command-block"><code>{{ content.envCommand }}</code></pre>
-    </article>
-
-    <div class="setup-group">
-      <div class="setup-heading">
-        <span class="mini-label">{{ content.packagesTitle }}</span>
-        <p>{{ content.packagesBody }}</p>
-      </div>
-      <div class="card-grid three-col">
-        @for (pkg of content.packages; track pkg.name) {
-          <article class="card package-card">
-            <h3><code class="package-name">{{ pkg.name }}</code></h3>
-            <p>{{ pkg.summary }}</p>
-            <div class="package-install"><code>{{ pkg.install }}</code></div>
-            <div class="package-actions">
-              <a class="script-link" [href]="pkg.npmHref" target="_blank" rel="noreferrer">{{ pkg.npmLabel }}</a>
-            </div>
-            <ul>
-              @for (detail of pkg.details; track detail) { <li>{{ detail }}</li> }
-            </ul>
-          </article>
-        }
-      </div>
-    </div>
-
-    <div class="setup-group">
-      <div class="setup-heading">
-        <span class="mini-label">{{ content.installersTitle }}</span>
-        <p>{{ content.installersBody }}</p>
-      </div>
-      <div class="installer-stack">
-        @for (installer of content.installers; track installer.name; let isFirst = $first) {
-          <details class="card installer-card installer-accordion" [attr.open]="isFirst ? '' : null">
-            <summary class="installer-summary">
-              <div class="integration-head">
-                <h3>{{ installer.name }}</h3>
-                <code class="source-pill">{{ installer.packageName }}</code>
-              </div>
-              <p>{{ installer.summary }}</p>
-              <span class="accordion-hint">Open Installer Details</span>
-            </summary>
-            <div class="installer-body">
-              <pre class="command-block"><code>{{ installer.command }}</code></pre>
-              <div class="installer-actions">
-                <a class="script-link" [href]="installer.scriptHref" [attr.download]="installer.scriptFileName">
-                  {{ installer.scriptLabel }}
-                </a>
-                <a class="script-link" [href]="installer.packageHref" target="_blank" rel="noreferrer">
-                  {{ installer.packageLinkLabel }}
-                </a>
-              </div>
-              <ul>
-                @for (note of installer.notes; track note) { <li>{{ note }}</li> }
-              </ul>
-            </div>
-          </details>
-        }
-      </div>
-    </div>
-
-    <aside class="runtime-note">
-      <span class="mini-label">{{ content.runtimeNoteTitle }}</span>
-      <p>{{ content.runtimeNoteBody }}</p>
-    </aside>
-    </div>
   </div>
 </section>

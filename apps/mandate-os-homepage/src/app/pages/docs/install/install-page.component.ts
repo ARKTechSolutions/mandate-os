@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { INSTALL_CONTENT } from '../../../content/install.content';
+import { INSTALL_CONTENT, type InstallHostId } from '../../../content/install.content';
 import { SeoService } from '../../../shared/seo.service';
 
 const OS_TAB_IDS = new Set(['windows', 'mac-linux']);
@@ -14,6 +14,7 @@ export class InstallPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
 
   protected readonly content = INSTALL_CONTENT;
+  protected activeHostId: InstallHostId = 'cursor';
   protected activeOsTabId = '';
   protected activeCodeTabIds: Record<string, string> = {};
   protected copiedCodeId = '';
@@ -24,6 +25,16 @@ export class InstallPageComponent implements OnInit {
       description: 'Install MandateOS guardrails into Codex, Cursor, Claude Code, or OpenClaw without cloning the repo.',
       path: '/docs/install',
     });
+  }
+
+  protected get activeGuide() {
+    return this.content.installGuide.guides[this.activeHostId];
+  }
+
+  protected setActiveHost(hostId: InstallHostId): void {
+    if (hostId === this.activeHostId) return;
+    this.activeHostId = hostId;
+    this.activeCodeTabIds = {};
   }
 
   protected activeCodeTab(
