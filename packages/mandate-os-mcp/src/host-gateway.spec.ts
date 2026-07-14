@@ -229,6 +229,85 @@ describe('MandateOsHostGateway', () => {
     });
   });
 
+  it('maps the installation demo shell commands to their policy scenarios', async () => {
+    const evaluateActions = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: {
+          batchId: 'sim_123',
+          receipts: [receipt('allowed')],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          batchId: 'sim_123',
+          receipts: [receipt('approval')],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          batchId: 'sim_123',
+          receipts: [receipt('blocked')],
+        },
+      });
+    const gateway = createGateway(evaluateActions);
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'mkdir -p .mandateos-demo',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'allow',
+      decision: 'policy_allowed',
+      ruleId: 'local.directory.create.command',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'pnpm publish --dry-run',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'ask',
+      decision: 'policy_approval',
+      ruleId: 'release.publish.command',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'rm -rf .mandateos-demo',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'policy_blocked',
+      ruleId: 'destructive.file.delete.command',
+    });
+
+    expect(evaluateActions).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        actions: [
+          expect.objectContaining<ActionScenario>({
+            tool: 'shell.exec',
+            zone: 'domestic',
+            riskLevel: 'medium',
+          }),
+        ],
+      }),
+    );
+    expect(evaluateActions).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        actions: [
+          expect.objectContaining<ActionScenario>({
+            tool: 'shell.exec',
+            zone: 'restricted',
+            riskLevel: 'high',
+          }),
+        ],
+      }),
+    );
+  });
+
   it('uses unmatched permission for unknown actions', async () => {
     const evaluateActions = vi.fn();
     const gateway = createGateway(evaluateActions, {
