@@ -115,6 +115,15 @@
   margin: 0.6rem 0 0;
 }
 
+.demo-connection-status {
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(246, 195, 107, 0.2);
+  border-radius: 0.9rem;
+  color: var(--color-muted);
+  background: rgba(246, 195, 107, 0.06);
+}
+
 .cursor-step-help {
   position: relative;
   flex: 0 0 auto;

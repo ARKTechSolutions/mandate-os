@@ -1,5 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { INSTALL_CONTENT, type InstallHostId } from '../../../content/install.content';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import {
+  INSTALL_CONTENT,
+  type InstallHostId,
+} from '../../../content/install.content';
+import {
+  DemoInstallService,
+  type DemoInstallConnection,
+} from '../../../shared/demo-install.service';
 import { SeoService } from '../../../shared/seo.service';
 
 const OS_TAB_IDS = new Set(['windows', 'mac-linux']);
@@ -12,19 +20,28 @@ const OS_TAB_IDS = new Set(['windows', 'mac-linux']);
 })
 export class InstallPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly demoInstall = inject(DemoInstallService);
 
   protected readonly content = INSTALL_CONTENT;
   protected activeHostId: InstallHostId = 'cursor';
   protected activeOsTabId = '';
   protected activeCodeTabIds: Record<string, string> = {};
   protected copiedCodeId = '';
+  protected demoConnection: DemoInstallConnection | null = null;
+  protected demoConnectionState: 'loading' | 'ready' | 'error' = 'loading';
 
   ngOnInit(): void {
     this.seo.setMeta({
       title: 'Install — MandateOS',
-      description: 'Install MandateOS guardrails into Codex, Cursor, Claude Code, or OpenClaw without cloning the repo.',
+      description:
+        'Install MandateOS guardrails into Codex, Cursor, Claude Code, or OpenClaw without cloning the repo.',
       path: '/docs/install',
     });
+
+    if (isPlatformBrowser(this.platformId)) {
+      void this.loadDemoConnection();
+    }
   }
 
   protected get activeGuide() {
@@ -37,12 +54,15 @@ export class InstallPageComponent implements OnInit {
     this.activeCodeTabIds = {};
   }
 
-  protected activeCodeTab(
-    step: {
+  protected activeCodeTab(step: {
+    id: string;
+    codeTabs?: readonly {
       id: string;
-      codeTabs?: readonly { id: string; label: string; language: string; code: string }[];
-    },
-  ) {
+      label: string;
+      language: string;
+      code: string;
+    }[];
+  }) {
     const tabs = step.codeTabs || [];
     const isOsStep = tabs.some((tab) => OS_TAB_IDS.has(tab.id));
     const activeId = isOsStep
@@ -53,6 +73,29 @@ export class InstallPageComponent implements OnInit {
 
   protected stepHelp(step: { help?: string }): string {
     return step.help || '';
+  }
+
+  protected isDemoConnectionStep(step: { id: string }): boolean {
+    return step.id === 'connection-values';
+  }
+
+  protected demoConnectionMessage(): string {
+    if (this.demoConnectionState === 'error') {
+      return 'The demo values could not be loaded. Refresh the page before copying anything; placeholder credentials are never copied.';
+    }
+
+    return 'Loading the shared demo URL, credential, and mandate from MandateOS…';
+  }
+
+  protected codeFor(code: string): string {
+    if (!this.demoConnection) {
+      return code;
+    }
+
+    return code
+      .replace(/__MANDATE_OS_BASE_URL__/g, this.demoConnection.baseUrl)
+      .replace(/__MANDATE_OS_AGENT_TOKEN__/g, this.demoConnection.bearerToken)
+      .replace(/__MANDATE_OS_MANDATE_ID__/g, this.demoConnection.mandate.id);
   }
 
   protected setActiveCodeTab(stepId: string, tabId: string): void {
@@ -74,6 +117,15 @@ export class InstallPageComponent implements OnInit {
         this.copiedCodeId = '';
       }
     }, 1800);
+  }
+
+  private async loadDemoConnection(): Promise<void> {
+    try {
+      this.demoConnection = await this.demoInstall.getConnection();
+      this.demoConnectionState = 'ready';
+    } catch {
+      this.demoConnectionState = 'error';
+    }
   }
 
   private async writeClipboard(value: string): Promise<void> {

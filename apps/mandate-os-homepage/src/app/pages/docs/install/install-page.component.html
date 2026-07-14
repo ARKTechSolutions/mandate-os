@@ -9,7 +9,11 @@
 
       <div class="host-selector">
         <span class="host-selector-label">Hosts</span>
-        <div class="host-chip-bar" role="tablist" aria-label="Select installation host">
+        <div
+          class="host-chip-bar"
+          role="tablist"
+          aria-label="Select installation host"
+        >
           @for (host of content.installGuide.hosts; track host.id) {
             <button
               type="button"
@@ -40,9 +44,19 @@
               </div>
               <p>{{ step.body }}</p>
 
-              @if (activeCodeTab(step); as activeTab) {
+              @if (
+                isDemoConnectionStep(step) && demoConnectionState !== 'ready'
+              ) {
+                <p class="demo-connection-status" aria-live="polite">
+                  {{ demoConnectionMessage() }}
+                </p>
+              } @else if (activeCodeTab(step); as activeTab) {
                 <div class="code-tabs">
-                  <div class="code-tab-bar" role="tablist" [attr.aria-label]="step.title + ' snippets'">
+                  <div
+                    class="code-tab-bar"
+                    role="tablist"
+                    [attr.aria-label]="step.title + ' snippets'"
+                  >
                     @for (tab of step.codeTabs; track tab.id) {
                       <button
                         type="button"
@@ -58,11 +72,15 @@
                   <div class="code-tab-panel">
                     <div class="code-tab-meta">
                       <span>{{ activeTab.language }}</span>
-                      <button type="button" class="copy-code-button" (click)="copyCode(step.id, activeTab.code)">
+                      <button
+                        type="button"
+                        class="copy-code-button"
+                        (click)="copyCode(step.id, codeFor(activeTab.code))"
+                      >
                         {{ copiedCodeId === step.id ? 'Copied' : 'Copy' }}
                       </button>
                     </div>
-                    <pre><code>{{ activeTab.code }}</code></pre>
+                    <pre><code>{{ codeFor(activeTab.code) }}</code></pre>
                   </div>
                 </div>
               }
