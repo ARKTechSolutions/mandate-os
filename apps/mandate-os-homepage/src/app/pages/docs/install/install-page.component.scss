@@ -124,6 +124,83 @@
   background: rgba(246, 195, 107, 0.06);
 }
 
+.demo-test-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(131, 227, 224, 0.16);
+  border-radius: 1rem;
+  background: rgba(3, 18, 29, 0.55);
+}
+
+.demo-test-heading h3 {
+  margin: 0.35rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.demo-test-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.85rem;
+}
+
+.demo-test-case {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.8rem;
+  background: rgba(0, 0, 0, 0.17);
+}
+
+.demo-test-outcome {
+  width: fit-content;
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.demo-test-outcome.is-allowed {
+  color: #9ce6c1;
+  background: rgba(84, 200, 130, 0.14);
+}
+
+.demo-test-outcome.is-approval {
+  color: var(--color-accent);
+  background: rgba(246, 195, 107, 0.14);
+}
+
+.demo-test-outcome.is-blocked {
+  color: #ffb2b2;
+  background: rgba(255, 110, 110, 0.14);
+}
+
+.demo-test-case code {
+  color: #dbefff;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.demo-test-case p,
+.demo-test-note {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.79rem;
+  line-height: 1.55;
+}
+
+.demo-test-note {
+  margin-top: 0.9rem;
+}
+
 .cursor-step-help {
   position: relative;
   flex: 0 0 auto;
@@ -284,5 +361,9 @@
 
   .cursor-step-help p {
     right: -0.2rem;
+  }
+
+  .demo-test-list {
+    grid-template-columns: 1fr;
   }
 }

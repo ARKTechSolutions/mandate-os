@@ -5,12 +5,19 @@ type InstallCodeTab = {
   code: string;
 };
 
+type DemoTest = {
+  outcome: 'Allowed' | 'Approval required' | 'Blocked';
+  prompt: string;
+  detail: string;
+};
+
 type InstallStep = {
   id: string;
   number: string;
   title: string;
   body: string;
   help?: string;
+  demoTests?: readonly DemoTest[];
   codeTabs: readonly InstallCodeTab[];
 };
 
@@ -25,6 +32,29 @@ type HostGuide = {
 };
 
 export type InstallHostId = 'codex' | 'cursor' | 'claude-code' | 'openclaw';
+
+const demoTests: readonly DemoTest[] = [
+  {
+    outcome: 'Allowed',
+    prompt: 'Show the MandateOS decision for npm run build. Do not run it.',
+    detail:
+      'A routine local repository command is allowed by the demo mandate.',
+  },
+  {
+    outcome: 'Approval required',
+    prompt:
+      'Show the MandateOS decision for pnpm publish --dry-run. Do not continue if approval is required.',
+    detail:
+      'Package publishing is high risk, so this safe dry-run demonstrates escalation.',
+  },
+  {
+    outcome: 'Blocked',
+    prompt:
+      'Use mandateos_evaluate_actions to evaluate one payment.execute action in OECD. Do not execute it.',
+    detail:
+      'Payments are outside the demo mandate and are rejected before anything can happen.',
+  },
+];
 
 const codexSteps: readonly InstallStep[] = [
   {
@@ -54,6 +84,7 @@ const codexSteps: readonly InstallStep[] = [
     title: 'Add your MandateOS connection values',
     body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work while escalating package publishing, deployment, deletion, and other high-risk actions — no MandateOS control-panel account required.',
     help: 'These are public demo credentials with access only to the rate-limited installation demo route. Codex uses an env_vars passthrough instead of writing the value into a config file, so keep these variables in the shell that launches Codex. Replace them with your own control-panel values when you are ready for a real workspace.',
+    demoTests,
     codeTabs: [
       {
         id: 'windows',
@@ -165,6 +196,7 @@ const cursorSteps: readonly InstallStep[] = [
     title: 'Add your MandateOS connection values',
     body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work while escalating package publishing, deployment, deletion, and other high-risk actions — no MandateOS control-panel account required.',
     help: "These are public demo credentials with access only to the rate-limited installation demo route. The guide fetches them from the API rather than bundling them in the website. The installer writes them into Cursor's MCP and hook config; replace them with your own control-panel values when you are ready for a real workspace.",
+    demoTests,
     codeTabs: [
       {
         id: 'windows',
@@ -296,6 +328,7 @@ const claudeCodeSteps: readonly InstallStep[] = [
     title: 'Add your MandateOS connection values',
     body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work while escalating package publishing, deployment, deletion, and other high-risk actions — no MandateOS control-panel account required.',
     help: "These are public demo credentials with access only to the rate-limited installation demo route. The guide fetches them from the API rather than bundling them in the website. The installer writes the value into Claude Code's local configuration; replace it with your own control-panel value when you are ready for a real workspace.",
+    demoTests,
     codeTabs: [
       {
         id: 'windows',
@@ -407,6 +440,7 @@ const openclawSteps: readonly InstallStep[] = [
     title: 'Add your MandateOS connection values',
     body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work while escalating package publishing, deployment, deletion, and other high-risk actions — no MandateOS control-panel account required.',
     help: 'These are public demo credentials with access only to the rate-limited installation demo route. The guide fetches them from the API rather than bundling them in the website. Unlike the other hosts, OpenClaw can install without a token, but it needs this one at runtime for the demo policy check.',
+    demoTests,
     codeTabs: [
       {
         id: 'windows',

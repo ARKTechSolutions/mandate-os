@@ -44,6 +44,41 @@
               </div>
               <p>{{ step.body }}</p>
 
+              @if (step.demoTests; as demoTests) {
+                <section
+                  class="demo-test-panel"
+                  aria-label="What you can test with the demo API"
+                >
+                  <div class="demo-test-heading">
+                    <p class="mini-label">What you can test</p>
+                    <h3>Three safe ways to see the demo policy work</h3>
+                  </div>
+                  <div class="demo-test-list">
+                    @for (test of demoTests; track test.outcome) {
+                      <article class="demo-test-case">
+                        <span
+                          class="demo-test-outcome"
+                          [class.is-allowed]="test.outcome === 'Allowed'"
+                          [class.is-approval]="
+                            test.outcome === 'Approval required'
+                          "
+                          [class.is-blocked]="test.outcome === 'Blocked'"
+                        >
+                          {{ test.outcome }}
+                        </span>
+                        <code>{{ test.prompt }}</code>
+                        <p>{{ test.detail }}</p>
+                      </article>
+                    }
+                  </div>
+                  <p class="demo-test-note">
+                    The demo API only evaluates one small action and returns a
+                    signed simulation receipt. It never runs a command, issues
+                    an execution grant, or writes to a control-panel workspace.
+                  </p>
+                </section>
+              }
+
               @if (
                 isDemoConnectionStep(step) && demoConnectionState !== 'ready'
               ) {
