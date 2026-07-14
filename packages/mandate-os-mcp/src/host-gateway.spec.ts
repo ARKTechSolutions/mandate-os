@@ -308,6 +308,26 @@ describe('MandateOsHostGateway', () => {
     );
   });
 
+  it('blocks the PowerShell destructive-delete command used in the installation guide', async () => {
+    const evaluateActions = vi.fn().mockResolvedValue({
+      data: {
+        batchId: 'sim_123',
+        receipts: [receipt('blocked')],
+      },
+    });
+    const gateway = createGateway(evaluateActions);
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'Remove-Item .mandateos-demo -Recurse -Force',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'policy_blocked',
+      ruleId: 'destructive.file.delete.command',
+    });
+  });
+
   it('uses unmatched permission for unknown actions', async () => {
     const evaluateActions = vi.fn();
     const gateway = createGateway(evaluateActions, {

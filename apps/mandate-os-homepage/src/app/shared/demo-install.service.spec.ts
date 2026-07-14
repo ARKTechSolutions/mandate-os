@@ -19,6 +19,17 @@ describe('DemoInstallService', () => {
             name: 'Demo mandate',
             description: 'A safe demo policy.',
           },
+          tests: [
+            {
+              id: 'local-directory-create',
+              decision: 'allowed',
+              description: 'Create a local directory.',
+              commands: {
+                macOsLinux: 'mkdir .mandateos-demo',
+                windowsPowerShell: 'mkdir .mandateos-demo',
+              },
+            },
+          ],
         },
       }),
     });
@@ -32,6 +43,17 @@ describe('DemoInstallService', () => {
         name: 'Demo mandate',
         description: 'A safe demo policy.',
       },
+      tests: [
+        {
+          id: 'local-directory-create',
+          decision: 'allowed',
+          description: 'Create a local directory.',
+          commands: {
+            macOsLinux: 'mkdir .mandateos-demo',
+            windowsPowerShell: 'mkdir .mandateos-demo',
+          },
+        },
+      ],
     });
 
     expect(fetchMock).toHaveBeenCalledWith(

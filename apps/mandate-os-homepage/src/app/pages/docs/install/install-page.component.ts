@@ -7,6 +7,7 @@ import {
 import {
   DemoInstallService,
   type DemoInstallConnection,
+  type DemoInstallTest,
 } from '../../../shared/demo-install.service';
 import { SeoService } from '../../../shared/seo.service';
 
@@ -85,6 +86,17 @@ export class InstallPageComponent implements OnInit {
     }
 
     return 'Loading the shared demo URL, credential, and mandate from MandateOS…';
+  }
+
+  protected demoTestOutcome(test: DemoInstallTest): string {
+    switch (test.decision) {
+      case 'allowed':
+        return 'Allowed';
+      case 'approval':
+        return 'Approval required';
+      case 'blocked':
+        return 'Blocked';
+    }
   }
 
   protected codeFor(code: string): string {

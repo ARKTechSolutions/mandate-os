@@ -44,7 +44,10 @@
               </div>
               <p>{{ step.body }}</p>
 
-              @if (step.demoTests; as demoTests) {
+              @if (
+                isDemoConnectionStep(step) && demoConnection?.tests;
+                as demoTests
+              ) {
                 <section
                   class="demo-test-panel"
                   aria-label="What you can test with the demo API"
@@ -52,22 +55,33 @@
                   <div class="demo-test-heading">
                     <p class="mini-label">What you can test</p>
                     <h3>Three safe ways to see the demo policy work</h3>
+                    <p>
+                      Ask your agent to show the MandateOS decision for a
+                      command below. Do not run the command.
+                    </p>
                   </div>
                   <div class="demo-test-list">
-                    @for (test of demoTests; track test.outcome) {
+                    @for (test of demoTests; track test.id) {
                       <article class="demo-test-case">
                         <span
                           class="demo-test-outcome"
-                          [class.is-allowed]="test.outcome === 'Allowed'"
-                          [class.is-approval]="
-                            test.outcome === 'Approval required'
-                          "
-                          [class.is-blocked]="test.outcome === 'Blocked'"
+                          [class.is-allowed]="test.decision === 'allowed'"
+                          [class.is-approval]="test.decision === 'approval'"
+                          [class.is-blocked]="test.decision === 'blocked'"
                         >
-                          {{ test.outcome }}
+                          {{ demoTestOutcome(test) }}
                         </span>
-                        <code>{{ test.prompt }}</code>
-                        <p>{{ test.detail }}</p>
+                        <p>{{ test.description }}</p>
+                        <div class="demo-test-commands">
+                          <div class="demo-test-command">
+                            <span>macOS / Linux</span>
+                            <code>{{ test.commands.macOsLinux }}</code>
+                          </div>
+                          <div class="demo-test-command">
+                            <span>Windows PowerShell</span>
+                            <code>{{ test.commands.windowsPowerShell }}</code>
+                          </div>
+                        </div>
                       </article>
                     }
                   </div>

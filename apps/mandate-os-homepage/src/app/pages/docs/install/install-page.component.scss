@@ -139,6 +139,13 @@
   letter-spacing: -0.025em;
 }
 
+.demo-test-heading p:not(.mini-label) {
+  margin: 0.45rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .demo-test-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -181,7 +188,25 @@
   background: rgba(255, 110, 110, 0.14);
 }
 
-.demo-test-case code {
+.demo-test-commands {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.demo-test-command {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.demo-test-command span {
+  color: var(--color-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.demo-test-command code {
   color: #dbefff;
   font-family: var(--font-mono);
   font-size: 0.74rem;

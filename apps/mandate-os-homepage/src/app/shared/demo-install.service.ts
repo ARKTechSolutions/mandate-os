@@ -1,5 +1,15 @@
 import { Injectable } from '@angular/core';
 
+export type DemoInstallTest = {
+  id: string;
+  decision: 'allowed' | 'approval' | 'blocked';
+  description: string;
+  commands: {
+    macOsLinux: string;
+    windowsPowerShell: string;
+  };
+};
+
 export type DemoInstallConnection = {
   baseUrl: string;
   bearerToken: string;
@@ -8,6 +18,7 @@ export type DemoInstallConnection = {
     name: string;
     description: string;
   };
+  tests: readonly DemoInstallTest[];
 };
 
 type DemoInstallPayload = {
@@ -53,7 +64,28 @@ function isDemoInstallConnection(
     value.mandate &&
     isNonEmptyString(value.mandate.id) &&
     isNonEmptyString(value.mandate.name) &&
-    isNonEmptyString(value.mandate.description),
+    isNonEmptyString(value.mandate.description) &&
+    Array.isArray(value.tests) &&
+    value.tests.length > 0 &&
+    value.tests.every(isDemoInstallTest),
+  );
+}
+
+function isDemoInstallTest(value: unknown): value is DemoInstallTest {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const test = value as Partial<DemoInstallTest>;
+  return (
+    isNonEmptyString(test.id) &&
+    (test.decision === 'allowed' ||
+      test.decision === 'approval' ||
+      test.decision === 'blocked') &&
+    isNonEmptyString(test.description) &&
+    Boolean(test.commands) &&
+    isNonEmptyString(test.commands?.macOsLinux) &&
+    isNonEmptyString(test.commands?.windowsPowerShell)
   );
 }
 

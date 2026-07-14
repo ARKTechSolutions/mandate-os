@@ -156,7 +156,7 @@ export const defaultHostGatewayRules: MandateOsPolicyGatewayRule[] = [
   {
     id: 'destructive.file.delete.command',
     channel: 'shell',
-    matcher: '(^|[\\n;&|]+)\\s*(?:rm|rmdir)\\b',
+    matcher: '(^|[\\n;&|]+)\\s*(?:rm|rmdir|remove-item|del|erase)\\b',
     flags: 'i',
     tool: 'shell.exec',
     title: 'Delete local files or directories',
