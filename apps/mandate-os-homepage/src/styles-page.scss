@@ -328,6 +328,12 @@
   margin-top: 1.5rem;
 }
 
+.cta.is-hero {
+  min-height: 3.45rem;
+  padding: 0 1.55rem;
+  font-size: 0.95rem;
+}
+
 .cta-note {
   max-width: 52ch;
   margin-top: 0.85rem;
@@ -413,11 +419,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .public-proof {
-  margin-top: 1.1rem;
+  margin-top: 1.35rem;
 }
 
 .public-proof-pills {
@@ -445,6 +451,7 @@
 .trust-link {
   display: inline-flex;
   align-items: center;
+  gap: 0.55rem;
   min-height: 2.45rem;
   padding: 0 0.9rem;
   border-radius: 999px;
@@ -457,6 +464,16 @@
   transition:
     transform 140ms ease,
     background-color 140ms ease;
+}
+
+.trust-link-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.trust-link-icon-npm {
+  border-radius: 2px;
 }
 
 .trust-link:hover {
@@ -494,10 +511,23 @@
 }
 
 .question-list li {
-  padding-bottom: 0.75rem;
+  padding-bottom: 0.85rem;
   border-bottom: 1px solid rgba(131, 227, 224, 0.1);
+}
+
+.question-title {
+  display: block;
+  color: var(--color-ink);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.question-content {
+  margin: 0.35rem 0 0;
   color: var(--color-muted);
   line-height: 1.55;
+  font-size: 0.9rem;
 }
 
 .panel-note {

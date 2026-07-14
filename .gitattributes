@@ -1,0 +1,30 @@
+# Normalize line endings across platforms.
+# All text files are stored AND checked out as LF, which eliminates
+# CRLF/LF conflicts between Windows, macOS, and Linux contributors
+# regardless of each developer's local core.autocrlf setting.
+* text=auto eol=lf
+
+# Shell scripts must always use LF. CRLF breaks them on Unix with
+# "bad interpreter: /bin/bash^M" errors.
+*.sh text eol=lf
+
+# Windows batch files must use CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets - never normalize line endings or diff as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.webm binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.pdf binary
+*.zip binary

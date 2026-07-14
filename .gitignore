@@ -31,6 +31,9 @@
 .env.staging
 .env.development
 
+# command code taste preferences
+.commandcode/taste
+
 # system
 .DS_Store
 Thumbs.db

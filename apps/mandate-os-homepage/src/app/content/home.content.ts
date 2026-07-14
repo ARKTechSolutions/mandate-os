@@ -2,7 +2,10 @@ import { MANDATE_OS_CONTENT } from '../mandate-os-content';
 
 export const HOME_CONTENT = {
   brandTagline: MANDATE_OS_CONTENT.brandTagline,
-  hero: MANDATE_OS_CONTENT.hero,
+  hero: {
+    ...MANDATE_OS_CONTENT.hero,
+    primaryHref: '/docs/install#cursor-install',
+  },
   proofStrip: MANDATE_OS_CONTENT.proofStrip,
   heroPanel: MANDATE_OS_CONTENT.heroPanel,
   integrationsSummary: {
@@ -14,7 +17,7 @@ export const HOME_CONTENT = {
   },
   finalCta: {
     ...MANDATE_OS_CONTENT.finalCta,
-    primaryHref: '/docs/install',
+    primaryHref: '/docs/install#cursor-install',
     secondaryHref: 'https://github.com/ARKTechSolutions/mandate-os',
   },
 } as const;

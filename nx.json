@@ -55,5 +55,6 @@
     "nx:run-commands": {
       "cache": true
     }
-  }
+  },
+  "analytics": false
 }
