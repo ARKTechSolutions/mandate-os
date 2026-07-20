@@ -54,10 +54,11 @@
                 >
                   <div class="demo-test-heading">
                     <p class="mini-label">What you can test</p>
-                    <h3>Three safe ways to see the demo policy work</h3>
+                    <h3>See the demo policy work in your own repo</h3>
                     <p>
-                      Ask your agent to show the MandateOS decision for a
-                      command below. Do not run the command.
+                      Ask your agent to run each command below. Approve the safe
+                      one when your host prompts you; the destructive one is
+                      blocked automatically.
                     </p>
                   </div>
                   <div class="demo-test-list">
@@ -86,9 +87,12 @@
                     }
                   </div>
                   <p class="demo-test-note">
-                    The demo API only evaluates one small action and returns a
-                    signed simulation receipt. It never runs a command, issues
-                    an execution grant, or writes to a control-panel workspace.
+                    The allowed and approval commands run for real in your
+                    repository. Blocked commands are refused even if you
+                    consent. These are public, rate-limited demo credentials (30
+                    evaluations per minute) — no MandateOS account required.
+                    Delete .mandateos-demo yourself when you are done; the agent
+                    is blocked from removing it.
                   </p>
                 </section>
               }

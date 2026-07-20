@@ -400,6 +400,8 @@ export const openClawPolicyGatewayRules: MandateOsPolicyGatewayRule[] = [
   },
 ] as const;
 
+export const DEMO_INSTALL_MANDATE_ID = 'mdt_demo_repo_guard_v1';
+
 export class MandateOsPolicyGateway {
   private readonly defaultMandateId?: string;
   private readonly defaultSource?: string;
@@ -504,11 +506,14 @@ export class MandateOsPolicyGateway {
       };
     }
 
-    const action = createActionScenario(
-      input.rule,
-      input.subject,
-      input.context,
-    );
+    let action = createActionScenario(input.rule, input.subject, input.context);
+    if (
+      this.defaultMandateId === DEMO_INSTALL_MANDATE_ID &&
+      input.rule.id === 'local.directory.create.command' &&
+      input.subject.toLowerCase().includes('.mandateos-demo')
+    ) {
+      action = { ...action, riskLevel: 'high' };
+    }
     const evaluation = await this.options.client.evaluateActions({
       mandateId,
       source:

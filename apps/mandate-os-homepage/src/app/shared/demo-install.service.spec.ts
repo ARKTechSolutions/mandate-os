@@ -21,12 +21,22 @@ describe('DemoInstallService', () => {
           },
           tests: [
             {
-              id: 'local-directory-create',
-              decision: 'allowed',
-              description: 'Create a local directory.',
+              id: 'demo-directory-create',
+              decision: 'approval',
+              description: 'Create the .mandateos-demo directory.',
               commands: {
                 macOsLinux: 'mkdir .mandateos-demo',
                 windowsPowerShell: 'mkdir .mandateos-demo',
+              },
+            },
+            {
+              id: 'demo-directory-delete',
+              decision: 'blocked',
+              description: 'Delete the .mandateos-demo directory.',
+              commands: {
+                macOsLinux: 'rm -rf .mandateos-demo',
+                windowsPowerShell:
+                  'Remove-Item .mandateos-demo -Recurse -Force',
               },
             },
           ],
@@ -45,12 +55,21 @@ describe('DemoInstallService', () => {
       },
       tests: [
         {
-          id: 'local-directory-create',
-          decision: 'allowed',
-          description: 'Create a local directory.',
+          id: 'demo-directory-create',
+          decision: 'approval',
+          description: 'Create the .mandateos-demo directory.',
           commands: {
             macOsLinux: 'mkdir .mandateos-demo',
             windowsPowerShell: 'mkdir .mandateos-demo',
+          },
+        },
+        {
+          id: 'demo-directory-delete',
+          decision: 'blocked',
+          description: 'Delete the .mandateos-demo directory.',
+          commands: {
+            macOsLinux: 'rm -rf .mandateos-demo',
+            windowsPowerShell: 'Remove-Item .mandateos-demo -Recurse -Force',
           },
         },
       ],
