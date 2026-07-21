@@ -1,5 +1,5 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
   INSTALL_CONTENT,
   type InstallHostId,
@@ -21,7 +21,7 @@ const OS_TAB_IDS = new Set(['windows', 'mac-linux']);
 })
 export class InstallPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
-  private readonly platformId = inject(PLATFORM_ID);
+  private readonly route = inject(ActivatedRoute);
   private readonly demoInstall = inject(DemoInstallService);
 
   protected readonly content = INSTALL_CONTENT;
@@ -40,9 +40,23 @@ export class InstallPageComponent implements OnInit {
       path: '/docs/install',
     });
 
-    if (isPlatformBrowser(this.platformId)) {
-      void this.loadDemoConnection();
+    const resolved = this.route.snapshot.data['demoConnection'] as
+      | DemoInstallConnection
+      | null
+      | undefined;
+
+    if (resolved) {
+      this.demoConnection = resolved;
+      this.demoConnectionState = 'ready';
+      return;
     }
+
+    if (resolved === null) {
+      this.demoConnectionState = 'error';
+      return;
+    }
+
+    void this.loadDemoConnection();
   }
 
   protected get activeGuide() {

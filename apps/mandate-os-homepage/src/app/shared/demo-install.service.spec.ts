@@ -1,7 +1,12 @@
+import { TestBed } from '@angular/core/testing';
 import { DemoInstallService } from './demo-install.service';
 
 describe('DemoInstallService', () => {
   const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+  });
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
@@ -45,7 +50,9 @@ describe('DemoInstallService', () => {
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-    await expect(new DemoInstallService().getConnection()).resolves.toEqual({
+    const service = TestBed.inject(DemoInstallService);
+
+    await expect(service.getConnection()).resolves.toEqual({
       baseUrl: 'https://api.example/demo',
       bearerToken: 'demo.public-token',
       mandate: {
@@ -77,8 +84,23 @@ describe('DemoInstallService', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.getmandateos.com/api/public/demo-install',
-      expect.objectContaining({ cache: 'no-store' }),
+      expect.objectContaining({
+        headers: { accept: 'application/json' },
+      }),
     );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await expect(service.getConnection()).resolves.toEqual({
+      baseUrl: 'https://api.example/demo',
+      bearerToken: 'demo.public-token',
+      mandate: {
+        id: 'mdt_demo',
+        name: 'Demo mandate',
+        description: 'A safe demo policy.',
+      },
+      tests: expect.any(Array),
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('rejects an incomplete response instead of returning placeholder values', async () => {
@@ -87,7 +109,9 @@ describe('DemoInstallService', () => {
       json: async () => ({ data: { baseUrl: 'https://api.example/demo' } }),
     }) as unknown as typeof fetch;
 
-    await expect(new DemoInstallService().getConnection()).rejects.toThrow(
+    const service = TestBed.inject(DemoInstallService);
+
+    await expect(service.getConnection()).rejects.toThrow(
       'Demo configuration response was incomplete.',
     );
   });
