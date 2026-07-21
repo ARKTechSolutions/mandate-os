@@ -262,7 +262,6 @@ export function toClaudeHookResponse(result: HostGatewayEvaluationResult) {
 
 export function toCodexHookResponse(result: HostGatewayEvaluationResult) {
   const reason = result.agentMessage || result.userMessage;
-  const permissionDecision = result.permission === 'allow' ? 'allow' : 'deny';
 
   return {
     ...(reason
@@ -272,7 +271,7 @@ export function toCodexHookResponse(result: HostGatewayEvaluationResult) {
       : {}),
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
-      permissionDecision,
+      permissionDecision: result.permission,
       ...(reason
         ? {
             permissionDecisionReason: reason,

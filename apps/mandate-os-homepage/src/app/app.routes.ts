@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { demoInstallResolver } from './shared/demo-install.resolver';
 
 export const appRoutes: Routes = [
   {
@@ -24,6 +25,9 @@ export const appRoutes: Routes = [
         path: 'install',
         loadComponent: () =>
           import('./pages/docs/install/install-page.component').then((m) => m.InstallPageComponent),
+        resolve: {
+          demoConnection: demoInstallResolver,
+        },
       },
       {
         path: 'security',

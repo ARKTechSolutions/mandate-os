@@ -308,6 +308,91 @@ describe('MandateOsHostGateway', () => {
     );
   });
 
+  it('classifies the installation demo mkdir as high risk so the demo mandate requires approval', async () => {
+    const evaluateActions = vi.fn().mockResolvedValue({
+      data: {
+        batchId: 'sim_123',
+        receipts: [receipt('approval')],
+      },
+    });
+    const gateway = createGateway(evaluateActions, {
+      client: {
+        evaluateActions,
+      } as never,
+      defaultMandateId: 'mdt_demo_repo_guard_v1',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'mkdir -p .mandateos-demo',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'ask',
+      decision: 'policy_approval',
+      ruleId: 'local.directory.create.command',
+    });
+
+    expect(evaluateActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actions: [
+          expect.objectContaining<ActionScenario>({
+            tool: 'shell.exec',
+            zone: 'domestic',
+            riskLevel: 'high',
+          }),
+        ],
+      }),
+    );
+  });
+
+  it('blocks the destructive demo delete commands under the demo mandate', async () => {
+    const evaluateActions = vi.fn().mockResolvedValue({
+      data: {
+        batchId: 'sim_123',
+        receipts: [receipt('blocked')],
+      },
+    });
+    const gateway = createGateway(evaluateActions, {
+      client: {
+        evaluateActions,
+      } as never,
+      defaultMandateId: 'mdt_demo_repo_guard_v1',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'rm -rf .mandateos-demo',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'policy_blocked',
+      ruleId: 'destructive.file.delete.command',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'Remove-Item .mandateos-demo -Recurse -Force',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'policy_blocked',
+      ruleId: 'destructive.file.delete.command',
+    });
+
+    expect(evaluateActions).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        actions: [
+          expect.objectContaining<ActionScenario>({
+            tool: 'shell.exec',
+            zone: 'restricted',
+            riskLevel: 'high',
+          }),
+        ],
+      }),
+    );
+  });
+
   it('blocks the PowerShell destructive-delete command used in the installation guide', async () => {
     const evaluateActions = vi.fn().mockResolvedValue({
       data: {
@@ -524,7 +609,7 @@ describe('host gateway helpers', () => {
       systemMessage: 'Approval is required before continuing.',
       hookSpecificOutput: {
         hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
+        permissionDecision: 'ask',
         permissionDecisionReason: 'Approval is required before continuing.',
       },
     });
