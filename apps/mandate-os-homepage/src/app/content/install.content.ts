@@ -17,6 +17,9 @@ type InstallStep = {
 type HostCompletion = {
   title: string;
   body: string;
+  help: string;
+  ctaLabel: string;
+  ctaHref: string;
 };
 
 type HostGuide = {
@@ -52,8 +55,8 @@ const codexSteps: readonly InstallStep[] = [
     id: 'connection-values',
     number: '02',
     title: 'Add your MandateOS connection values',
-    body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work, requires approval for sensitive actions, and blocks destructive deletion — no MandateOS control-panel account required. These are public demo credentials; the demo is rate-limited to 30 evaluations per minute.',
-    help: 'These are public demo credentials with access only to the rate-limited installation demo route. Codex uses an env_vars passthrough instead of writing the value into a config file, so keep these variables in the shell that launches Codex. Replace them with your own control-panel values when you are ready for a real workspace.',
+    body: 'This installation guide provides ready-to-use demo URL, credential, and mandates. They will allow you to test against our demo mandates, but will be replaced with your real credentials later.',
+    help: 'These are public demo credentials with access only to the rate-limited installation demo route (30 evaluations per minute). Codex uses an env_vars passthrough instead of writing the value into a config file, so keep these variables in the shell that launches Codex. Replace them with your own control-panel values when you are ready for a real workspace.',
     codeTabs: [
       {
         id: 'windows',
@@ -121,28 +124,22 @@ export MANDATE_OS_MCP_DEFAULT_SOURCE="codex.mandateos.project"`,
     id: 'verify',
     number: '05',
     title: 'Launch Codex and verify a guarded action',
-    body: 'Launch Codex from this repository. Keep MANDATE_OS_BASE_URL and MANDATE_OS_AGENT_TOKEN in the shell environment that starts Codex — the config uses env_vars passthrough, so the guarded runtime reads them at launch time. Ask Codex to run the demo commands below and watch MandateOS require approval for the directory creation and block the destructive delete.',
+    body: 'Test that MandateOS works by issuing one of the specific commands below. These commands have been pre-programmed into the demo mandates so you can see how it works (in practice you can set up your own mandates or use one of our pre-made ones). Keep MANDATE_OS_BASE_URL and MANDATE_OS_AGENT_TOKEN in the shell that launches Codex.',
     help: 'Codex currently exposes Bash PreToolUse hooks only. Non-Bash tool interception is not available yet, so MCP-side tool calls are not guarded by the hook layer. The env_vars mechanism means the token stays in your shell, not in a config file.',
-    codeTabs: [
-      {
-        id: 'approval-prompt',
-        label: 'Approval test',
-        language: 'text',
-        code: 'Run mkdir .mandateos-demo. When MandateOS asks for approval, approve it and confirm the .mandateos-demo folder is created.',
-      },
-      {
-        id: 'block-prompt',
-        label: 'Block test',
-        language: 'text',
-        code: 'Run rm -rf .mandateos-demo (macOS/Linux) or Remove-Item .mandateos-demo -Recurse -Force (Windows). MandateOS should block it and the .mandateos-demo folder should remain.',
-      },
-    ],
+    codeTabs: [],
   },
 ];
 
+const sharedCompletion = {
+  title: 'You now have MandateOS running in your repository!',
+  body: 'With MandateOS your agents can still move fast, but risky actions no longer run unchecked. You already did the hard part — the hooks are installed. Sign up to replace the demo credentials with your own workspace, attach real mandates, and start protecting every guarded action from day one.',
+  ctaLabel: 'Sign up',
+  ctaHref: 'https://app.getmandateos.com',
+} as const;
+
 const codexCompletion: HostCompletion = {
-  title: 'You now have MandateOS running in Codex.',
-  body: 'Your repo should now contain a project .codex/config.toml and .codex/hooks.json, Codex should know about the mandateos MCP server, and Bash commands that match the starter presets should route through MandateOS before they continue. Keep MANDATE_OS_BASE_URL and MANDATE_OS_AGENT_TOKEN in the shell that launches Codex — the config uses env_vars passthrough instead of writing the token to disk. A good first success signal is Codex prompting you to approve mkdir .mandateos-demo, then blocking rm -rf .mandateos-demo while the folder remains.',
+  ...sharedCompletion,
+  help: 'Your repo now has project .codex/config.toml and .codex/hooks.json, Codex knows about the mandateos MCP server, and Bash commands that match your mandates route through MandateOS before they continue. You can remove .codex/config.toml and .codex/hooks.json to disable the demo setup.',
 };
 
 const cursorSteps: readonly InstallStep[] = [
@@ -171,8 +168,8 @@ const cursorSteps: readonly InstallStep[] = [
     id: 'connection-values',
     number: '02',
     title: 'Add your MandateOS connection values',
-    body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work, requires approval for sensitive actions, and blocks destructive deletion — no MandateOS control-panel account required. These are public demo credentials; the demo is rate-limited to 30 evaluations per minute.',
-    help: "These are public demo credentials with access only to the rate-limited installation demo route. The guide fetches them from the API rather than bundling them in the website. The installer writes them into Cursor's MCP and hook config; replace them with your own control-panel values when you are ready for a real workspace.",
+    body: 'This installation guide provides ready-to-use demo URL, credential, and mandates. They will allow you to test against our demo mandates, but will be replaced with your real credentials later.',
+    help: "These are public demo credentials with access only to the rate-limited installation demo route (30 evaluations per minute). The guide fetches them from the API rather than bundling them in the website. The installer writes them into Cursor's MCP and hook config; replace them with your own control-panel values when you are ready for a real workspace.",
     codeTabs: [
       {
         id: 'windows',
@@ -254,28 +251,15 @@ export MANDATE_OS_MCP_DEFAULT_SOURCE="cursor.mandateos.project"`,
     id: 'verify-guardrail',
     number: '06',
     title: 'Verify a guarded action',
-    body: 'Ask Cursor to run the demo commands below. MandateOS should prompt you to approve the directory creation and block the destructive delete.',
-    help: 'The default starter bundles recognize local scripts, dependency changes, file mutations, deploy commands, content publishing, payments, refunds, and similar MCP tool calls.',
-    codeTabs: [
-      {
-        id: 'approval-prompt',
-        label: 'Approval test',
-        language: 'text',
-        code: 'Run mkdir .mandateos-demo. When MandateOS asks for approval, approve it and confirm the .mandateos-demo folder is created.',
-      },
-      {
-        id: 'block-prompt',
-        label: 'Block test',
-        language: 'text',
-        code: 'Run rm -rf .mandateos-demo (macOS/Linux) or Remove-Item .mandateos-demo -Recurse -Force (Windows). MandateOS should block it and the .mandateos-demo folder should remain.',
-      },
-    ],
+    body: 'Test that MandateOS works by issuing one of the specific commands below. These commands have been pre-programmed into the demo mandates so you can see how it works (in practice you can set up your own mandates or use one of our pre-made ones).',
+    help: 'The default starter bundles recognize local scripts, dependency changes, file mutations, deploy commands, content publishing, payments, refunds, and similar MCP tool calls. Ask Cursor to run each command; MandateOS evaluates it against the demo mandate before the action continues.',
+    codeTabs: [],
   },
 ];
 
 const cursorCompletion: HostCompletion = {
-  title: 'You now have MandateOS running in Cursor.',
-  body: 'Your repo should now contain a project .cursor/mcp.json and .cursor/hooks.json, Cursor should know about the mandateos MCP server, and shell or MCP actions that match the starter presets should route through MandateOS before they continue. A good first success signal is Cursor prompting you to approve mkdir .mandateos-demo, then blocking rm -rf .mandateos-demo while the folder remains.',
+  ...sharedCompletion,
+  help: 'Your repo now has project .cursor/mcp.json and .cursor/hooks.json, Cursor knows about the mandateos MCP server, and shell or MCP actions that match your mandates route through MandateOS before they continue. You can remove .cursor/mcp.json and .cursor/hooks.json to disable the demo setup.',
 };
 
 const claudeCodeSteps: readonly InstallStep[] = [
@@ -304,8 +288,8 @@ const claudeCodeSteps: readonly InstallStep[] = [
     id: 'connection-values',
     number: '02',
     title: 'Add your MandateOS connection values',
-    body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work, requires approval for sensitive actions, and blocks destructive deletion — no MandateOS control-panel account required. These are public demo credentials; the demo is rate-limited to 30 evaluations per minute.',
-    help: "These are public demo credentials with access only to the rate-limited installation demo route. The guide fetches them from the API rather than bundling them in the website. The installer writes the value into Claude Code's local configuration; replace it with your own control-panel value when you are ready for a real workspace.",
+    body: 'This installation guide provides ready-to-use demo URL, credential, and mandates. They will allow you to test against our demo mandates, but will be replaced with your real credentials later.',
+    help: "These are public demo credentials with access only to the rate-limited installation demo route (30 evaluations per minute). The guide fetches them from the API rather than bundling them in the website. The installer writes the value into Claude Code's local configuration; replace it with your own control-panel value when you are ready for a real workspace.",
     codeTabs: [
       {
         id: 'windows',
@@ -373,28 +357,15 @@ export MANDATE_OS_MCP_DEFAULT_SOURCE="claude.mandateos.local"`,
     id: 'verify',
     number: '05',
     title: 'Open Claude Code and verify',
-    body: 'Open Claude Code in this repository. The local-scoped mandateos MCP entry loads automatically from ~/.claude.json and the PreToolUse hooks load from .claude/settings.local.json — no explicit approval step is needed. Then ask Claude Code to run the demo commands below: approve the directory creation, and confirm the destructive delete is blocked.',
-    help: 'Claude Code does not require an approval dialog. The MCP entry and hooks are loaded from the config files written by the installer. If the context tool is not visible, confirm the workspace path matches the project key in ~/.claude.json.',
-    codeTabs: [
-      {
-        id: 'approval-prompt',
-        label: 'Approval test',
-        language: 'text',
-        code: 'Run mkdir .mandateos-demo. When MandateOS asks for approval, approve it and confirm the .mandateos-demo folder is created.',
-      },
-      {
-        id: 'block-prompt',
-        label: 'Block test',
-        language: 'text',
-        code: 'Run rm -rf .mandateos-demo (macOS/Linux) or Remove-Item .mandateos-demo -Recurse -Force (Windows). MandateOS should block it and the .mandateos-demo folder should remain.',
-      },
-    ],
+    body: 'Test that MandateOS works by issuing one of the specific commands below. These commands have been pre-programmed into the demo mandates so you can see how it works (in practice you can set up your own mandates or use one of our pre-made ones). Open Claude Code in this repository first — the local-scoped mandateos MCP entry and PreToolUse hooks load automatically.',
+    help: 'Claude Code does not require an approval dialog for the MCP entry. If the context tool is not visible, confirm the workspace path matches the project key in ~/.claude.json.',
+    codeTabs: [],
   },
 ];
 
 const claudeCodeCompletion: HostCompletion = {
-  title: 'You now have MandateOS running in Claude Code.',
-  body: 'Your workspace should now have a local-scoped mandateos MCP entry in ~/.claude.json and PreToolUse hooks in .claude/settings.local.json. Claude Code should load both automatically when you open the repo, and shell or MCP actions that match the starter presets should route through MandateOS before they continue. A good first success signal is Claude Code prompting you to approve mkdir .mandateos-demo, then blocking rm -rf .mandateos-demo while the folder remains.',
+  ...sharedCompletion,
+  help: 'Your workspace now has a local-scoped mandateos MCP entry in ~/.claude.json and PreToolUse hooks in .claude/settings.local.json. Shell or MCP actions that match your mandates route through MandateOS before they continue. You can remove the mandateos entry from ~/.claude.json and delete .claude/settings.local.json to disable the demo setup.',
 };
 
 const openclawSteps: readonly InstallStep[] = [
@@ -423,8 +394,8 @@ const openclawSteps: readonly InstallStep[] = [
     id: 'connection-values',
     number: '02',
     title: 'Add your MandateOS connection values',
-    body: 'The installation guide loads a ready-to-use URL, credential, and repository-safety mandate below. It allows routine local work, requires approval for sensitive actions, and blocks destructive deletion — no MandateOS control-panel account required. These are public demo credentials; the demo is rate-limited to 30 evaluations per minute.',
-    help: 'These are public demo credentials with access only to the rate-limited installation demo route. The guide fetches them from the API rather than bundling them in the website. Unlike the other hosts, OpenClaw can install without a token, but it needs this one at runtime for the demo policy check.',
+    body: 'This installation guide provides ready-to-use demo URL, credential, and mandates. They will allow you to test against our demo mandates, but will be replaced with your real credentials later.',
+    help: 'These are public demo credentials with access only to the rate-limited installation demo route (30 evaluations per minute). The guide fetches them from the API rather than bundling them in the website. Unlike the other hosts, OpenClaw can install without a token, but it needs this one at runtime for the demo policy check.',
     codeTabs: [
       {
         id: 'windows',
@@ -519,28 +490,15 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install doct
     id: 'verify',
     number: '06',
     title: 'Start OpenClaw with a guarded agent and verify',
-    body: 'Start OpenClaw using the mandateos_guarded agent profile that the installer created. Ask the guarded agent to run the demo commands below: approve the directory creation, and confirm the destructive delete is blocked.',
+    body: 'Test that MandateOS works by issuing one of the specific commands below. These commands have been pre-programmed into the demo mandates so you can see how it works (in practice you can set up your own mandates or use one of our pre-made ones). Start OpenClaw with the mandateos_guarded agent profile first.',
     help: 'The guarded agent profile routes shell execution and browser actions through the MandateOS bridge. The default starter bundles recognize local scripts, dependency changes, file mutations, deploy commands, and similar tool calls.',
-    codeTabs: [
-      {
-        id: 'approval-prompt',
-        label: 'Approval test',
-        language: 'text',
-        code: 'Run mkdir .mandateos-demo. When MandateOS asks for approval, approve it and confirm the .mandateos-demo folder is created.',
-      },
-      {
-        id: 'block-prompt',
-        label: 'Block test',
-        language: 'text',
-        code: 'Run rm -rf .mandateos-demo (macOS/Linux) or Remove-Item .mandateos-demo -Recurse -Force (Windows). MandateOS should block it and the .mandateos-demo folder should remain.',
-      },
-    ],
+    codeTabs: [],
   },
 ];
 
 const openclawCompletion: HostCompletion = {
-  title: 'You now have MandateOS running in OpenClaw.',
-  body: 'Your OpenClaw state directory should now contain the MandateOS plugin bundle and bridge runtime, ~/.openclaw/openclaw.json should list the mandateos MCP server and guarded agent profile, and the doctor self-test should pass all five checks. Shell and browser actions from the mandateos_guarded agent that match the starter presets should route through the MandateOS bridge before they continue. A good first success signal is the guarded agent prompting you to approve mkdir .mandateos-demo, then blocking rm -rf .mandateos-demo while the folder remains.',
+  ...sharedCompletion,
+  help: 'Your OpenClaw state directory now contains the MandateOS plugin bundle and bridge runtime, and ~/.openclaw/openclaw.json lists the mandateos MCP server and guarded agent profile. Shell and browser actions from the mandateos_guarded agent that match your mandates route through the MandateOS bridge before they continue. You can remove the mandateos plugin entries from ~/.openclaw/openclaw.json to disable the demo setup.',
 };
 
 const installHosts: readonly { id: InstallHostId; label: string }[] = [

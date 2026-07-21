@@ -12,6 +12,14 @@ import {
 import { SeoService } from '../../../shared/seo.service';
 
 const OS_TAB_IDS = new Set(['windows', 'mac-linux']);
+const VERIFY_STEP_IDS = new Set(['verify', 'verify-guardrail']);
+
+type DemoTestCodeTab = {
+  id: string;
+  label: string;
+  language: string;
+  code: string;
+};
 
 @Component({
   selector: 'app-install-page',
@@ -79,6 +87,9 @@ export class InstallPageComponent implements OnInit {
     }[];
   }) {
     const tabs = step.codeTabs || [];
+    if (tabs.length === 0) {
+      return undefined;
+    }
     const isOsStep = tabs.some((tab) => OS_TAB_IDS.has(tab.id));
     const activeId = isOsStep
       ? this.activeOsTabId || tabs[0]?.id
@@ -92,6 +103,44 @@ export class InstallPageComponent implements OnInit {
 
   protected isDemoConnectionStep(step: { id: string }): boolean {
     return step.id === 'connection-values';
+  }
+
+  protected isDemoVerifyStep(step: { id: string }): boolean {
+    return VERIFY_STEP_IDS.has(step.id);
+  }
+
+  protected demoVerifyTests(): DemoInstallTest[] {
+    const tests = this.demoConnection?.tests || [];
+    return tests.filter(
+      (test) => test.decision === 'approval' || test.decision === 'blocked',
+    );
+  }
+
+  protected demoTestCodeTabs(test: DemoInstallTest): DemoTestCodeTab[] {
+    return [
+      {
+        id: 'windows',
+        label: 'Windows PowerShell',
+        language: 'powershell',
+        code: test.commands.windowsPowerShell,
+      },
+      {
+        id: 'mac-linux',
+        label: 'macOS / Linux',
+        language: 'bash',
+        code: test.commands.macOsLinux,
+      },
+    ];
+  }
+
+  protected activeDemoTestTab(test: DemoInstallTest): DemoTestCodeTab {
+    const tabs = this.demoTestCodeTabs(test);
+    const activeId = this.activeOsTabId || tabs[0].id;
+    return tabs.find((tab) => tab.id === activeId) || tabs[0];
+  }
+
+  protected demoTestCopyId(test: DemoInstallTest): string {
+    return `demo-test-${test.id}`;
   }
 
   protected demoConnectionMessage(): string {
@@ -110,6 +159,17 @@ export class InstallPageComponent implements OnInit {
         return 'Approval required';
       case 'blocked':
         return 'Blocked';
+    }
+  }
+
+  protected demoTestExpectation(test: DemoInstallTest): string {
+    switch (test.decision) {
+      case 'allowed':
+        return 'Expect the command to run without an approval prompt.';
+      case 'approval':
+        return 'Expect MandateOS to pause and ask for approval. Approve it, then confirm the action completed.';
+      case 'blocked':
+        return 'Expect MandateOS to refuse the action even if you consent. Nothing destructive should change in the repo.';
     }
   }
 
