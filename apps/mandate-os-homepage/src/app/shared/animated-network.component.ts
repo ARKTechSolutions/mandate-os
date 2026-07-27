@@ -120,7 +120,7 @@ export class AnimatedNetworkComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private makeSafeLine(phase: number = 0): SafeLine {
+  private makeSafeLine(phase = 0): SafeLine {
     const y = 4 + Math.random() * Math.max(this.h - 8, 1);
     return {
       x: -200 + phase * (this.w + 600) * -1,
