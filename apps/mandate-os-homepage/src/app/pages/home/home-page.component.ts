@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HOME_CONTENT } from '../../content/home.content';
+import { AnimatedNetworkComponent } from '../../shared/animated-network.component';
 import { SeoService } from '../../shared/seo.service';
 
 interface ScreenshotSlot {
@@ -14,7 +15,7 @@ interface ScreenshotSlot {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, AnimatedNetworkComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
 })
