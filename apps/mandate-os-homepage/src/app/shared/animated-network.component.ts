@@ -62,7 +62,8 @@ export class AnimatedNetworkComponent implements AfterViewInit, OnDestroy {
     y: number;
     speed: number;
     intercepted: boolean;
-  } = { active: false, x: 0, y: 0, speed: 0, intercepted: false };
+    tailLength: number;
+  } = { active: false, x: 0, y: 0, speed: 0, intercepted: false, tailLength: 0 };
 
   private wallFlashMs = 0;
 
@@ -137,10 +138,11 @@ export class AnimatedNetworkComponent implements AfterViewInit, OnDestroy {
     const wallBottom = this.h * 0.90;
     this.risky = {
       active: true,
-      x: -60,
+      x: -80,
       y: wallTop + Math.random() * (wallBottom - wallTop),
       speed: 90 + Math.random() * 80,
       intercepted: false,
+      tailLength: 80,
     };
   }
 
@@ -165,23 +167,35 @@ export class AnimatedNetworkComponent implements AfterViewInit, OnDestroy {
 
     // --- risky line (drawn first, behind everything) ---
     if (this.risky.active) {
-      this.risky.x += this.risky.speed * sec;
+      if (!this.risky.intercepted) {
+        this.risky.x += this.risky.speed * sec;
 
-      // Clamp at wall — line stops here, never passes through
-      if (this.risky.x >= wallPos) {
-        if (!this.risky.intercepted) {
+        // Clamp at wall
+        if (this.risky.x >= wallPos) {
           this.risky.intercepted = true;
+          this.risky.x = wallPos;
           this.wallFlashMs = now + 400;
         }
-        this.risky.x = wallPos;
       }
 
-      // Draw the approach segment, clamped to never extend past wallPos
-      const segLeft = Math.max(this.risky.x - 60, 4);
-      const segRight = Math.min(this.risky.x, wallPos);
+      // The line is drawn as: [x - tailLength, x], right edge clamped at wallPos
+      let segRight: number;
+      if (this.risky.intercepted) {
+        // Shrink tail into the wall
+        this.risky.tailLength -= 200 * sec;
+        if (this.risky.tailLength <= 0) {
+          this.risky.active = false;
+          this.riskTimer = 0;
+        }
+        segRight = wallPos;
+      } else {
+        segRight = Math.min(this.risky.x, wallPos);
+      }
+
+      const segLeft = segRight - this.risky.tailLength;
       if (segLeft < segRight) {
         ctx.beginPath();
-        const alpha = this.risky.intercepted ? 0.55 : 0.5;
+        const alpha = this.risky.intercepted ? 0.45 : 0.5;
         ctx.strokeStyle = `hsla(25, 100%, 60%, ${alpha})`;
         ctx.lineWidth = 2;
         ctx.shadowColor = 'hsla(25, 100%, 60%, 0.25)';
@@ -190,15 +204,6 @@ export class AnimatedNetworkComponent implements AfterViewInit, OnDestroy {
         ctx.lineTo(segRight, this.risky.y);
         ctx.stroke();
         ctx.shadowBlur = 0;
-      }
-
-      // Fade out intercepted lines
-      if (this.risky.intercepted) {
-        const elapsed = now - (this.wallFlashMs - 400);
-        if (elapsed > 600) {
-          this.risky.active = false;
-          this.riskTimer = 0;
-        }
       }
     } else {
       this.riskTimer += delta;
@@ -209,35 +214,36 @@ export class AnimatedNetworkComponent implements AfterViewInit, OnDestroy {
 
     ctx.shadowBlur = 0;
 
-    // --- center wall (drawn on top of risky line, below safe lines) ---
+    // --- center wall (thick rounded rect drawn on top of risky line, below safe lines) ---
     const flashing = now < this.wallFlashMs;
+    const wallW = flashing ? 8 : 6;
+    const wallX0 = wallPos - wallW / 2;
+    const wallRadius = wallW / 2;
+    const wallY0 = h * 0.08;
+    const wallY1 = h * 0.92;
+    const wallH = wallY1 - wallY0;
     const wallColor = flashing
       ? 'hsla(0, 65%, 45%, 0.85)'
-      : 'hsla(190, 100%, 55%, 0.6)';
+      : 'hsla(190, 100%, 55%, 0.65)';
     const wallGlow = flashing
       ? 'hsla(0, 65%, 45%, 0.4)'
       : 'hsla(190, 100%, 55%, 0.3)';
 
     ctx.beginPath();
-    ctx.strokeStyle = wallColor;
-    ctx.lineWidth = flashing ? 3 : 2;
     ctx.shadowColor = wallGlow;
     ctx.shadowBlur = flashing ? 22 : 14;
-    ctx.moveTo(wallPos, h * 0.08);
-    ctx.lineTo(wallPos, h * 0.92);
-    ctx.stroke();
+    ctx.fillStyle = wallColor;
+    ctx.roundRect(wallX0, wallY0, wallW, wallH, wallRadius);
+    ctx.fill();
 
-    // Subtle shimmer on wall when not flashing
+    // Subtle shimmer overlay
     if (!flashing) {
       const shimmer = 0.3 + 0.12 * Math.sin(now * 0.002);
       ctx.beginPath();
-      ctx.strokeStyle = `hsla(190, 100%, 70%, ${shimmer * 0.2})`;
-      ctx.lineWidth = 6;
-      ctx.shadowColor = 'hsla(190, 100%, 70%, 0.08)';
-      ctx.shadowBlur = 10;
-      ctx.moveTo(wallPos, h * 0.08);
-      ctx.lineTo(wallPos, h * 0.92);
-      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = `hsla(190, 100%, 70%, ${shimmer * 0.15})`;
+      ctx.roundRect(wallX0, wallY0, wallW, wallH, wallRadius);
+      ctx.fill();
     }
 
     ctx.shadowBlur = 0;
