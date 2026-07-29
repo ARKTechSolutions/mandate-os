@@ -45,55 +45,6 @@
               <p>{{ step.body }}</p>
 
               @if (
-                isDemoConnectionStep(step) && demoConnection?.tests;
-                as demoTests
-              ) {
-                <section
-                  class="demo-test-panel"
-                  aria-label="What you can test with the demo API"
-                >
-                  <div class="demo-test-heading">
-                    <p class="mini-label">What you can test</p>
-                    <h3>Three safe ways to see the demo policy work</h3>
-                    <p>
-                      Ask your agent to show the MandateOS decision for a
-                      command below. Do not run the command.
-                    </p>
-                  </div>
-                  <div class="demo-test-list">
-                    @for (test of demoTests; track test.id) {
-                      <article class="demo-test-case">
-                        <span
-                          class="demo-test-outcome"
-                          [class.is-allowed]="test.decision === 'allowed'"
-                          [class.is-approval]="test.decision === 'approval'"
-                          [class.is-blocked]="test.decision === 'blocked'"
-                        >
-                          {{ demoTestOutcome(test) }}
-                        </span>
-                        <p>{{ test.description }}</p>
-                        <div class="demo-test-commands">
-                          <div class="demo-test-command">
-                            <span>macOS / Linux</span>
-                            <code>{{ test.commands.macOsLinux }}</code>
-                          </div>
-                          <div class="demo-test-command">
-                            <span>Windows PowerShell</span>
-                            <code>{{ test.commands.windowsPowerShell }}</code>
-                          </div>
-                        </div>
-                      </article>
-                    }
-                  </div>
-                  <p class="demo-test-note">
-                    The demo API only evaluates one small action and returns a
-                    signed simulation receipt. It never runs a command, issues
-                    an execution grant, or writes to a control-panel workspace.
-                  </p>
-                </section>
-              }
-
-              @if (
                 isDemoConnectionStep(step) && demoConnectionState !== 'ready'
               ) {
                 <p class="demo-connection-status" aria-live="polite">
@@ -133,15 +84,126 @@
                   </div>
                 </div>
               }
+
+              @if (isDemoVerifyStep(step)) {
+                @if (demoConnectionState === 'ready') {
+                  <div class="demo-verify-blocks">
+                    @for (test of demoVerifyTests(); track test.id) {
+                      <article
+                        class="demo-verify-block"
+                        [class.is-approval]="test.decision === 'approval'"
+                        [class.is-blocked]="test.decision === 'blocked'"
+                      >
+                        <span
+                          class="demo-test-outcome"
+                          [class.is-approval]="test.decision === 'approval'"
+                          [class.is-blocked]="test.decision === 'blocked'"
+                        >
+                          {{ demoTestOutcome(test) }}
+                        </span>
+                        <p class="demo-verify-description">
+                          {{ test.description }}
+                        </p>
+                        <p class="demo-verify-expectation">
+                          {{ demoTestExpectation(test) }}
+                        </p>
+                        @if (activeDemoTestTab(test); as activeTab) {
+                          <div class="code-tabs">
+                            <div
+                              class="code-tab-bar"
+                              role="tablist"
+                              [attr.aria-label]="
+                                demoTestOutcome(test) + ' command'
+                              "
+                            >
+                              @for (
+                                tab of demoTestCodeTabs(test);
+                                track tab.id
+                              ) {
+                                <button
+                                  type="button"
+                                  role="tab"
+                                  [class.is-active]="activeTab.id === tab.id"
+                                  [attr.aria-selected]="
+                                    activeTab.id === tab.id
+                                  "
+                                  (click)="
+                                    setActiveCodeTab(
+                                      demoTestCopyId(test),
+                                      tab.id
+                                    )
+                                  "
+                                >
+                                  {{ tab.label }}
+                                </button>
+                              }
+                            </div>
+                            <div class="code-tab-panel">
+                              <div class="code-tab-meta">
+                                <span>{{ activeTab.language }}</span>
+                                <button
+                                  type="button"
+                                  class="copy-code-button"
+                                  (click)="
+                                    copyCode(
+                                      demoTestCopyId(test),
+                                      activeTab.code
+                                    )
+                                  "
+                                >
+                                  {{
+                                    copiedCodeId === demoTestCopyId(test)
+                                      ? 'Copied'
+                                      : 'Copy'
+                                  }}
+                                </button>
+                              </div>
+                              <pre><code>{{ activeTab.code }}</code></pre>
+                            </div>
+                          </div>
+                        }
+                      </article>
+                    }
+                  </div>
+                  <p class="demo-test-note">
+                    The commands run for real in your repository. Blocked
+                    commands are refused even if you consent. These are public,
+                    rate-limited demo credentials (30 evaluations per minute) —
+                    no MandateOS account required. Delete .mandateos-demo
+                    yourself when you are done; the agent is blocked from
+                    removing it.
+                  </p>
+                } @else {
+                  <p class="demo-connection-status" aria-live="polite">
+                    {{ demoConnectionMessage() }}
+                  </p>
+                }
+              }
             </div>
           </article>
         }
       </div>
 
       <aside class="cursor-complete-card">
-        <span class="mini-label">Setup complete</span>
+        <div class="complete-card-header">
+          <span class="mini-label">Setup complete</span>
+          <details class="cursor-step-help complete-help">
+            <summary aria-label="More about this setup">?</summary>
+            <p>{{ activeGuide.completion.help }}</p>
+          </details>
+        </div>
         <h2>{{ activeGuide.completion.title }}</h2>
         <p>{{ activeGuide.completion.body }}</p>
+        <div class="complete-card-footer">
+          <a
+            class="complete-cta"
+            [href]="activeGuide.completion.ctaHref"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            {{ activeGuide.completion.ctaLabel }}
+          </a>
+        </div>
       </aside>
     </section>
   </div>
