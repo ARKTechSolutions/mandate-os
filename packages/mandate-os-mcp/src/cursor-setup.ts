@@ -15,6 +15,7 @@ import {
   isMandateOsHookGatewayInvocation,
   toMandateOsRuntimeFileReference,
 } from './runtime-command.js';
+import { buildEnvPrefixedShellCommand } from './shell-env-command.js';
 
 export type CursorMcpServerEntry = {
   command?: string;
@@ -49,6 +50,12 @@ export type MandateOsCursorInstallOptions = {
   installUserMcp?: boolean;
   installProjectMcp?: boolean;
   installProjectHooks?: boolean;
+  /**
+   * Platform used when generating hook shell commands. Defaults to the
+   * installer host (`process.platform`), so Windows installs get `cmd /c`
+   * hooks and POSIX installs keep `env ...`.
+   */
+  platform?: NodeJS.Platform;
 };
 
 export type MandateOsCursorInstallResult = {
@@ -142,6 +149,7 @@ export function installMandateOsIntoCursor(
       unmatchedPermission: normalized.unmatchedPermission,
       rulesFiles: normalized.rulesFiles,
       hookGatewayPath: normalized.hookGatewayPath,
+      platform: normalized.platform,
     });
     writeJsonFile(normalized.projectHooksPath, nextHooksConfig);
   }
@@ -283,6 +291,7 @@ export function upsertMandateOsHooks(
     unmatchedPermission: HostGatewayPermission;
     rulesFiles: string[];
     hookGatewayPath?: string;
+    platform?: NodeJS.Platform;
   },
 ): CursorHooksConfig {
   const hookGatewayPath =
@@ -302,6 +311,7 @@ export function upsertMandateOsHooks(
       defaultSource: input.defaultSource,
       unmatchedPermission: input.unmatchedPermission,
       rulesFiles: input.rulesFiles,
+      platform: input.platform,
     }),
     hookGatewayPath,
     'before-shell',
@@ -318,6 +328,7 @@ export function upsertMandateOsHooks(
       defaultSource: input.defaultSource,
       unmatchedPermission: input.unmatchedPermission,
       rulesFiles: input.rulesFiles,
+      platform: input.platform,
     }),
     hookGatewayPath,
     'before-mcp',
@@ -395,6 +406,7 @@ function normalizeInstallOptions(options: MandateOsCursorInstallOptions) {
     installUserMcp,
     installProjectMcp,
     installProjectHooks,
+    platform: options.platform || process.platform,
     userMcpPath: path.join(cursorHomeDir, 'mcp.json'),
     projectMcpPath: path.join(cursorProjectDir, 'mcp.json'),
     projectHooksPath: path.join(cursorProjectDir, 'hooks.json'),
@@ -412,6 +424,7 @@ function buildMandateOsHookEntry(input: {
   defaultSource: string;
   unmatchedPermission: HostGatewayPermission;
   rulesFiles: string[];
+  platform?: NodeJS.Platform;
 }) {
   const runtimeCommand = createMandateOsNodeRuntimeCommand({
     scriptPath: input.hookGatewayPath,
@@ -438,13 +451,11 @@ function buildMandateOsHookEntry(input: {
     ]);
   }
 
-  const command = [
-    'env',
-    ...envPairs.map(([key, value]) => `${key}=${shellQuote(value)}`),
-    ...runtimeCommand.shellWords.map(shellQuote),
-    'cursor',
-    input.event,
-  ].join(' ');
+  const command = buildEnvPrefixedShellCommand({
+    env: envPairs,
+    argv: [...runtimeCommand.shellWords, 'cursor', input.event],
+    platform: input.platform,
+  });
 
   return {
     command,
@@ -554,10 +565,6 @@ function resolvePackageAssetPath(relativePath: string) {
     candidatePaths[0];
 
   return resolvedPath;
-}
-
-function shellQuote(value: string) {
-  return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
 function normalizeOptionalText(value: string | undefined) {

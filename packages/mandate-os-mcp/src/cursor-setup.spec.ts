@@ -109,6 +109,7 @@ describe('cursor setup helpers', () => {
         unmatchedPermission: 'ask',
         rulesFiles: ['/tmp/release.json', '/tmp/docs.json'],
         hookGatewayPath: '/tmp/mandate-os-mcp/hook-gateway.js',
+        platform: 'linux',
       },
     );
 
@@ -118,14 +119,53 @@ describe('cursor setup helpers', () => {
     expect(
       (nextHooks.hooks.beforeShellExecution?.[0] as { command: string })
         .command,
-    ).toContain('cursor before-shell');
+    ).toContain("'cursor' 'before-shell'");
+    expect(
+      (nextHooks.hooks.beforeShellExecution?.[0] as { command: string })
+        .command,
+    ).toMatch(/^env /);
     expect(
       (nextHooks.hooks.beforeShellExecution?.[1] as { command: string })
         .command,
     ).toBe('echo keep-me');
     expect(
       (nextHooks.hooks.beforeMCPExecution?.[0] as { command: string }).command,
-    ).toContain('cursor before-mcp');
+    ).toContain("'cursor' 'before-mcp'");
+  });
+
+  it('generates Windows-safe Cursor hook commands with cmd /c', () => {
+    const nextHooks = upsertMandateOsHooks(
+      {
+        version: 1,
+        hooks: {},
+      },
+      {
+        baseUrl: 'https://api.getmandateos.com/demo',
+        bearerToken: 'demo_install.public_v1',
+        defaultMandateId: 'mdt_demo_repo_guard_v1',
+        defaultSource: 'cursor.mandateos.hooks',
+        unmatchedPermission: 'ask',
+        rulesFiles: [],
+        hookGatewayPath: '/tmp/mandate-os-mcp/hook-gateway.js',
+        platform: 'win32',
+      },
+    );
+
+    const beforeMcp = (
+      nextHooks.hooks.beforeMCPExecution?.[0] as { command: string }
+    ).command;
+    const beforeShell = (
+      nextHooks.hooks.beforeShellExecution?.[0] as { command: string }
+    ).command;
+
+    expect(beforeMcp.startsWith('cmd /c ')).toBe(true);
+    expect(beforeMcp).toContain('set ""MANDATE_OS_BASE_URL=');
+    expect(beforeMcp).toContain('hook-gateway.js');
+    expect(beforeMcp).toContain('cursor before-mcp');
+    expect(beforeMcp).not.toMatch(/(^|[^\w-])env /);
+
+    expect(beforeShell.startsWith('cmd /c ')).toBe(true);
+    expect(beforeShell).toContain('cursor before-shell');
   });
 
   it('derives both public and realpath approval candidates for Cursor projects', () => {

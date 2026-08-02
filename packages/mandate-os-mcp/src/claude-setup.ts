@@ -16,6 +16,7 @@ import {
   isMandateOsHookGatewayInvocation,
   toMandateOsRuntimeFileReference,
 } from './runtime-command.js';
+import { buildEnvPrefixedShellCommand } from './shell-env-command.js';
 
 export type ClaudeMcpServerEntry = {
   type?: 'stdio' | 'sse' | 'http';
@@ -76,6 +77,7 @@ export type MandateOsClaudeInstallOptions = {
   installLocalMcp?: boolean;
   installLocalHooks?: boolean;
   updateGitInfoExclude?: boolean;
+  platform?: NodeJS.Platform;
 };
 
 export type MandateOsClaudeInstallResult = {
@@ -148,6 +150,7 @@ export function installMandateOsIntoClaude(
       unmatchedPermission: normalized.unmatchedPermission,
       rulesFiles: normalized.rulesFiles,
       hookGatewayPath: normalized.hookGatewayPath,
+      platform: normalized.platform,
     });
     writeJsonFile(normalized.localSettingsPath, nextSettings);
   }
@@ -299,6 +302,7 @@ export function upsertMandateOsClaudeHooks(
     unmatchedPermission: HostGatewayPermission;
     rulesFiles: string[];
     hookGatewayPath?: string;
+    platform?: NodeJS.Platform;
   },
 ): ClaudeSettingsConfig {
   const hookGatewayPath =
@@ -316,6 +320,7 @@ export function upsertMandateOsClaudeHooks(
       defaultSource: input.defaultSource,
       unmatchedPermission: input.unmatchedPermission,
       rulesFiles: input.rulesFiles,
+      platform: input.platform,
     }),
     hookGatewayPath,
     'pre-tool-bash',
@@ -338,6 +343,7 @@ export function upsertMandateOsClaudeHooks(
           defaultSource: input.defaultSource,
           unmatchedPermission: input.unmatchedPermission,
           rulesFiles: input.rulesFiles,
+          platform: input.platform,
         }),
         hookGatewayPath,
         'pre-tool-mcp',
@@ -396,6 +402,7 @@ function normalizeInstallOptions(options: MandateOsClaudeInstallOptions) {
     installLocalHooks,
     updateGitInfoExclude: options.updateGitInfoExclude !== false,
     gitInfoExcludePath,
+    platform: options.platform || process.platform,
     hookGatewayPath: resolvePackageAssetPath('hook-gateway.js'),
   };
 }
@@ -410,6 +417,7 @@ function buildMandateOsClaudeHookMatcherEntry(input: {
   defaultSource: string;
   unmatchedPermission: HostGatewayPermission;
   rulesFiles: string[];
+  platform?: NodeJS.Platform;
 }): ClaudeHookMatcherEntry {
   const runtimeCommand = createMandateOsNodeRuntimeCommand({
     scriptPath: input.hookGatewayPath,
@@ -441,13 +449,11 @@ function buildMandateOsClaudeHookMatcherEntry(input: {
     hooks: [
       {
         type: 'command',
-        command: [
-          'env',
-          ...envPairs.map(([key, value]) => `${key}=${shellQuote(value)}`),
-          ...runtimeCommand.shellWords.map(shellQuote),
-          'claude',
-          input.event,
-        ].join(' '),
+        command: buildEnvPrefixedShellCommand({
+          env: envPairs,
+          argv: [...runtimeCommand.shellWords, 'claude', input.event],
+          platform: input.platform,
+        }),
       },
     ],
   };
@@ -719,10 +725,6 @@ function resolvePackageAssetPath(relativePath: string) {
     candidatePaths.find((candidatePath) => existsSync(candidatePath)) ||
     candidatePaths[0]
   );
-}
-
-function shellQuote(value: string) {
-  return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
 function normalizeOptionalText(value: unknown) {

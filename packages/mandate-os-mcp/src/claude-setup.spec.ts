@@ -148,6 +148,7 @@ describe('claude setup helpers', () => {
         unmatchedPermission: 'ask',
         rulesFiles: ['/tmp/release.json', '/tmp/docs.json'],
         hookGatewayPath: '/tmp/mandate-os-mcp/hook-gateway.js',
+        platform: 'linux',
       },
     );
 
@@ -163,7 +164,7 @@ describe('claude setup helpers', () => {
         matcher: 'Bash',
         hooks: [
           expect.objectContaining({
-            command: expect.stringContaining('claude pre-tool-bash'),
+            command: expect.stringContaining("'claude' 'pre-tool-bash'"),
           }),
           expect.objectContaining({
             command: 'echo keep-me',
