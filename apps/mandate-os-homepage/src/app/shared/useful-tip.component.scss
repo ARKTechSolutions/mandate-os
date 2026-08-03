@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+.useful-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-top: 0.95rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(131, 227, 224, 0.14);
+  border-radius: 0.95rem;
+  background: rgba(131, 227, 224, 0.05);
+}
+
+.useful-tip-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  margin-top: 0.05rem;
+  color: var(--color-accent);
+}
+
+.useful-tip-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.useful-tip p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.useful-tip-label {
+  margin-right: 0.35rem;
+  color: var(--color-ink);
+  font-weight: 800;
+}
+
+.useful-tip em {
+  font-style: italic;
+  color: rgba(219, 239, 255, 0.92);
+}
