@@ -10,6 +10,7 @@ import {
   type DemoInstallTest,
 } from '../../../shared/demo-install.service';
 import { SeoService } from '../../../shared/seo.service';
+import { UsefulTipComponent } from '../../../shared/useful-tip.component';
 
 const OS_TAB_IDS = new Set(['windows', 'mac-linux']);
 const VERIFY_STEP_IDS = new Set(['verify', 'verify-guardrail']);
@@ -24,6 +25,7 @@ type DemoTestCodeTab = {
 @Component({
   selector: 'app-install-page',
   standalone: true,
+  imports: [UsefulTipComponent],
   templateUrl: './install-page.component.html',
   styleUrl: './install-page.component.scss',
 })
