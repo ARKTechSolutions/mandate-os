@@ -44,6 +44,35 @@
               </div>
               <p>{{ step.body }}</p>
 
+              @if (step.keyShortcuts?.length) {
+                <p class="step-key-hint">
+                  Press
+                  @for (
+                    shortcut of step.keyShortcuts;
+                    track shortcut.platforms;
+                    let first = $first
+                  ) {
+                    @if (!first) {
+                      <span> or </span>
+                    }
+                    <span class="key-chord">
+                      @for (
+                        key of shortcut.keys;
+                        track $index;
+                        let last = $last
+                      ) {
+                        <kbd>{{ key }}</kbd>
+                        @if (!last) {
+                          <span class="kbd-plus">+</span>
+                        }
+                      }
+                    </span>
+                    on {{ shortcut.platforms }}
+                  }
+                  {{ step.keyShortcutAction || 'to open the terminal' }}.
+                </p>
+              }
+
               @if (
                 isDemoConnectionStep(step) && demoConnectionState !== 'ready'
               ) {
@@ -83,6 +112,13 @@
                     <pre><code>{{ codeFor(activeTab.code) }}</code></pre>
                   </div>
                 </div>
+
+                @if (step.tip; as tip) {
+                  <app-useful-tip
+                    [label]="tip.label || 'Useful tip'"
+                    [body]="tip.body"
+                  />
+                }
               }
 
               @if (isDemoVerifyStep(step)) {
