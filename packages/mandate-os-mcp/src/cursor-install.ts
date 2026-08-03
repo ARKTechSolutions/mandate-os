@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { readMandateOsMcpConfig } from './config.js';
@@ -9,6 +10,23 @@ import {
   readMandateOsCursorStatus,
 } from './cursor-setup.js';
 import type { HostGatewayPermission } from './host-gateway.js';
+
+const ANSI = {
+  reset: '\u001b[0m',
+  green: '\u001b[32m',
+  yellow: '\u001b[33m',
+  red: '\u001b[31m',
+  dim: '\u001b[2m',
+} as const;
+
+type InstallRowTone = 'green' | 'yellow' | 'red';
+
+type InstallOutputRow = {
+  status: string;
+  tone: InstallRowTone;
+  label: string;
+  path: string;
+};
 
 type CursorInstallCommand = 'install' | 'status';
 
@@ -167,37 +185,166 @@ function parseCursorInstallArgs(argv: string[]): CursorInstallCliOptions {
 function formatInstallResult(
   result: ReturnType<typeof installMandateOsIntoCursor>,
 ) {
-  const lines = [
-    'MandateOS Cursor install complete.',
-    `Workspace: ${result.workspacePath}`,
-    `Cursor home: ${result.cursorHomeDir}`,
-    `Identifier: ${result.identifier}`,
-  ];
+  const rows: InstallOutputRow[] = [];
 
   if (result.userMcpPath) {
-    lines.push(`User MCP: ${result.userMcpPath}`);
+    rows.push(createPathStatusRow('User MCP', result.userMcpPath, 'installed'));
   }
 
   if (result.projectMcpPath) {
-    lines.push(`Project MCP: ${result.projectMcpPath}`);
+    rows.push(
+      createPathStatusRow('Project MCP', result.projectMcpPath, 'installed'),
+    );
   }
 
   if (result.projectHooksPath) {
-    lines.push(`Project hooks: ${result.projectHooksPath}`);
+    rows.push(
+      createPathStatusRow(
+        'Project hooks',
+        result.projectHooksPath,
+        'installed',
+      ),
+    );
   }
 
-  lines.push('Rule bundles:');
-  lines.push(...result.rulesFiles.map((value) => `- ${value}`));
-  lines.push('Approval files to watch:');
-  lines.push(...result.approvalPaths.map((value) => `- ${value}`));
-  lines.push('Next:');
-  lines.push(`- Open Cursor on ${result.workspacePath}`);
-  lines.push('- Approve the `mandateos` MCP if Cursor asks');
-  lines.push(
+  for (const rulesFile of result.rulesFiles) {
+    rows.push(createPathStatusRow('Rule bundle', rulesFile, 'ok'));
+  }
+
+  const lines = [
+    '',
+    'MandateOS Cursor install complete.',
+    '',
+    `Workspace: ${result.workspacePath}`,
+    `Cursor home: ${result.cursorHomeDir}`,
+    `Identifier: ${result.identifier}`,
+    '',
+    formatInstallTable(rows),
+    '',
+    ...formatApprovalSection(result.approvalPaths),
+    '',
+    'Next:',
+    `- Open Cursor on ${result.workspacePath}`,
+    '- Approve the `mandateos` MCP if Cursor asks',
     '- Try: Use the mandateos_get_context tool and tell me which MandateOS tools are available here.',
-  );
+  ];
 
   return `${lines.join('\n')}\n`;
+}
+
+function createPathStatusRow(
+  label: string,
+  filePath: string,
+  successStatus: 'installed' | 'ok',
+): InstallOutputRow {
+  if (existsSync(filePath)) {
+    return {
+      status: successStatus,
+      tone: 'green',
+      label,
+      path: filePath,
+    };
+  }
+
+  return {
+    status: 'missing',
+    tone: 'red',
+    label,
+    path: filePath,
+  };
+}
+
+function formatApprovalSection(approvalPaths: string[]) {
+  if (approvalPaths.length === 0) {
+    return [];
+  }
+
+  const lines = [
+    'MCP approval (Cursor-owned — this installer does not create it):',
+    'Cursor writes this file after you approve the `mandateos` MCP server.',
+  ];
+
+  const statusWidth = 'awaiting you'.length;
+
+  for (const approvalPath of approvalPaths) {
+    if (existsSync(approvalPath)) {
+      lines.push(
+        `${padEndVisible(colorizeText('recorded', 'green'), statusWidth)}  ${approvalPath}`,
+      );
+      continue;
+    }
+
+    lines.push(
+      `${padEndVisible(colorizeText('awaiting you', 'yellow'), statusWidth)}  ${approvalPath}`,
+    );
+  }
+
+  return lines;
+}
+
+function formatInstallTable(rows: InstallOutputRow[]) {
+  if (rows.length === 0) {
+    return colorizeText('No install targets were written.', 'yellow');
+  }
+
+  const statusWidth = Math.max(
+    'STATUS'.length,
+    ...rows.map((row) => row.status.length),
+  );
+  const labelWidth = Math.max(
+    'COMPONENT'.length,
+    ...rows.map((row) => row.label.length),
+  );
+
+  const header = [
+    padEndVisible('STATUS', statusWidth),
+    padEndVisible('COMPONENT', labelWidth),
+    'PATH',
+  ].join('  ');
+
+  const separator = [
+    '-'.repeat(statusWidth),
+    '-'.repeat(labelWidth),
+    '-'.repeat(4),
+  ].join('  ');
+
+  const body = rows.map((row) => {
+    const statusCell = padEndVisible(
+      colorizeText(row.status, row.tone),
+      statusWidth,
+    );
+    const labelCell = padEndVisible(row.label, labelWidth);
+    return `${statusCell}  ${labelCell}  ${row.path}`;
+  });
+
+  return [colorizeText(header, 'dim'), colorizeText(separator, 'dim'), ...body].join(
+    '\n',
+  );
+}
+
+function supportsColor() {
+  if (process.env.NO_COLOR) {
+    return false;
+  }
+
+  if (process.env.FORCE_COLOR === '0') {
+    return false;
+  }
+
+  return Boolean(process.stdout.isTTY) || Boolean(process.env.FORCE_COLOR);
+}
+
+function colorizeText(text: string, tone: InstallRowTone | 'dim') {
+  if (!supportsColor()) {
+    return text;
+  }
+
+  return `${ANSI[tone]}${text}${ANSI.reset}`;
+}
+
+function padEndVisible(text: string, width: number) {
+  const visibleLength = text.replace(/\u001b\[[0-9;]*m/g, '').length;
+  return `${text}${' '.repeat(Math.max(0, width - visibleLength))}`;
 }
 
 function formatCursorStatus(
