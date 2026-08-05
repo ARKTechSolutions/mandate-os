@@ -66,6 +66,13 @@ export class AnalyticsService {
     });
   }
 
+  trackInstallCopy(host: string, stepId: string): void {
+    this.trackEvent('install_copy', {
+      install_host: host,
+      copy_step_id: stepId,
+    });
+  }
+
   getStoredConsent(): CookieConsentValue | null {
     if (!isPlatformBrowser(this.platformId)) {
       return null;
