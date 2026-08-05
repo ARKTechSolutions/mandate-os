@@ -1,5 +1,4 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   INSTALL_CONTENT,
   type InstallHostId,
@@ -32,7 +31,6 @@ type DemoTestCodeTab = {
 })
 export class InstallPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
-  private readonly route = inject(ActivatedRoute);
   private readonly demoInstall = inject(DemoInstallService);
   private readonly analytics = inject(AnalyticsService);
 
@@ -51,22 +49,6 @@ export class InstallPageComponent implements OnInit {
         'Install MandateOS guardrails into Codex, Cursor, Claude Code, or OpenClaw without cloning the repo.',
       path: '/docs/install',
     });
-
-    const resolved = this.route.snapshot.data['demoConnection'] as
-      | DemoInstallConnection
-      | null
-      | undefined;
-
-    if (resolved) {
-      this.demoConnection = resolved;
-      this.demoConnectionState = 'ready';
-      return;
-    }
-
-    if (resolved === null) {
-      this.demoConnectionState = 'error';
-      return;
-    }
 
     void this.loadDemoConnection();
   }
@@ -159,7 +141,7 @@ export class InstallPageComponent implements OnInit {
       return 'The demo values could not be loaded. Refresh the page before copying anything; placeholder credentials are never copied.';
     }
 
-    return 'Loading the shared demo URL, credential, and mandate from MandateOS…';
+    return 'We are getting the connection values for you, hang on!';
   }
 
   protected demoTestOutcome(test: DemoInstallTest): string {
