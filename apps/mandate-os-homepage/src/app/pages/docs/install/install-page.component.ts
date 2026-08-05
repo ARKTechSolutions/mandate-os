@@ -4,6 +4,7 @@ import {
   INSTALL_CONTENT,
   type InstallHostId,
 } from '../../../content/install.content';
+import { AnalyticsService } from '../../../shared/analytics.service';
 import {
   DemoInstallService,
   type DemoInstallConnection,
@@ -33,6 +34,7 @@ export class InstallPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
   private readonly route = inject(ActivatedRoute);
   private readonly demoInstall = inject(DemoInstallService);
+  private readonly analytics = inject(AnalyticsService);
 
   protected readonly content = INSTALL_CONTENT;
   protected activeHostId: InstallHostId = 'cursor';
@@ -77,6 +79,10 @@ export class InstallPageComponent implements OnInit {
     if (hostId === this.activeHostId) return;
     this.activeHostId = hostId;
     this.activeCodeTabIds = {};
+  }
+
+  protected trackSignUp(): void {
+    this.analytics.trackEvent('sign_up', { method: 'web' });
   }
 
   protected activeCodeTab(step: {

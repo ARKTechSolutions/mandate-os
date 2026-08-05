@@ -236,6 +236,7 @@
             [href]="activeGuide.completion.ctaHref"
             target="_blank"
             rel="noreferrer noopener"
+            (click)="trackSignUp()"
           >
             {{ activeGuide.completion.ctaLabel }}
           </a>

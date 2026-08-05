@@ -1,1 +1,19 @@
-:host { display: block; }
+:host {
+  display: block;
+}
+
+.footer-preferences {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-preferences:hover {
+  color: var(--color-accent);
+}

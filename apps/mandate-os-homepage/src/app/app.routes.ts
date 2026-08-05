@@ -88,5 +88,15 @@ export const appRoutes: Routes = [
     loadComponent: () =>
       import('./pages/pricing/pricing-placeholder.component').then((m) => m.PricingPlaceholderComponent),
   },
+  {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./pages/privacy/privacy-page.component').then((m) => m.PrivacyPageComponent),
+    data: {
+      title: 'Privacy Policy — MandateOS',
+      description:
+        'How MandateOS uses cookies and Google Analytics, and how you can manage consent.',
+    },
+  },
   { path: '**', redirectTo: '' },
 ];

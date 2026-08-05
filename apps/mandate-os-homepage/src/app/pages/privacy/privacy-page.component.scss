@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+.privacy-page {
+  padding-block: 2rem 4rem;
+}
+
+.privacy-body {
+  max-width: 64ch;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.privacy-body h2 {
+  margin: 1.4rem 0 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+}
+
+.privacy-body p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.privacy-body a,
+.privacy-body .text-link {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+
+.privacy-body a:hover,
+.privacy-body .text-link:hover {
+  color: #83e3e0;
+}
+
+.privacy-body code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--color-ink);
+}
+
+.privacy-body .text-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.privacy-back {
+  margin-top: 1.5rem;
+}
