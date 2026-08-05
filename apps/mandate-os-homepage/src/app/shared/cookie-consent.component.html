@@ -1,0 +1,23 @@
+@if (visible()) {
+  <div
+    class="cookie-consent"
+    role="dialog"
+    aria-labelledby="cookie-consent-title"
+    aria-describedby="cookie-consent-body"
+  >
+    <div class="cookie-consent-copy">
+      <p id="cookie-consent-title" class="cookie-consent-title">Cookies &amp; analytics</p>
+      <p id="cookie-consent-body">
+        We use cookies and similar technologies (Google Analytics) to understand how visitors use
+        MandateOS and to measure marketing campaigns, including traffic from ads. Accept to allow
+        analytics cookies, or Reject to continue without them. See our
+        <a routerLink="/privacy">Privacy Policy</a>
+        for details. You can change this anytime via Cookie preferences.
+      </p>
+    </div>
+    <div class="cookie-consent-actions">
+      <button type="button" class="cookie-btn is-reject" (click)="reject()">Reject</button>
+      <button type="button" class="cookie-btn is-accept" (click)="accept()">Accept</button>
+    </div>
+  </div>
+}
