@@ -82,7 +82,10 @@ export class InstallPageComponent implements OnInit {
   }
 
   protected trackSignUp(): void {
-    this.analytics.trackEvent('sign_up', { method: 'web' });
+    this.analytics.trackEvent('sign_up', {
+      method: 'web',
+      install_host: this.activeHostId,
+    });
   }
 
   protected activeCodeTab(step: {
@@ -206,6 +209,7 @@ export class InstallPageComponent implements OnInit {
   protected async copyCode(stepId: string, code: string): Promise<void> {
     this.copiedCodeId = stepId;
     await this.writeClipboard(code);
+    this.analytics.trackInstallCopy(this.activeHostId, stepId);
     window.setTimeout(() => {
       if (this.copiedCodeId === stepId) {
         this.copiedCodeId = '';
