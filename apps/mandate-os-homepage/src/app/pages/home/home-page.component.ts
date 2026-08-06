@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HOME_CONTENT } from '../../content/home.content';
+import { AnalyticsService } from '../../shared/analytics.service';
 import { AnimatedNetworkComponent } from '../../shared/animated-network.component';
 import { SeoService } from '../../shared/seo.service';
 
@@ -21,6 +22,7 @@ interface ScreenshotSlot {
 })
 export class HomePageComponent implements OnInit {
   private readonly seo = inject(SeoService);
+  private readonly analytics = inject(AnalyticsService);
 
   protected readonly content = HOME_CONTENT;
 
@@ -59,6 +61,10 @@ export class HomePageComponent implements OnInit {
         'MandateOS gives platform and security teams a runtime guardrail layer for Codex, Cursor, Claude Code, OpenClaw, and MCP-based agent workflows.',
       path: '/',
     });
+  }
+
+  protected trackCta(location: string, label: string): void {
+    this.analytics.trackCtaClick(location, label);
   }
 
   protected hostSlug(name: string): string {

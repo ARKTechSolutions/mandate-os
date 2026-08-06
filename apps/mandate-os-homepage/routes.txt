@@ -11,3 +11,4 @@
 /docs/integrations/openclaw
 /docs/integrations/github
 /pricing
+/privacy

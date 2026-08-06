@@ -742,6 +742,10 @@ npx --yes --package @mandate-os/openclaw@latest mandate-os-openclaw-install inst
       href: 'https://www.npmjs.com/search?q=%40mandate-os',
     },
     {
+      label: 'Privacy',
+      href: '/privacy',
+    },
+    {
       label: 'LLMs.txt',
       href: '/llms.txt',
     },

@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { demoInstallResolver } from './shared/demo-install.resolver';
 
 export const appRoutes: Routes = [
   {
@@ -25,9 +24,6 @@ export const appRoutes: Routes = [
         path: 'install',
         loadComponent: () =>
           import('./pages/docs/install/install-page.component').then((m) => m.InstallPageComponent),
-        resolve: {
-          demoConnection: demoInstallResolver,
-        },
       },
       {
         path: 'security',
@@ -87,6 +83,16 @@ export const appRoutes: Routes = [
     path: 'pricing',
     loadComponent: () =>
       import('./pages/pricing/pricing-placeholder.component').then((m) => m.PricingPlaceholderComponent),
+  },
+  {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./pages/privacy/privacy-page.component').then((m) => m.PrivacyPageComponent),
+    data: {
+      title: 'Privacy Policy — MandateOS',
+      description:
+        'How MandateOS uses cookies and Google Analytics, and how you can manage consent.',
+    },
   },
   { path: '**', redirectTo: '' },
 ];

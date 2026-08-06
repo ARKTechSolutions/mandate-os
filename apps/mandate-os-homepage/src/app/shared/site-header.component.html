@@ -20,10 +20,10 @@
         @for (link of navLinks; track link.path) {
           <a [routerLink]="link.path">{{ link.label }}</a>
         }
-        <a [href]="signInHref">Sign In</a>
+        <a [href]="signInHref" (click)="trackSignIn()">Sign In</a>
       </nav>
     </details>
 
-    <a class="header-cta" [href]="signInHref">Sign In</a>
+    <a class="header-cta" [href]="signInHref" (click)="trackSignIn()">Sign In</a>
   </div>
 </header>

@@ -20,6 +20,7 @@ describe('App', () => {
     expect(compiled.querySelector('app-site-header')).not.toBeNull();
     expect(compiled.querySelector('main router-outlet')).not.toBeNull();
     expect(compiled.querySelector('app-site-footer')).not.toBeNull();
+    expect(compiled.querySelector('app-cookie-consent')).not.toBeNull();
     expect(compiled.querySelector('.brand-name')?.textContent).toContain('MandateOS');
   });
 });

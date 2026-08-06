@@ -6,8 +6,20 @@
     <p class="hero-new-lede">MandateOS gives you a controlled loop for agent safety: you define guardrails, MandateOS intercepts risky actions, escalates approvals, and keeps signed evidence of every run.</p>
 
     <div class="hero-new-actions">
-      <a class="cta is-primary is-hero-new" [routerLink]="['/docs/install']">{{ content.hero.primaryLabel }}</a>
-      <a class="cta is-secondary is-hero-new" [href]="content.hero.secondaryHref">{{ content.hero.secondaryLabel }}</a>
+      <a
+        class="cta is-primary is-hero-new"
+        [routerLink]="['/docs/install']"
+        (click)="trackCta('hero', 'try_for_free')"
+      >
+        {{ content.hero.primaryLabel }}
+      </a>
+      <a
+        class="cta is-secondary is-hero-new"
+        [href]="content.hero.secondaryHref"
+        (click)="trackCta('hero', 'see_how_it_works')"
+      >
+        {{ content.hero.secondaryLabel }}
+      </a>
     </div>
   </div>
 
@@ -221,8 +233,21 @@
     <h2>{{ content.finalCta.title }}</h2>
     <p>{{ content.finalCta.body }}</p>
     <div class="hero-actions">
-      <a class="cta is-primary" [routerLink]="['/docs/install']" fragment="cursor-install">{{ content.finalCta.primaryLabel }}</a>
-      <a class="cta is-secondary" [href]="content.finalCta.secondaryHref" target="_blank" rel="noreferrer noopener">
+      <a
+        class="cta is-primary"
+        [routerLink]="['/docs/install']"
+        fragment="cursor-install"
+        (click)="trackCta('final_cta', 'open_install_guide')"
+      >
+        {{ content.finalCta.primaryLabel }}
+      </a>
+      <a
+        class="cta is-secondary"
+        [href]="content.finalCta.secondaryHref"
+        target="_blank"
+        rel="noreferrer noopener"
+        (click)="trackCta('final_cta', 'inspect_public_repo')"
+      >
         {{ content.finalCta.secondaryLabel }}
       </a>
     </div>

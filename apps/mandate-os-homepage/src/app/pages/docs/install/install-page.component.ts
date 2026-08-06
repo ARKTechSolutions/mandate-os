@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   INSTALL_CONTENT,
   type InstallHostId,
 } from '../../../content/install.content';
+import { AnalyticsService } from '../../../shared/analytics.service';
 import {
   DemoInstallService,
   type DemoInstallConnection,
@@ -31,8 +31,8 @@ type DemoTestCodeTab = {
 })
 export class InstallPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
-  private readonly route = inject(ActivatedRoute);
   private readonly demoInstall = inject(DemoInstallService);
+  private readonly analytics = inject(AnalyticsService);
 
   protected readonly content = INSTALL_CONTENT;
   protected activeHostId: InstallHostId = 'cursor';
@@ -50,22 +50,6 @@ export class InstallPageComponent implements OnInit {
       path: '/docs/install',
     });
 
-    const resolved = this.route.snapshot.data['demoConnection'] as
-      | DemoInstallConnection
-      | null
-      | undefined;
-
-    if (resolved) {
-      this.demoConnection = resolved;
-      this.demoConnectionState = 'ready';
-      return;
-    }
-
-    if (resolved === null) {
-      this.demoConnectionState = 'error';
-      return;
-    }
-
     void this.loadDemoConnection();
   }
 
@@ -77,6 +61,13 @@ export class InstallPageComponent implements OnInit {
     if (hostId === this.activeHostId) return;
     this.activeHostId = hostId;
     this.activeCodeTabIds = {};
+  }
+
+  protected trackSignUp(): void {
+    this.analytics.trackEvent('sign_up', {
+      method: 'web',
+      install_host: this.activeHostId,
+    });
   }
 
   protected activeCodeTab(step: {
@@ -150,7 +141,7 @@ export class InstallPageComponent implements OnInit {
       return 'The demo values could not be loaded. Refresh the page before copying anything; placeholder credentials are never copied.';
     }
 
-    return 'Loading the shared demo URL, credential, and mandate from MandateOS…';
+    return 'We are getting the connection values for you, hang on!';
   }
 
   protected demoTestOutcome(test: DemoInstallTest): string {
@@ -200,6 +191,7 @@ export class InstallPageComponent implements OnInit {
   protected async copyCode(stepId: string, code: string): Promise<void> {
     this.copiedCodeId = stepId;
     await this.writeClipboard(code);
+    this.analytics.trackInstallCopy(this.activeHostId, stepId);
     window.setTimeout(() => {
       if (this.copiedCodeId === stepId) {
         this.copiedCodeId = '';

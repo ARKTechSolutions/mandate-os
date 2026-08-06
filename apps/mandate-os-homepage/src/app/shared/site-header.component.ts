@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AnalyticsService } from './analytics.service';
 
 @Component({
   selector: 'app-site-header',
@@ -9,10 +10,16 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './site-header.component.scss',
 })
 export class SiteHeaderComponent {
+  private readonly analytics = inject(AnalyticsService);
+
   protected readonly signInHref = 'https://app.getmandateos.com/';
   protected readonly navLinks = [
     { label: 'Docs', path: '/docs' },
     { label: 'Integrations', path: '/docs/integrations' },
     { label: 'Pricing', path: '/pricing' },
   ];
+
+  protected trackSignIn(): void {
+    this.analytics.trackCtaClick('header', 'sign_in');
+  }
 }
