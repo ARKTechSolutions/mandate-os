@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   INSTALL_CONTENT,
   type InstallHostId,
@@ -39,8 +39,11 @@ export class InstallPageComponent implements OnInit {
   protected activeOsTabId = '';
   protected activeCodeTabIds: Record<string, string> = {};
   protected copiedCodeId = '';
-  protected demoConnection: DemoInstallConnection | null = null;
-  protected demoConnectionState: 'loading' | 'ready' | 'error' = 'loading';
+  // Signals so zoneless change detection picks up the async fetch result.
+  protected readonly demoConnection = signal<DemoInstallConnection | null>(null);
+  protected readonly demoConnectionState = signal<'loading' | 'ready' | 'error'>(
+    'loading',
+  );
 
   ngOnInit(): void {
     this.seo.setMeta({
@@ -103,7 +106,7 @@ export class InstallPageComponent implements OnInit {
   }
 
   protected demoVerifyTests(): DemoInstallTest[] {
-    const tests = this.demoConnection?.tests || [];
+    const tests = this.demoConnection()?.tests || [];
     return tests.filter(
       (test) => test.decision === 'approval' || test.decision === 'blocked',
     );
@@ -137,7 +140,7 @@ export class InstallPageComponent implements OnInit {
   }
 
   protected demoConnectionMessage(): string {
-    if (this.demoConnectionState === 'error') {
+    if (this.demoConnectionState() === 'error') {
       return 'The demo values could not be loaded. Refresh the page before copying anything; placeholder credentials are never copied.';
     }
 
@@ -167,14 +170,15 @@ export class InstallPageComponent implements OnInit {
   }
 
   protected codeFor(code: string): string {
-    if (!this.demoConnection) {
+    const connection = this.demoConnection();
+    if (!connection) {
       return code;
     }
 
     return code
-      .replace(/__MANDATE_OS_BASE_URL__/g, this.demoConnection.baseUrl)
-      .replace(/__MANDATE_OS_AGENT_TOKEN__/g, this.demoConnection.bearerToken)
-      .replace(/__MANDATE_OS_MANDATE_ID__/g, this.demoConnection.mandate.id);
+      .replace(/__MANDATE_OS_BASE_URL__/g, connection.baseUrl)
+      .replace(/__MANDATE_OS_AGENT_TOKEN__/g, connection.bearerToken)
+      .replace(/__MANDATE_OS_MANDATE_ID__/g, connection.mandate.id);
   }
 
   protected setActiveCodeTab(stepId: string, tabId: string): void {
@@ -201,10 +205,10 @@ export class InstallPageComponent implements OnInit {
 
   private async loadDemoConnection(): Promise<void> {
     try {
-      this.demoConnection = await this.demoInstall.getConnection();
-      this.demoConnectionState = 'ready';
+      this.demoConnection.set(await this.demoInstall.getConnection());
+      this.demoConnectionState.set('ready');
     } catch {
-      this.demoConnectionState = 'error';
+      this.demoConnectionState.set('error');
     }
   }
 
