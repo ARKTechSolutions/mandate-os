@@ -106,6 +106,8 @@ That command:
 - updates `/absolute/path/to/your/repo/.cursor/mcp.json` with a workspace override
 - updates `/absolute/path/to/your/repo/.cursor/hooks.json` with MandateOS `beforeShellExecution` and `beforeMCPExecution` hooks
 
+Hook commands are generated for the installer host OS: POSIX installs keep `env KEY=value ...`, while Windows installs use `cmd /c` + `set` so Cursor hooks work without the Unix `env` utility. The generated `.cursor/hooks.json` is local to that machine/workspace (and usually should not be committed when it embeds tokens), so each developer runs install on their own PC.
+
 The default installer uses all bundled starter rule files:
 
 - `local-workspace.json`

@@ -16,6 +16,7 @@ import {
   isMandateOsHookGatewayInvocation,
   toMandateOsRuntimeFileReference,
 } from './runtime-command.js';
+import { buildEnvPrefixedShellCommand } from './shell-env-command.js';
 
 export type CodexMcpServerEntry = {
   command?: string;
@@ -78,6 +79,7 @@ export type MandateOsCodexInstallOptions = {
   installProjectHooks?: boolean;
   enableHooksFeature?: boolean;
   updateGitInfoExclude?: boolean;
+  platform?: NodeJS.Platform;
 };
 
 export type MandateOsCodexInstallResult = {
@@ -154,6 +156,7 @@ export function installMandateOsIntoCodex(
       unmatchedPermission: normalized.unmatchedPermission,
       rulesFiles: normalized.rulesFiles,
       hookGatewayPath: normalized.hookGatewayPath,
+      platform: normalized.platform,
     });
     writeJsonFile(normalized.hooksPath, nextHooks);
   }
@@ -294,6 +297,7 @@ export function upsertMandateOsCodexHooks(
     unmatchedPermission: HostGatewayPermission;
     rulesFiles: string[];
     hookGatewayPath?: string;
+    platform?: NodeJS.Platform;
   },
 ): CodexHooksConfig {
   const hookGatewayPath =
@@ -314,6 +318,7 @@ export function upsertMandateOsCodexHooks(
           defaultSource: input.defaultSource,
           unmatchedPermission: input.unmatchedPermission,
           rulesFiles: input.rulesFiles,
+          platform: input.platform,
         }),
         hookGatewayPath,
         'pre-tool-bash',
@@ -371,6 +376,7 @@ function normalizeInstallOptions(options: MandateOsCodexInstallOptions) {
     updateGitInfoExclude:
       options.updateGitInfoExclude !== false && configAndHooksAreWorkspaceLocal,
     gitInfoExcludePath,
+    platform: options.platform || process.platform,
     entryScriptPath: resolvePackageAssetPath('index.js'),
     hookGatewayPath: resolvePackageAssetPath('hook-gateway.js'),
   };
@@ -384,6 +390,7 @@ function buildMandateOsCodexHookMatcherEntry(input: {
   defaultSource: string;
   unmatchedPermission: HostGatewayPermission;
   rulesFiles: string[];
+  platform?: NodeJS.Platform;
 }): CodexHookMatcherEntry {
   const runtimeCommand = createMandateOsNodeRuntimeCommand({
     scriptPath: input.hookGatewayPath,
@@ -413,13 +420,11 @@ function buildMandateOsCodexHookMatcherEntry(input: {
     hooks: [
       {
         type: 'command',
-        command: [
-          'env',
-          ...envPairs.map(([key, value]) => `${key}=${shellQuote(value)}`),
-          ...runtimeCommand.shellWords.map(shellQuote),
-          'codex',
-          input.event,
-        ].join(' '),
+        command: buildEnvPrefixedShellCommand({
+          env: envPairs,
+          argv: [...runtimeCommand.shellWords, 'codex', input.event],
+          platform: input.platform,
+        }),
         statusMessage: 'Checking Bash command',
         timeout: DEFAULT_HOOK_TIMEOUT_SECONDS,
       },
@@ -687,10 +692,6 @@ function resolvePackageAssetPath(relativePath: string) {
     candidatePaths.find((candidatePath) => existsSync(candidatePath)) ||
     candidatePaths[0]
   );
-}
-
-function shellQuote(value: string) {
-  return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
 function normalizeOptionalText(value: unknown) {

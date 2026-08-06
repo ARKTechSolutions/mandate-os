@@ -148,6 +148,7 @@ describe('codex setup helpers', () => {
         unmatchedPermission: 'ask',
         rulesFiles: ['/tmp/release.json', '/tmp/docs.json'],
         hookGatewayPath: '/tmp/mandate-os-mcp/hook-gateway.js',
+        platform: 'linux',
       },
     );
 
@@ -157,7 +158,7 @@ describe('codex setup helpers', () => {
         hooks: [
           expect.objectContaining({
             type: 'command',
-            command: expect.stringContaining('codex pre-tool-bash'),
+            command: expect.stringContaining("'codex' 'pre-tool-bash'"),
             statusMessage: 'Checking Bash command',
             timeout: 25,
           }),
@@ -214,6 +215,7 @@ describe('codex setup helpers', () => {
         unmatchedPermission: 'ask',
         rulesFiles: ['/tmp/local-workspace.json'],
         hookGatewayPath: '/tmp/new-mandate-os-mcp/hook-gateway.js',
+        platform: 'linux',
       },
     );
 
@@ -224,7 +226,7 @@ describe('codex setup helpers', () => {
           expect.objectContaining({
             type: 'command',
             command: expect.stringContaining(
-              "/tmp/new-mandate-os-mcp/hook-gateway.js' codex pre-tool-bash",
+              "'/tmp/new-mandate-os-mcp/hook-gateway.js' 'codex' 'pre-tool-bash'",
             ),
           }),
         ],
@@ -243,6 +245,7 @@ describe('codex setup helpers', () => {
         rulesFiles: ['/tmp/local-workspace.json'],
         hookGatewayPath:
           '/Users/example/.npm/_npx/1234/node_modules/@mandate-os/mcp/hook-gateway.js',
+        platform: 'linux',
       },
     );
 
@@ -276,6 +279,7 @@ describe('codex setup helpers', () => {
       codexConfigPath,
       rulesFiles: [transientRulePath],
       installProjectMcp: false,
+      platform: 'linux',
     });
 
     expect(result.rulesFiles).toEqual([path.resolve(transientRulePath)]);

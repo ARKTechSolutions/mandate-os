@@ -1,2 +1,19 @@
 #!/usr/bin/env node
-import '../../dist/packages/mandate-os-mcp/hook-gateway.js';
+import { spawn } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const target = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../dist/packages/mandate-os-mcp/hook-gateway.js',
+);
+const child = spawn(process.execPath, [target, ...process.argv.slice(2)], {
+  stdio: 'inherit',
+});
+child.on('exit', (code, signal) => {
+  if (signal) {
+    process.kill(process.pid, signal);
+    return;
+  }
+  process.exit(code ?? 1);
+});
