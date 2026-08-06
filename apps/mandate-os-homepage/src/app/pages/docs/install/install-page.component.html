@@ -74,10 +74,10 @@
               }
 
               @if (
-                isDemoConnectionStep(step) && demoConnectionState !== 'ready'
+                isDemoConnectionStep(step) && demoConnectionState() !== 'ready'
               ) {
                 <div class="demo-connection-status" aria-live="polite">
-                  @if (demoConnectionState === 'loading') {
+                  @if (demoConnectionState() === 'loading') {
                     <span class="demo-connection-spinner" aria-hidden="true"></span>
                   }
                   <p>{{ demoConnectionMessage() }}</p>
@@ -125,7 +125,7 @@
               }
 
               @if (isDemoVerifyStep(step)) {
-                @if (demoConnectionState === 'ready') {
+                @if (demoConnectionState() === 'ready') {
                   <div class="demo-verify-blocks">
                     @for (test of demoVerifyTests(); track test.id) {
                       <article
