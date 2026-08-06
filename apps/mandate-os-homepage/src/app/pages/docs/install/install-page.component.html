@@ -76,9 +76,12 @@
               @if (
                 isDemoConnectionStep(step) && demoConnectionState !== 'ready'
               ) {
-                <p class="demo-connection-status" aria-live="polite">
-                  {{ demoConnectionMessage() }}
-                </p>
+                <div class="demo-connection-status" aria-live="polite">
+                  @if (demoConnectionState === 'loading') {
+                    <span class="demo-connection-spinner" aria-hidden="true"></span>
+                  }
+                  <p>{{ demoConnectionMessage() }}</p>
+                </div>
               } @else if (activeCodeTab(step); as activeTab) {
                 <div class="code-tabs">
                   <div
