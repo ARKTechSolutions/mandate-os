@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, initial-scale=1" />
+  <title>MandateOS — Request Guardrail (square)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #04111a;
+      --ink: #f4fbff;
+      --muted: rgba(229, 239, 247, 0.72);
+      --accent: #f6c36b;
+      --line: rgba(131, 227, 224, 0.14);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: #02080e;
+      color: var(--ink);
+      font-family: "DM Sans", "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+    }
+
+    .frame {
+      width: 1080px;
+      height: 1080px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 50% at 18% 28%, rgba(78, 145, 255, 0.18), transparent 55%),
+        radial-gradient(ellipse 70% 45% at 82% 22%, rgba(246, 195, 107, 0.12), transparent 50%),
+        radial-gradient(ellipse 60% 40% at 50% 88%, rgba(131, 227, 224, 0.08), transparent 55%),
+        linear-gradient(180deg, #07131d 0%, var(--bg-deep) 55%, #030b12 100%);
+      display: grid;
+      grid-template-rows: 1fr;
+      padding: 52px;
+    }
+
+    .frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(131, 227, 224, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(131, 227, 224, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 20%, transparent 75%);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .stage-wrap {
+      position: relative;
+      z-index: 2;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(4, 17, 26, 0.55);
+      overflow: hidden;
+      min-height: 0;
+      aspect-ratio: 1 / 1;
+    }
+
+    .stage-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 80px rgba(4, 17, 26, 0.45);
+      border-radius: inherit;
+    }
+
+    canvas#stage {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .lane-label {
+      position: absolute;
+      top: 22px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(244, 251, 255, 0.55);
+    }
+
+    .lane-label.agents { left: 28px; }
+    .lane-label.boundary {
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--accent);
+    }
+    .lane-label.net { right: 28px; }
+
+    .pulse-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 130px;
+      height: 130px;
+      margin: -65px 0 0 -65px;
+      border-radius: 50%;
+      border: 1px solid rgba(246, 195, 107, 0.35);
+      animation: pulse-ring 2.5s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.55); opacity: 0.65; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+
+    @media (max-width: 1100px) {
+      body { align-items: flex-start; padding: 24px 0; }
+      .frame {
+        transform: scale(min(1, calc((100vw - 32px) / 1080)));
+        transform-origin: top center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hidden: still used to draw the crest mark on the canvas shield -->
+  <img id="logoMark" src="logo-mark.png" alt="" width="42" height="42" hidden />
+
+  <div class="frame" id="frame" aria-label="MandateOS request guardrail, 1080 by 1080">
+    <div class="stage-wrap">
+      <div class="pulse-ring"></div>
+      <div class="labels">
+        <span class="lane-label agents">AI Agents</span>
+        <span class="lane-label boundary">MandateOS Boundary</span>
+        <span class="lane-label net">Internet</span>
+      </div>
+      <canvas id="stage" width="976" height="976"></canvas>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const LOOP = 5;
+      const canvas = document.getElementById("stage");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;
+      const H = canvas.height;
+
+      const BOUNDARY_X = W * 0.5;
+      const NET_HUB = { x: W - 72, y: H * 0.5 };
+      const GLOBE = { x: W - 72, y: H * 0.5, r: 38 };
+
+      // Crest mark (hidden img in DOM)
+      const logoEl = document.getElementById("logoMark");
+      logoEl.addEventListener("error", () => {
+        logoEl.src = "https://getmandateos.com/logo-mark.png";
+      });
+
+      // Vertically redistributed for the square stage (was tuned for 720h)
+      const terminals = [129, 291, 454, 617, 779].map((y, i) => ({
+        id: i,
+        x: 28,
+        y,
+        w: 86,
+        h: 58,
+      }));
+
+      /*
+        5 beats × 1.0s:
+        1) T2 → 3 red
+        2) T4 + T5 → 1 and 2 red
+        3) T3 → 1 red
+        4) T1 (top) → 2 red
+        5) none
+      */
+      const BEAT = LOOP / 5;
+      const threatBeats = [
+        { t0: 0 * BEAT, t1: 1 * BEAT, items: [{ term: 1, count: 3 }] },
+        { t0: 1 * BEAT, t1: 2 * BEAT, items: [{ term: 3, count: 1 }, { term: 4, count: 2 }] },
+        { t0: 2 * BEAT, t1: 3 * BEAT, items: [{ term: 2, count: 1 }] },
+        { t0: 3 * BEAT, t1: 4 * BEAT, items: [{ term: 0, count: 2 }] },
+        { t0: 4 * BEAT, t1: 5 * BEAT, items: [] },
+      ];
+
+      function threatStateAt(loopT) {
+        const active = new Map();
+        for (const w of threatWindows) {
+          if (loopT >= w.t0 && loopT < w.t1) {
+            active.set(w.term, true);
+          }
+        }
+        return active;
+      }
+
+      // Fraction along path until x clears the terminal
+      function uUntilX(pts, targetX) {
+        const total = polylineLength(pts);
+        if (total <= 0) return 0.05;
+        let acc = 0;
+        for (let i = 1; i < pts.length; i++) {
+          const x0 = pts[i - 1].x;
+          const x1 = pts[i].x;
+          if (x1 >= targetX) {
+            const dx = x1 - x0;
+            if (dx > 0.01) {
+              const t = Math.max(0, Math.min(1, (targetX - x0) / dx));
+              acc += Math.hypot(dx, pts[i].y - pts[i - 1].y) * t;
+            }
+            return Math.max(0.04, Math.min(0.35, acc / total));
+          }
+          acc += Math.hypot(x1 - x0, pts[i].y - pts[i - 1].y);
+        }
+        return 0.08;
+      }
+
+      // 90° only — long horizontals; verticals subdivided into small consecutive ticks.
+      function clampY(y) {
+        return Math.max(58, Math.min(H - 58, y));
+      }
+
+      function buildRoute(term, threat, lineId) {
+        const startX = term.x + term.w + 12;
+        const startY = term.y + term.h * 0.55;
+        const midX = BOUNDARY_X;
+        const endX = threat ? midX - 10 : NET_HUB.x - 8;
+        const pts = [{ x: startX, y: startY }];
+        let x = startX;
+        let y = startY;
+
+        const stagger = ((lineId * 37) % 97) / 97;
+        const dir0 = (lineId % 2 === 0) ? 1 : -1;
+        const H_TICK = 11;
+        const V_TICK = 8;
+
+        function goH(nextX) {
+          const nx = Math.min(Math.max(nextX, x + 1), endX);
+          const dx = nx - x;
+          if (dx < 1) return;
+          let moved = 0;
+          while (moved < dx - 0.01) {
+            const step = Math.min(H_TICK, dx - moved);
+            x += step;
+            moved += step;
+            pts.push({ x, y });
+          }
+          x = nx;
+          if (pts[pts.length - 1].x !== nx) pts.push({ x: nx, y });
+        }
+
+        // Vertical travel in small consecutive steps (smooth — not one big jump)
+        function goV(nextY) {
+          const ny = clampY(nextY);
+          const dy = ny - y;
+          if (Math.abs(dy) < 1) return;
+          const dir = Math.sign(dy);
+          const dist = Math.abs(dy);
+          let moved = 0;
+          while (moved < dist - 0.01) {
+            const step = Math.min(V_TICK, dist - moved);
+            y = clampY(y + dir * step);
+            moved += step;
+            pts.push({ x, y });
+          }
+          y = ny;
+          if (pts[pts.length - 1].y !== ny) pts.push({ x, y: ny });
+        }
+
+        // Lead out horizontally before any vertical
+        goH(startX + 32 + (lineId % 5) * 6);
+
+        // Early: one larger vertical (continuous segment), then hold that lane
+        const firstAmp = 52 + (lineId % 7) * 10;
+        goV(startY + dir0 * firstAmp);
+
+        if (threat) {
+          goH(midX - 110 - stagger * 35);
+          // Opposite direction later — different size, after a long horizontal
+          goV(y - dir0 * (28 + (lineId % 5) * 6));
+          goH(midX - 48 - (lineId % 4) * 8);
+          if (lineId % 2 === 0) {
+            goH(midX - 28);
+            goV(y + dir0 * (18 + (lineId % 4) * 4));
+          }
+          goH(endX);
+          return pts;
+        }
+
+        // Safe: long horizontal cruises between verticals; alternate direction / size
+        goH(midX - 120 - stagger * 30);
+        goV(y - dir0 * (36 + (lineId % 6) * 7)); // opposite of first
+        goH(midX - 40 - (lineId % 5) * 5);
+        goH(midX + 36 + (lineId % 4) * 4);
+        goH(midX + 100 + stagger * 25);
+        goV(y + dir0 * (24 + ((lineId + 2) % 5) * 5)); // flip again, different amp
+        goH(midX + 160 + (lineId % 5) * 6);
+        if (lineId % 3 !== 0) {
+          goV(y - dir0 * (14 + (lineId % 4) * 4));
+        }
+        goH(endX);
+        return pts;
+      }
+
+      function polylineLength(pts) {
+        let len = 0;
+        for (let i = 1; i < pts.length; i++) {
+          const dx = pts[i].x - pts[i - 1].x;
+          const dy = pts[i].y - pts[i - 1].y;
+          len += Math.hypot(dx, dy);
+        }
+        return len;
+      }
+
+      function pointOnPolyline(pts, u) {
+        const total = polylineLength(pts);
+        let target = Math.max(0, Math.min(1, u)) * total;
+        for (let i = 1; i < pts.length; i++) {
+          const dx = pts[i].x - pts[i - 1].x;
+          const dy = pts[i].y - pts[i - 1].y;
+          const seg = Math.hypot(dx, dy);
+          if (target <= seg || i === pts.length - 1) {
+            const t = seg === 0 ? 0 : target / seg;
+            return {
+              x: pts[i - 1].x + dx * t,
+              y: pts[i - 1].y + dy * t,
+            };
+          }
+          target -= seg;
+        }
+        return pts[pts.length - 1];
+      }
+
+      function samplePolyline(pts, u0, u1, steps) {
+        const out = [];
+        for (let i = 0; i <= steps; i++) {
+          const u = u0 + (u1 - u0) * (i / steps);
+          out.push(pointOnPolyline(pts, u));
+        }
+        return out;
+      }
+
+      function trailSegment(pts, u0, u1) {
+        const total = polylineLength(pts);
+        if (total <= 0) return [];
+        const a = Math.max(0, Math.min(1, u0)) * total;
+        const b = Math.max(0, Math.min(1, u1)) * total;
+        const out = [pointOnPolyline(pts, u0)];
+        let acc = 0;
+        for (let i = 1; i < pts.length; i++) {
+          const dx = pts[i].x - pts[i - 1].x;
+          const dy = pts[i].y - pts[i - 1].y;
+          const seg = Math.hypot(dx, dy);
+          const at = acc + seg;
+          if (at > a && acc < b) {
+            out.push({ x: pts[i].x, y: pts[i].y });
+          }
+          acc = at;
+        }
+        const end = pointOnPolyline(pts, u1);
+        const last = out[out.length - 1];
+        if (!last || last.x !== end.x || last.y !== end.y) out.push(end);
+        return out;
+      }
+
+      let lineSeq = 0;
+
+      const threatWindows = [];
+      const redPackets = [];
+      threatBeats.forEach((beat) => {
+        beat.items.forEach((it) => {
+          const term = terminals[it.term];
+          const exitX = term.x + term.w + 48;
+          let nextLaunch = beat.t0 + 0.06;
+          let windowEnd = beat.t0 + 0.1;
+
+          for (let n = 0; n < it.count; n++) {
+            const lineId = lineSeq++ * 3 + it.term * 5 + n;
+            const pts = buildRoute(term, true, lineId);
+            const travel = 1.35;
+            const exitU = uUntilX(pts, exitX);
+            const launch = nextLaunch;
+
+            redPackets.push({
+              threat: true,
+              term,
+              launch,
+              travel,
+              pts,
+              width: 3.2,
+              hitY: pts[pts.length - 1].y,
+            });
+
+            const clearTime = launch + exitU * travel;
+            nextLaunch = clearTime + 0.1;
+            windowEnd = clearTime + 0.35;
+          }
+
+          threatWindows.push({ term: it.term, t0: beat.t0, t1: windowEnd });
+        });
+      });
+
+      // Safe streams: mostly green, some blue — shorter visible trails
+      const SAFE_GREEN = "#5fd4a4";
+      const SAFE_BLUE = "#6eb0ff";
+      const safePackets = [];
+      terminals.forEach((term) => {
+        for (let n = 0; n < 4; n++) {
+          const lineId = 100 + term.id * 17 + n * 7;
+          const isBlue = (term.id + n) % 3 === 0;
+          safePackets.push({
+            threat: false,
+            term,
+            offset: (n / 4) + term.id * 0.11,
+            // Integer speed so phase at t=0 equals phase at t=LOOP (seamless 5s loop)
+            speed: 1,
+            pts: buildRoute(term, false, lineId),
+            width: 3.0,
+            color: isBlue ? SAFE_BLUE : SAFE_GREEN,
+            isBlue,
+          });
+        }
+      });
+
+      // Terminals that emit blue streams use blue code bars (box stays grey)
+      const blueBarTerms = new Set(
+        safePackets.filter((p) => p.isBlue).map((p) => p.term.id)
+      );
+
+      // ---- 3D spider-web internet — slight rearrange + a few more nodes ----
+      const webNodes = [];
+      const rings = [
+        { count: 8,  radius: 66,  yScale: 1.48, z: 0.95, a0: -Math.PI * 0.48 },
+        { count: 10, radius: 112, yScale: 1.62, z: 0.72, a0: -Math.PI * 0.52 },
+        { count: 12, radius: 158, yScale: 1.78, z: 0.48, a0: -Math.PI * 0.45 },
+        { count: 14, radius: 208, yScale: 1.92, z: 0.28, a0: -Math.PI * 0.5 },
+      ];
+      let wi = 0;
+      rings.forEach((ring, ri) => {
+        for (let i = 0; i < ring.count; i++) {
+          const a = ring.a0 + (Math.PI * 2 * i) / ring.count + ri * 0.05;
+          const x3 = Math.cos(a) * ring.radius * 0.52 - 22 - (ri % 2) * 6;
+          const y3 = Math.sin(a) * ring.radius * ring.yScale + ((i % 3) - 1) * 6;
+          const z = ring.z + ((i % 3) - 1) * 0.045;
+          let kind = "dot";
+          if (ri === 0 && i % 3 === 0) kind = "wifi";
+          if (ri === 1 && i % 4 === 2) kind = "cloud";
+          if (ri === 2 && i % 5 === 1) kind = "wifi";
+          if (ri === 3 && i % 4 === 0) kind = "cloud";
+          webNodes.push({ x3, y3, z: Math.max(0.16, Math.min(1, z)), kind, id: wi++ });
+        }
+      });
+      for (let i = 0; i < 18; i++) {
+        const a = i * 0.68 + 0.22;
+        webNodes.push({
+          x3: Math.cos(a) * (85 + (i % 4) * 30) - 30 + (i % 2) * 8,
+          y3: Math.sin(a) * (130 + (i % 5) * 36) + ((i % 3) - 1) * 12,
+          z: 0.17 + (i % 5) * 0.09,
+          kind: i % 3 === 0 ? "wifi" : i % 3 === 1 ? "cloud" : "dot",
+          id: wi++,
+        });
+      }
+
+      function projectNode(n) {
+        const s = 0.42 + n.z * 0.58;
+        return {
+          x: NET_HUB.x + n.x3 * s,
+          y: NET_HUB.y + n.y3 * s,
+          s,
+          z: n.z,
+          alpha: 0.18 + n.z * 0.7,
+          r: (2.2 + n.z * 2.6) * (n.kind === "dot" ? 1 : 1),
+          kind: n.kind,
+        };
+      }
+
+      const projected = webNodes.map(projectNode);
+
+      // Connect each node to nearest 2–3 neighbors in projected space (spider web)
+      const webLinks = [];
+      for (let i = 0; i < projected.length; i++) {
+        const dists = [];
+        for (let j = 0; j < projected.length; j++) {
+          if (i === j) continue;
+          const dx = projected[i].x - projected[j].x;
+          const dy = projected[i].y - projected[j].y;
+          const dz = (webNodes[i].z - webNodes[j].z) * 80;
+          dists.push({ j, d: Math.hypot(dx, dy) + Math.abs(dz) * 0.35 });
+        }
+        dists.sort((a, b) => a.d - b.d);
+        const nLinks = webNodes[i].z > 0.7 ? 3 : 2;
+        for (let k = 0; k < nLinks; k++) {
+          const j = dists[k].j;
+          const a = Math.min(i, j);
+          const b = Math.max(i, j);
+          if (!webLinks.some((l) => l[0] === a && l[1] === b)) {
+            webLinks.push([a, b]);
+          }
+        }
+        // Spoke to hub for near rings
+        if (webNodes[i].z > 0.55) webLinks.push([i, -1]); // -1 = hub
+      }
+
+      // Impact FX queue (loop-synced via red packet phases)
+      let shieldFlash = 0;
+
+      function roundRect(c, x, y, w, h, r) {
+        const radii = typeof r === "number" ? { tl: r, tr: r, br: r, bl: r } : r;
+        c.moveTo(x + radii.tl, y);
+        c.lineTo(x + w - radii.tr, y);
+        c.quadraticCurveTo(x + w, y, x + w, y + radii.tr);
+        c.lineTo(x + w, y + h - radii.br);
+        c.quadraticCurveTo(x + w, y + h, x + w - radii.br, y + h);
+        c.lineTo(x + radii.bl, y + h);
+        c.quadraticCurveTo(x, y + h, x, y + h - radii.bl);
+        c.lineTo(x, y + radii.tl);
+        c.quadraticCurveTo(x, y, x + radii.tl, y);
+        c.closePath();
+      }
+
+      function drawTerminal(term, loopT, isThreat) {
+        const { x, y, w, h } = term;
+        const useBlue = !isThreat && blueBarTerms.has(term.id);
+        const barColor = isThreat ? "#e85a5a" : (useBlue ? SAFE_BLUE : "#5fd4a4");
+        const barAlt = isThreat ? "#f08080" : (useBlue ? "#9bc5ff" : "#8be0c0");
+        const cursorColor = isThreat ? "#e85a5a" : (useBlue ? SAFE_BLUE : "rgba(244, 251, 255, 0.75)");
+
+        ctx.fillStyle = "rgba(18, 26, 34, 0.95)";
+        ctx.strokeStyle = isThreat ? "#e85a5a" : "rgba(220, 230, 238, 0.38)";
+        ctx.lineWidth = isThreat ? 2.4 : 1.5;
+        ctx.beginPath();
+        roundRect(ctx, x, y, w, h, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(244, 251, 255, 0.08)";
+        ctx.beginPath();
+        roundRect(ctx, x, y, w, 14, { tl: 8, tr: 8, br: 0, bl: 0 });
+        ctx.fill();
+
+        ["#9aa7b2", "#c5ced6", "#e8eef3"].forEach((c, i) => {
+          ctx.fillStyle = c;
+          ctx.beginPath();
+          ctx.arc(x + 10 + i * 9, y + 7, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        for (let r = 0; r < 4; r++) {
+          const phase = (loopT / LOOP + term.id * 0.17 + r * 0.13) % 1;
+          const baseW = 18 + ((r * 17 + term.id * 11) % 40);
+          const pulse = 0.55 + 0.45 * Math.sin(phase * Math.PI * 2);
+          const barW = baseW * (0.7 + pulse * 0.45);
+          const by = y + 22 + r * 8;
+
+          ctx.fillStyle = "rgba(244, 251, 255, 0.07)";
+          ctx.fillRect(x + 8, by, w - 16, 3.5);
+
+          ctx.fillStyle = r % 2 === 0 ? barColor : barAlt;
+          ctx.globalAlpha = 0.55 + pulse * 0.45;
+          ctx.fillRect(x + 8, by, Math.min(barW, w - 16), 3.5);
+          ctx.globalAlpha = 1;
+
+          if (r === 3 && Math.sin(loopT * Math.PI * 4) > 0) {
+            ctx.fillStyle = cursorColor;
+            ctx.fillRect(x + 8 + Math.min(barW, w - 16) + 2, by - 0.5, 2, 4.5);
+          }
+        }
+      }
+
+      // Flat top-center, sides slope down — no notch
+      function shieldPath(c, sw, sh) {
+        c.moveTo(-sw, -sh * 0.62);
+        c.lineTo(-sw * 0.42, -sh);
+        c.lineTo(sw * 0.42, -sh);           // flat top center
+        c.lineTo(sw, -sh * 0.62);           // slope down to side
+        c.lineTo(sw * 0.92, sh * 0.22);
+        c.quadraticCurveTo(sw * 0.62, sh * 0.72, 0, sh);
+        c.quadraticCurveTo(-sw * 0.62, sh * 0.72, -sw * 0.92, sh * 0.22);
+        c.closePath();
+      }
+
+      function drawShield(loopT) {
+        const cx = BOUNDARY_X;
+        const cy = H * 0.5;
+        const pulse = 0.5 + 0.5 * Math.sin((loopT / LOOP) * Math.PI * 2 * 2);
+        const flash = shieldFlash;
+
+        const field = ctx.createLinearGradient(cx - 80, 0, cx + 80, 0);
+        field.addColorStop(0, "rgba(246, 195, 107, 0)");
+        field.addColorStop(0.45, `rgba(232, 90, 90, ${flash * 0.28})`); // red flash — left (blocked side)
+        field.addColorStop(0.5, `rgba(131, 227, 224, ${0.14 + flash * 0.25})`);
+        field.addColorStop(0.55, `rgba(246, 195, 107, ${0.05 + flash * 0.12})`); // gold — right
+        field.addColorStop(1, "rgba(246, 195, 107, 0)");
+        ctx.fillStyle = field;
+        ctx.fillRect(cx - 80, 36, 160, H - 72);
+
+        ctx.strokeStyle = `rgba(246, 195, 107, ${0.4 + pulse * 0.3 + flash * 0.4})`;
+        ctx.lineWidth = 2.5 + flash * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, 44);
+        ctx.lineTo(cx, H - 44);
+        ctx.stroke();
+
+        const sw = 44 + pulse * 1.5 + flash * 3;
+        const sh = 54 + pulse * 1.5 + flash * 2;
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        ctx.beginPath();
+        shieldPath(ctx, sw, sh);
+        ctx.fillStyle = "rgba(7, 19, 29, 0.94)";
+        ctx.fill();
+        ctx.strokeStyle = `rgba(246, 195, 107, ${0.65 + pulse * 0.25 + flash * 0.3})`;
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        shieldPath(ctx, sw * 0.78, sh * 0.78);
+        ctx.strokeStyle = "rgba(131, 227, 224, 0.28)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Logo from the same DOM image as the header mark
+        const logoSize = 52;
+        if (logoEl.complete && logoEl.naturalWidth > 0) {
+          ctx.drawImage(
+            logoEl,
+            -logoSize / 2,
+            -logoSize / 2 - 1,
+            logoSize,
+            logoSize
+          );
+        } else {
+          // Visible placeholder until image is ready
+          ctx.fillStyle = "rgba(131, 227, 224, 0.35)";
+          ctx.beginPath();
+          ctx.arc(0, 0, 16, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawCloud(x, y, scale, alpha) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = "#7ec8ff";
+        ctx.beginPath();
+        ctx.arc(-6, 2, 5, 0, Math.PI * 2);
+        ctx.arc(1, -1, 6.5, 0, Math.PI * 2);
+        ctx.arc(8, 2, 4.8, 0, Math.PI * 2);
+        ctx.rect(-10, 2, 20, 6);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+
+      function drawWifi(x, y, scale, alpha, loopT) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        const pulse = 0.5 + 0.5 * Math.sin((loopT / LOOP) * Math.PI * 2 * 2 + x * 0.01);
+        ctx.strokeStyle = "#7ec8ff";
+        ctx.fillStyle = "#7ec8ff";
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = "round";
+        for (let i = 1; i <= 3; i++) {
+          ctx.globalAlpha = alpha * (0.35 + pulse * 0.25) * (i / 3);
+          ctx.beginPath();
+          ctx.arc(0, 4, 3 + i * 3.6, -Math.PI * 0.75, -Math.PI * 0.25);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(0, 4, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+
+      function drawInternet(loopT) {
+        // Depth-sorted: far first
+        const order = projected
+          .map((p, i) => ({ p, i, z: webNodes[i].z }))
+          .sort((a, b) => a.z - b.z);
+
+        // Links (spider strands) — fade by average depth
+        webLinks.forEach(([a, b]) => {
+          let ax, ay, bx, by, za, zb;
+          if (b === -1) {
+            ax = projected[a].x;
+            ay = projected[a].y;
+            bx = NET_HUB.x;
+            by = NET_HUB.y;
+            za = webNodes[a].z;
+            zb = 1;
+          } else {
+            ax = projected[a].x;
+            ay = projected[a].y;
+            bx = projected[b].x;
+            by = projected[b].y;
+            za = webNodes[a].z;
+            zb = webNodes[b].z;
+          }
+          const zAvg = (za + zb) * 0.5;
+          const pulse = 0.2 + 0.2 * Math.sin((loopT / LOOP) * Math.PI * 2 + a);
+          ctx.strokeStyle = `rgba(126, 200, 255, ${0.12 + zAvg * 0.35 + pulse * 0.1})`;
+          ctx.lineWidth = 0.7 + zAvg * 0.9;
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.stroke();
+        });
+
+        order.forEach(({ p, i }) => {
+          const tw = 0.55 + 0.45 * Math.sin((loopT / LOOP) * Math.PI * 2 * 2 + i);
+          const sc = 0.55 + p.z * 0.55;
+          if (p.kind === "cloud") {
+            drawCloud(p.x, p.y, sc * 0.7, p.alpha * (0.55 + tw * 0.25));
+          } else if (p.kind === "wifi") {
+            drawWifi(p.x, p.y, sc * 0.75, p.alpha * (0.55 + tw * 0.25), loopT);
+          } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * (0.85 + tw * 0.2), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(126, 200, 255, ${p.alpha})`;
+            ctx.fill();
+          }
+        });
+
+        // Globe in front of far strands
+        const { x: gx, y: gy, r: gr } = GLOBE;
+        const globePulse = 0.5 + 0.5 * Math.sin((loopT / LOOP) * Math.PI * 2);
+        ctx.strokeStyle = `rgba(131, 227, 224, ${0.42 + globePulse * 0.2})`;
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.arc(gx, gy, gr, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let i = -3; i <= 3; i++) {
+          ctx.beginPath();
+          ctx.ellipse(gx, gy, Math.max(3, 9 + i * 6.5), gr, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(131, 227, 224, ${0.12 + Math.abs(i) * 0.03})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        for (let i = -3; i <= 3; i++) {
+          const yy = gy + i * 9;
+          const rr = Math.sqrt(Math.max(0, gr * gr - (i * 9) * (i * 9)));
+          ctx.beginPath();
+          ctx.ellipse(gx, yy, rr, 3.2 + Math.abs(i) * 0.35, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(246, 195, 107, 0.2)";
+          ctx.stroke();
+        }
+      }
+
+      function strokeTrail(ptsSample, color, width, alphaMul) {
+        if (ptsSample.length < 2) return;
+        ctx.beginPath();
+        ctx.moveTo(ptsSample[0].x, ptsSample[0].y);
+        for (let i = 1; i < ptsSample.length; i++) {
+          ctx.lineTo(ptsSample[i].x, ptsSample[i].y);
+        }
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = Math.max(0, Math.min(1, alphaMul));
+        ctx.lineWidth = width;
+        ctx.lineCap = "butt";
+        ctx.lineJoin = "miter";
+        ctx.miterLimit = 4;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      function drawImpact(x, y, burst) {
+        // burst 0 → 1
+        const fade = 1 - burst;
+
+        // Hot core flash
+        const core = ctx.createRadialGradient(x, y, 0, x, y, 18 + burst * 40);
+        core.addColorStop(0, `rgba(255, 230, 220, ${0.9 * fade})`);
+        core.addColorStop(0.35, `rgba(232, 90, 90, ${0.7 * fade})`);
+        core.addColorStop(1, "rgba(232, 90, 90, 0)");
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.arc(x, y, 18 + burst * 40, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Expanding rings
+        for (let r = 0; r < 3; r++) {
+          const rr = 10 + burst * (28 + r * 22);
+          ctx.globalAlpha = fade * (0.7 - r * 0.18);
+          ctx.strokeStyle = r === 0 ? "#fff5f0" : "#e85a5a";
+          ctx.lineWidth = 2.5 - r * 0.5;
+          ctx.beginPath();
+          ctx.arc(x, y, rr, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Shatter shards
+        const n = 14;
+        for (let i = 0; i < n; i++) {
+          const a = (Math.PI * 2 * i) / n + burst * 0.4;
+          const dist = 10 + burst * (36 + (i % 3) * 14);
+          const len = 8 + (i % 4) * 4;
+          ctx.globalAlpha = fade * 0.95;
+          ctx.strokeStyle = i % 2 === 0 ? "#ff8a8a" : "#ffffff";
+          ctx.lineWidth = 2.2;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(x + Math.cos(a) * (dist * 0.35), y + Math.sin(a) * (dist * 0.35));
+          ctx.lineTo(x + Math.cos(a) * dist, y + Math.sin(a) * dist);
+          ctx.stroke();
+          // tip spark
+          ctx.fillStyle = "#fff";
+          ctx.globalAlpha = fade * 0.8;
+          ctx.beginPath();
+          ctx.arc(x + Math.cos(a) * dist, y + Math.sin(a) * dist, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Vertical barrier slash
+        ctx.globalAlpha = fade * 0.55;
+        ctx.strokeStyle = "#e85a5a";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(BOUNDARY_X, y - 50 - burst * 30);
+        ctx.lineTo(BOUNDARY_X, y + 50 + burst * 30);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      function drawSafePacket(stream, loopT) {
+        const phase = (loopT / LOOP * stream.speed + stream.offset) % 1;
+
+        // Shorter trail; dissolve into the internet near the end (not a hard pop)
+        let trailLen = 0.16;
+        let alpha = 1;
+        if (phase > 0.72) {
+          const eat = (phase - 0.72) / 0.28;
+          trailLen = 0.16 * (1 - eat * 0.85);
+          alpha = 1 - eat * eat;
+        }
+        if (alpha <= 0.02) return;
+
+        const u0 = Math.max(0, phase - trailLen);
+        strokeTrail(trailSegment(stream.pts, u0, phase), stream.color, stream.width, alpha);
+      }
+
+      function drawRedPacket(packet, loopT) {
+        // Modular local time so packets wrap cleanly across the 5s seam
+        let local = (loopT - packet.launch + LOOP) % LOOP;
+        if (local > packet.travel + 0.28) return;
+
+        const u = Math.min(1, local / packet.travel);
+        const trailLen = 0.22;
+        const color = "#e85a5a";
+
+        if (u >= 0.88) {
+          const burst = Math.min(1, (local - packet.travel * 0.88) / 0.22);
+          const hit = pointOnPolyline(packet.pts, 1);
+          drawImpact(hit.x, hit.y, burst);
+          shieldFlash = Math.max(shieldFlash, 1 - burst);
+          if (u < 0.96) {
+            strokeTrail(
+              trailSegment(packet.pts, Math.max(0, u - trailLen), u),
+              color,
+              packet.width,
+              0.5
+            );
+          }
+          return;
+        }
+
+        strokeTrail(
+          trailSegment(packet.pts, Math.max(0, u - trailLen), u),
+          color,
+          packet.width,
+          1
+        );
+
+        const tip = pointOnPolyline(packet.pts, u);
+        ctx.fillStyle = "#fff";
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(tip.x - 1.5, tip.y - 1.5, 3, 3);
+        ctx.globalAlpha = 1;
+      }
+
+      function drawLegend() {
+        ctx.font = "600 11px 'DM Sans', sans-serif";
+        ctx.fillStyle = "rgba(229, 239, 247, 0.45)";
+        ctx.fillText("SAFE STREAM", 28, H - 18);
+        ctx.strokeStyle = "#5fd4a4";
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = "miter";
+        ctx.beginPath();
+        ctx.moveTo(112, H - 22);
+        ctx.lineTo(122, H - 22);
+        ctx.lineTo(122, H - 28);
+        ctx.lineTo(132, H - 28);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(229, 239, 247, 0.45)";
+        ctx.fillText("THREAT STREAM", 152, H - 18);
+        ctx.strokeStyle = "#e85a5a";
+        ctx.beginPath();
+        ctx.moveTo(256, H - 22);
+        ctx.lineTo(266, H - 22);
+        ctx.lineTo(266, H - 28);
+        ctx.lineTo(276, H - 28);
+        ctx.stroke();
+      }
+
+      const start = performance.now();
+      // Begin mid-flow so the board is already populated; t and t+5s match exactly
+      const LOOP_ORIGIN = 1.6;
+
+      function frame(now) {
+        const loopT = ((now - start) / 1000 + LOOP_ORIGIN) % LOOP;
+        const threatActive = threatStateAt(loopT);
+        shieldFlash *= 0.88; // decay
+
+        ctx.clearRect(0, 0, W, H);
+
+        const g = ctx.createLinearGradient(0, 0, W, 0);
+        g.addColorStop(0, "rgba(78, 145, 255, 0.06)");
+        g.addColorStop(0.5, "rgba(246, 195, 107, 0.04)");
+        g.addColorStop(1, "rgba(131, 227, 224, 0.06)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+
+        // Draw far web first, then streams, shield on top of mid, globe already in internet
+        terminals.forEach((t) => drawTerminal(t, loopT, threatActive.has(t.id)));
+        drawInternet(loopT);
+        safePackets.forEach((s) => drawSafePacket(s, loopT));
+        redPackets.forEach((p) => drawRedPacket(p, loopT));
+        drawShield(loopT);
+        drawLegend();
+
+        requestAnimationFrame(frame);
+      }
+
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MandateOS — Guardrail Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #04111a;
+      --ink: #f4fbff;
+      --muted: rgba(229, 239, 247, 0.72);
+      --accent: #f6c36b;
+      --safe: #5fd4a4;
+      --threat: #e85a5a;
+      --shield-blue: #6eb0ff;
+      --line: rgba(131, 227, 224, 0.14);
+      --panel: rgba(7, 19, 29, 0.72);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: #02080e;
+      color: var(--ink);
+      font-family: "DM Sans", "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+    }
+
+    .frame {
+      /* Wider play frame — fills more of a 1080p screen while keeping a fixed ratio */
+      --frame-w: 1440;
+      --frame-h: 960;
+      width: min(calc(var(--frame-w) * 1px), calc(100vw - 16px), calc((100vh - 16px) * var(--frame-w) / var(--frame-h)));
+      aspect-ratio: 1440 / 960;
+      height: auto;
+      max-height: calc(100vh - 16px);
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 50% at 18% 28%, rgba(78, 145, 255, 0.18), transparent 55%),
+        radial-gradient(ellipse 70% 45% at 82% 22%, rgba(246, 195, 107, 0.12), transparent 50%),
+        radial-gradient(ellipse 60% 40% at 50% 88%, rgba(131, 227, 224, 0.08), transparent 55%),
+        linear-gradient(180deg, #07131d 0%, var(--bg-deep) 55%, #030b12 100%);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      padding: clamp(10px, 1.4vw, 18px) clamp(14px, 1.8vw, 28px) clamp(10px, 1.2vw, 16px);
+      gap: clamp(8px, 1.1vw, 14px);
+    }
+
+    .frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(131, 227, 224, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(131, 227, 224, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 20%, transparent 75%);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      overflow: hidden;
+      border: 1px solid rgba(131, 227, 224, 0.28);
+      background: #000;
+    }
+
+    .mark img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .brand-name {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .brand-name span {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.25rem, 2vw, 1.55rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: clamp(0.78rem, 1.1vw, 0.88rem);
+      line-height: 1.4;
+      max-width: 62ch;
+      font-weight: 500;
+    }
+
+    .stage-wrap {
+      position: relative;
+      z-index: 2;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(4, 17, 26, 0.55);
+      overflow: hidden;
+      min-height: 0;
+      cursor: none;
+      touch-action: manipulation;
+    }
+
+    .stage-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 80px rgba(4, 17, 26, 0.45);
+      border-radius: inherit;
+    }
+
+    canvas#stage {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .lane-label {
+      position: absolute;
+      top: 18px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(244, 251, 255, 0.55);
+    }
+
+    .lane-label.agents { left: 22px; }
+    .lane-label.boundary {
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--accent);
+    }
+    .lane-label.net { right: 22px; }
+
+    .hint {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      z-index: 4;
+      pointer-events: none;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(110, 176, 255, 0.75);
+      white-space: nowrap;
+    }
+
+    .stats {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      padding: 10px 10px 9px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      text-align: center;
+    }
+
+    .stat .k {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(229, 239, 247, 0.5);
+      margin-bottom: 4px;
+    }
+
+    .stat .v {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.2rem, 2.2vw, 1.65rem);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .stat .v.actions { color: var(--safe); }
+    .stat .v.unauthorized { color: var(--threat); }
+    .stat .v.blocked-count { color: var(--shield-blue); }
+
+    .controls {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .diff-toggle {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(7, 19, 29, 0.7);
+    }
+
+    .diff-toggle button {
+      border: 0;
+      background: transparent;
+      color: rgba(229, 239, 247, 0.55);
+      font: inherit;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      cursor: pointer;
+    }
+
+    .diff-toggle button.active {
+      background: rgba(110, 176, 255, 0.18);
+      color: var(--shield-blue);
+    }
+
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .streak-stat {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(229, 239, 247, 0.55);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .streak-stat strong {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: #e85a5a;
+      font-size: 1.05rem;
+      transition: font-size 160ms ease, color 160ms ease;
+    }
+
+    .nodes-left {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(229, 239, 247, 0.55);
+    }
+
+    .nodes-left strong {
+      color: var(--accent);
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0;
+      margin-left: 6px;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 8, 14, 0.78);
+      backdrop-filter: blur(6px);
+      padding: 24px;
+      pointer-events: none; /* off when hidden */
+    }
+
+    .overlay.show {
+      display: flex;
+      pointer-events: auto; /* capture all clicks while game over */
+    }
+
+    .overlay-card {
+      width: min(420px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(7, 19, 29, 0.95);
+      padding: 36px 28px 28px;
+      text-align: center;
+      pointer-events: auto;
+      position: relative;
+      z-index: 101;
+    }
+
+    .overlay-card h2 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+
+    .overlay-card p {
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .final-stats {
+      display: grid;
+      gap: 8px;
+      text-align: left;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    .final-stats div {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(244, 251, 255, 0.04);
+    }
+
+    .final-stats span { color: rgba(229, 239, 247, 0.55); }
+    .final-stats strong { font-family: "Instrument Serif", Georgia, serif; font-size: 1.25rem; }
+
+    .final-stats .final-score {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 18px 12px 16px;
+      margin-bottom: 4px;
+      background: rgba(95, 212, 164, 0.08);
+      border: 1px solid rgba(95, 212, 164, 0.22);
+    }
+
+    .final-stats .final-score span {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .final-stats .final-score strong {
+      font-size: 3.1rem;
+      line-height: 1;
+      font-weight: 400;
+    }
+
+    #restartBtn,
+    #startBtn {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 28px;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      color: #06131f;
+      background: linear-gradient(135deg, #83e3e0, #f6c36b);
+    }
+
+    #startBtn {
+      padding: 20px 48px;
+      font-size: 1.15rem;
+      letter-spacing: 0.14em;
+      min-width: 200px;
+    }
+
+    .overlay-card.start-card p {
+      margin-bottom: 28px;
+    }
+
+    .overlay-panel { display: none; }
+    .overlay-panel.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame" id="frame">
+    <header class="header">
+      <div class="brand-row">
+        <div class="mark" aria-hidden="true">
+          <img id="logoMark" src="logo-mark.png" alt="" width="42" height="42" />
+        </div>
+        <div>
+          <div class="eyebrow">Live containment</div>
+          <div class="brand-name">Mandate<span>OS</span></div>
+        </div>
+      </div>
+      <h1 class="title">Guardrail Defense</h1>
+      <p class="lede">
+        Tap the center to raise the shield (3s). Tap red lines to stop them manually before they breach the internet.
+      </p>
+    </header>
+
+    <div class="stage-wrap" id="stageWrap">
+      <div class="labels">
+        <span class="lane-label agents">AI Agents</span>
+        <span class="lane-label boundary">Tap to shield · tap reds to stop</span>
+        <span class="lane-label net">Internet</span>
+      </div>
+      <canvas id="stage" width="1200" height="780"></canvas>
+      <div class="hint" id="hint">Tap center column to activate shield · tap red lines to block</div>
+    </div>
+
+    <div class="stats" aria-live="polite">
+      <div class="stat">
+        <div class="k">Actions</div>
+        <div class="v actions" id="statActions">0</div>
+      </div>
+      <div class="stat">
+        <div class="k">Unauthorized sent</div>
+        <div class="v unauthorized" id="statUnauthorized">0</div>
+      </div>
+      <div class="stat">
+        <div class="k">Unauthorized blocked</div>
+        <div class="v blocked-count" id="statBlockedCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="k">Blocked</div>
+        <div class="v" id="statBlockedPct">100%</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="diff-toggle" role="group" aria-label="Difficulty">
+        <button type="button" id="btnEasy" class="active">Easy</button>
+        <button type="button" id="btnHard">Hard</button>
+      </div>
+      <div class="controls-right">
+        <div class="streak-stat">Streak<strong id="streakCount">x0</strong></div>
+        <div class="nodes-left">Internet nodes<strong id="nodesLeft">0</strong></div>
+      </div>
+    </div>
+
+    <div class="overlay show" id="overlay">
+      <div class="overlay-card start-card overlay-panel show" id="startPanel">
+        <h2>MandateOS Guardrail</h2>
+        <p>Tap the center column to raise the shield, or manually click on a red line to stop it. Your goal is to stop the red lines before they reach the internet.</p>
+        <button type="button" id="startBtn">Start</button>
+      </div>
+      <div class="overlay-card overlay-panel" id="endPanel">
+        <h2>Internet breached</h2>
+        <p>All nodes were lost. Raise the shield faster next time.</p>
+        <div class="final-stats" id="finalStats"></div>
+        <button type="button" id="restartBtn" onclick="window.__mandateGuardRestart && window.__mandateGuardRestart()">Play again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById("stage");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;
+      const H = canvas.height;
+
+      const SAFE_GREEN = "#5fd4a4";
+      const SAFE_BLUE = "#6eb0ff";
+      const THREAT = "#e85a5a";
+      const BOUNDARY_X = W * 0.5;
+      const NET_HUB = { x: W - 88, y: H * 0.5 };
+      const GLOBE = { x: W - 88, y: H * 0.5, r: 42 };
+      const COLUMN_HALF = 48;
+
+      const DIFF = {
+        easy: { spawnPerSec: 10.4, speedMul: 1, activeSec: 3, cooldownSec: 2, redChance: 0.22 },
+        hard: { spawnPerSec: 20.8, speedMul: 1.5, activeSec: 3, cooldownSec: 1, redChance: 0.26 },
+      };
+      const WARMUP_SEC = 30;
+      const WARMUP_START = 0.72; // start a bit slower, then ramp to full pace
+      const HIT_RADIUS = 28; // slightly larger than the previous 22px hit area
+
+      const els = {
+        actions: document.getElementById("statActions"),
+        unauthorized: document.getElementById("statUnauthorized"),
+        blockedCount: document.getElementById("statBlockedCount"),
+        blockedPct: document.getElementById("statBlockedPct"),
+        nodesLeft: document.getElementById("nodesLeft"),
+        streakCount: document.getElementById("streakCount"),
+        overlay: document.getElementById("overlay"),
+        startPanel: document.getElementById("startPanel"),
+        endPanel: document.getElementById("endPanel"),
+        finalStats: document.getElementById("finalStats"),
+        hint: document.getElementById("hint"),
+        btnEasy: document.getElementById("btnEasy"),
+        btnHard: document.getElementById("btnHard"),
+      };
+
+      const logoEl = document.getElementById("logoMark");
+      logoEl.addEventListener("error", () => {
+        logoEl.src = "https://getmandateos.com/logo-mark.png";
+      });
+
+      const terminals = [100, 235, 370, 505, 640].map((y, i) => ({
+        id: i,
+        x: 32,
+        y,
+        w: 92,
+        h: 62,
+        threatUntil: 0,
+        barTint: "green",
+      }));
+
+      let difficulty = "easy";
+      let gameOver = false;
+      let awaitingStart = true;
+      let runStartedAt = 0;
+      let lineSeq = 0;
+      let spawnAcc = 0;
+      let lastNow = performance.now();
+      let redStreak = 0;
+      let bestRedStreak = 0;
+
+      const stats = { actions: 0, unauthorizedSent: 0, unauthorizedBlocked: 0 };
+      const packets = [];
+
+      // Shield: 'ready' | 'active' | 'cooldown'
+      let shieldMode = "ready";
+      let shieldActiveUntil = 0;
+      let shieldCooldownUntil = 0;
+      let notReadyFlash = 0;
+      let impactFlash = 0;
+      let leakFlash = 0;
+
+      // ---- Internet nodes (rebuildable) ----
+      let webNodes = [];
+      let webLinks = [];
+      let projected = [];
+
+      function buildWeb() {
+        webNodes = [];
+        const rings = [
+          { count: 8,  radius: 66,  yScale: 1.48, z: 0.95, a0: -Math.PI * 0.48 },
+          { count: 10, radius: 112, yScale: 1.62, z: 0.72, a0: -Math.PI * 0.52 },
+          { count: 12, radius: 158, yScale: 1.78, z: 0.48, a0: -Math.PI * 0.45 },
+          { count: 14, radius: 208, yScale: 1.92, z: 0.28, a0: -Math.PI * 0.5 },
+        ];
+        let wi = 0;
+        rings.forEach((ring, ri) => {
+          for (let i = 0; i < ring.count; i++) {
+            const a = ring.a0 + (Math.PI * 2 * i) / ring.count + ri * 0.05;
+            const x3 = Math.cos(a) * ring.radius * 0.52 - 22 - (ri % 2) * 6;
+            const y3 = Math.sin(a) * ring.radius * ring.yScale + ((i % 3) - 1) * 6;
+            const z = ring.z + ((i % 3) - 1) * 0.045;
+            let kind = "dot";
+            if (ri === 0 && i % 3 === 0) kind = "wifi";
+            if (ri === 1 && i % 4 === 2) kind = "cloud";
+            if (ri === 2 && i % 5 === 1) kind = "wifi";
+            if (ri === 3 && i % 4 === 0) kind = "cloud";
+            webNodes.push({
+              x3, y3,
+              z: Math.max(0.16, Math.min(1, z)),
+              kind,
+              id: wi++,
+              alive: true,
+            });
+          }
+        });
+        for (let i = 0; i < 18; i++) {
+          const a = i * 0.68 + 0.22;
+          webNodes.push({
+            x3: Math.cos(a) * (85 + (i % 4) * 30) - 30 + (i % 2) * 8,
+            y3: Math.sin(a) * (130 + (i % 5) * 36) + ((i % 3) - 1) * 12,
+            z: 0.17 + (i % 5) * 0.09,
+            kind: i % 3 === 0 ? "wifi" : i % 3 === 1 ? "cloud" : "dot",
+            id: wi++,
+            alive: true,
+          });
+        }
+        rebuildProjection();
+      }
+
+      function rebuildProjection() {
+        projected = webNodes.map((n) => {
+          const s = 0.42 + n.z * 0.58;
+          return {
+            x: NET_HUB.x + n.x3 * s,
+            y: NET_HUB.y + n.y3 * s,
+            s,
+            z: n.z,
+            alpha: 0.18 + n.z * 0.7,
+            r: 2.2 + n.z * 2.6,
+            kind: n.kind,
+            alive: n.alive,
+          };
+        });
+
+        webLinks = [];
+        for (let i = 0; i < projected.length; i++) {
+          if (!webNodes[i].alive) continue;
+          const dists = [];
+          for (let j = 0; j < projected.length; j++) {
+            if (i === j || !webNodes[j].alive) continue;
+            const dx = projected[i].x - projected[j].x;
+            const dy = projected[i].y - projected[j].y;
+            const dz = (webNodes[i].z - webNodes[j].z) * 80;
+            dists.push({ j, d: Math.hypot(dx, dy) + Math.abs(dz) * 0.35 });
+          }
+          dists.sort((a, b) => a.d - b.d);
+          const nLinks = webNodes[i].z > 0.7 ? 3 : 2;
+          for (let k = 0; k < Math.min(nLinks, dists.length); k++) {
+            const j = dists[k].j;
+            const a = Math.min(i, j);
+            const b = Math.max(i, j);
+            if (!webLinks.some((l) => l[0] === a && l[1] === b)) webLinks.push([a, b]);
+          }
+          if (webNodes[i].z > 0.55) webLinks.push([i, -1]);
+        }
+        els.nodesLeft.textContent = String(aliveCount());
+      }
+
+      function aliveCount() {
+        return webNodes.filter((n) => n.alive).length;
+      }
+
+      function loseNode() {
+        const alive = webNodes.filter((n) => n.alive);
+        if (!alive.length) return;
+        const victim = alive[Math.floor(Math.random() * alive.length)];
+        victim.alive = false;
+        rebuildProjection();
+        leakFlash = 1;
+        if (aliveCount() <= 0) endGame();
+      }
+
+      function resetRedStreak() {
+        redStreak = 0;
+        updateStreakDisplay();
+      }
+
+      function bumpRedStreak() {
+        redStreak += 1;
+        if (redStreak > bestRedStreak) bestRedStreak = redStreak;
+        updateStreakDisplay();
+      }
+
+      function updateStreakDisplay() {
+        const el = els.streakCount;
+        if (!el) return;
+        el.textContent = `x${redStreak}`;
+        // Every 10 stops: slightly larger + shift red → gold
+        const tier = Math.floor(redStreak / 10);
+        const t = Math.min(1, tier / 5); // cap visual ramp around X50
+        const size = 1.05 + tier * 0.12;
+        const r = Math.round(232 + (246 - 232) * t);
+        const g = Math.round(90 + (195 - 90) * t);
+        const b = Math.round(90 + (107 - 90) * t);
+        el.style.fontSize = `${size}rem`;
+        el.style.color = `rgb(${r},${g},${b})`;
+      }
+
+      // ---- Routing (same language as demo) ----
+      function clampY(y) {
+        return Math.max(58, Math.min(H - 58, y));
+      }
+
+      function buildRoute(term, threat, lineId) {
+        const startX = term.x + term.w + 12;
+        const startY = term.y + term.h * 0.55;
+        const midX = BOUNDARY_X;
+        const endX = threat ? midX - 4 : NET_HUB.x - 8;
+        const pts = [{ x: startX, y: startY }];
+        let x = startX;
+        let y = startY;
+
+        const stagger = ((lineId * 37) % 97) / 97;
+        const dir0 = (lineId % 2 === 0) ? 1 : -1;
+        const H_TICK = 11;
+        const V_TICK = 8;
+
+        function goH(nextX) {
+          const nx = Math.min(Math.max(nextX, x + 1), endX);
+          const dx = nx - x;
+          if (dx < 1) return;
+          let moved = 0;
+          while (moved < dx - 0.01) {
+            const step = Math.min(H_TICK, dx - moved);
+            x += step;
+            moved += step;
+            pts.push({ x, y });
+          }
+          x = nx;
+          if (pts[pts.length - 1].x !== nx) pts.push({ x: nx, y });
+        }
+
+        function goV(nextY) {
+          const ny = clampY(nextY);
+          const dy = ny - y;
+          if (Math.abs(dy) < 1) return;
+          const dir = Math.sign(dy);
+          const dist = Math.abs(dy);
+          let moved = 0;
+          while (moved < dist - 0.01) {
+            const step = Math.min(V_TICK, dist - moved);
+            y = clampY(y + dir * step);
+            moved += step;
+            pts.push({ x, y });
+          }
+          y = ny;
+          if (pts[pts.length - 1].y !== ny) pts.push({ x, y: ny });
+        }
+
+        goH(startX + 32 + (lineId % 5) * 6);
+        const firstAmp = 52 + (lineId % 7) * 10;
+        goV(startY + dir0 * firstAmp);
+
+        if (threat) {
+          // Red always routes to the boundary (may still leak through if unshielded)
+          goH(midX - 110 - stagger * 35);
+          goV(y - dir0 * (28 + (lineId % 5) * 6));
+          goH(midX - 48 - (lineId % 4) * 8);
+          if (lineId % 2 === 0) {
+            goH(midX - 28);
+            goV(y + dir0 * (18 + (lineId % 4) * 4));
+          }
+          goH(endX);
+          return pts;
+        }
+
+        goH(midX - 120 - stagger * 30);
+        goV(y - dir0 * (36 + (lineId % 6) * 7));
+        goH(midX - 40 - (lineId % 5) * 5);
+        goH(midX + 36 + (lineId % 4) * 4);
+        goH(midX + 100 + stagger * 25);
+        goV(y + dir0 * (24 + ((lineId + 2) % 5) * 5));
+        goH(midX + 160 + (lineId % 5) * 6);
+        if (lineId % 3 !== 0) goV(y - dir0 * (14 + (lineId % 4) * 4));
+        goH(endX);
+        return pts;
+      }
+
+      // Extend a blocked-red path? No — blocked ends at boundary.
+      // For leaked red: continue from boundary to internet with same 90° language.
+      function extendToInternet(basePts, lineId) {
+        const last = basePts[basePts.length - 1];
+        const pts = basePts.map((p) => ({ x: p.x, y: p.y }));
+        let x = last.x;
+        let y = last.y;
+        const endX = NET_HUB.x - 8;
+        const H_TICK = 11;
+        const V_TICK = 8;
+        const dir0 = (lineId % 2 === 0) ? 1 : -1;
+
+        function goH(nextX) {
+          const nx = Math.min(Math.max(nextX, x + 1), endX);
+          const dx = nx - x;
+          if (dx < 1) return;
+          let moved = 0;
+          while (moved < dx - 0.01) {
+            const step = Math.min(H_TICK, dx - moved);
+            x += step;
+            moved += step;
+            pts.push({ x, y });
+          }
+          x = nx;
+          if (pts[pts.length - 1].x !== nx) pts.push({ x: nx, y });
+        }
+        function goV(nextY) {
+          const ny = clampY(nextY);
+          const dy = ny - y;
+          if (Math.abs(dy) < 1) return;
+          const dir = Math.sign(dy);
+          const dist = Math.abs(dy);
+          let moved = 0;
+          while (moved < dist - 0.01) {
+            const step = Math.min(V_TICK, dist - moved);
+            y = clampY(y + dir * step);
+            moved += step;
+            pts.push({ x, y });
+          }
+          y = ny;
+          if (pts[pts.length - 1].y !== ny) pts.push({ x, y: ny });
+        }
+
+        goH(BOUNDARY_X + 40 + (lineId % 5) * 6);
+        goV(y + dir0 * (22 + (lineId % 4) * 6));
+        goH(BOUNDARY_X + 120 + (lineId % 4) * 8);
+        goV(y - dir0 * (16 + (lineId % 3) * 5));
+        goH(endX);
+        return pts;
+      }
+
+      function polylineLength(pts) {
+        let len = 0;
+        for (let i = 1; i < pts.length; i++) {
+          len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+        }
+        return len;
+      }
+
+      function pointOnPolyline(pts, u) {
+        const total = polylineLength(pts);
+        let target = Math.max(0, Math.min(1, u)) * total;
+        for (let i = 1; i < pts.length; i++) {
+          const dx = pts[i].x - pts[i - 1].x;
+          const dy = pts[i].y - pts[i - 1].y;
+          const seg = Math.hypot(dx, dy);
+          if (target <= seg || i === pts.length - 1) {
+            const t = seg === 0 ? 0 : target / seg;
+            return { x: pts[i - 1].x + dx * t, y: pts[i - 1].y + dy * t };
+          }
+          target -= seg;
+        }
+        return pts[pts.length - 1];
+      }
+
+      function trailSegment(pts, u0, u1) {
+        const total = polylineLength(pts);
+        if (total <= 0) return [];
+        const a = Math.max(0, Math.min(1, u0)) * total;
+        const b = Math.max(0, Math.min(1, u1)) * total;
+        const out = [pointOnPolyline(pts, u0)];
+        let acc = 0;
+        for (let i = 1; i < pts.length; i++) {
+          const dx = pts[i].x - pts[i - 1].x;
+          const dy = pts[i].y - pts[i - 1].y;
+          const seg = Math.hypot(dx, dy);
+          const at = acc + seg;
+          if (at > a && acc < b) out.push({ x: pts[i].x, y: pts[i].y });
+          acc = at;
+        }
+        const end = pointOnPolyline(pts, u1);
+        const last = out[out.length - 1];
+        if (!last || last.x !== end.x || last.y !== end.y) out.push(end);
+        return out;
+      }
+
+      function uUntilX(pts, targetX) {
+        const total = polylineLength(pts);
+        if (total <= 0) return 0.05;
+        let acc = 0;
+        for (let i = 1; i < pts.length; i++) {
+          const x0 = pts[i - 1].x;
+          const x1 = pts[i].x;
+          if (x1 >= targetX) {
+            const dx = x1 - x0;
+            if (dx > 0.01) {
+              const t = Math.max(0, Math.min(1, (targetX - x0) / dx));
+              acc += Math.hypot(dx, pts[i].y - pts[i - 1].y) * t;
+            }
+            return Math.max(0.04, Math.min(0.35, acc / total));
+          }
+          acc += Math.hypot(x1 - x0, pts[i].y - pts[i - 1].y);
+        }
+        return 0.08;
+      }
+
+      function cfg() {
+        return DIFF[difficulty];
+      }
+
+      // First 10s of each run: ease from a slower pace up to full DIFF speed
+      function paceFactor(now) {
+        if (!runStartedAt) return WARMUP_START;
+        const t = Math.min(1, Math.max(0, (now - runStartedAt) / 1000 / WARMUP_SEC));
+        return WARMUP_START + (1 - WARMUP_START) * t;
+      }
+
+      function spawnPacket(now) {
+        const term = terminals[Math.floor(Math.random() * terminals.length)];
+        const roll = Math.random();
+        const c = cfg();
+        let kind = "green";
+        if (roll < c.redChance) kind = "red";
+        else if (roll < c.redChance + 0.28) kind = "blue";
+
+        const lineId = lineSeq++;
+        const isThreat = kind === "red";
+        // Always build full path to internet; reds decide block/leak at the boundary
+        let pts = buildRoute(term, false, lineId);
+        let boundaryU = 0.5;
+        if (isThreat) {
+          const toBoundary = buildRoute(term, true, lineId);
+          pts = extendToInternet(toBoundary, lineId);
+          const shortLen = polylineLength(toBoundary);
+          const fullLen = polylineLength(pts);
+          boundaryU = fullLen > 0 ? shortLen / fullLen : 0.5;
+        }
+
+        const len = polylineLength(pts);
+        const travel = (len / 520) * 1.35 / (c.speedMul * paceFactor(now));
+
+        const packet = {
+          kind,
+          color: kind === "red" ? THREAT : kind === "blue" ? SAFE_BLUE : SAFE_GREEN,
+          term,
+          pts,
+          travel,
+          u: 0,
+          width: kind === "red" ? 4.2 : 3.0,
+          lineId,
+          boundaryU,
+          resolved: false,
+          leaking: false,
+          dying: false,
+          dieUntil: 0,
+          impactU: null,
+        };
+
+        packets.push(packet);
+        stats.actions++;
+        if (kind === "red") {
+          stats.unauthorizedSent++;
+          const exitX = term.x + term.w + 48;
+          const exitU = uUntilX(pts, exitX);
+          term.threatUntil = Math.max(term.threatUntil, now + exitU * travel * 1000 + 120);
+          term.barTint = "red";
+        } else {
+          term.barTint = kind;
+        }
+
+        updateStats();
+      }
+
+      function updateStats() {
+        els.actions.textContent = String(stats.actions);
+        els.unauthorized.textContent = String(stats.unauthorizedSent);
+        els.blockedCount.textContent = String(stats.unauthorizedBlocked);
+        const pct = stats.unauthorizedSent === 0
+          ? 100
+          : Math.round((stats.unauthorizedBlocked / stats.unauthorizedSent) * 100);
+        els.blockedPct.textContent = `${pct}%`;
+        // green (100) → yellow (50) → red (0)
+        const t = pct / 100;
+        const r = Math.round(232 + (95 - 232) * t);
+        const g = Math.round(90 + (212 - 90) * t);
+        const b = Math.round(90 + (164 - 90) * t);
+        els.blockedPct.style.color = `rgb(${r},${g},${b})`;
+      }
+
+      function activateShield(now) {
+        const c = cfg();
+        shieldMode = "active";
+        shieldActiveUntil = now + c.activeSec * 1000;
+        shieldCooldownUntil = 0;
+        els.hint.textContent = "Shield active (3s) — tap reds to stop them";
+      }
+
+      function startCooldown(now) {
+        const c = cfg();
+        shieldMode = "cooldown";
+        shieldActiveUntil = 0;
+        shieldCooldownUntil = now + c.cooldownSec * 1000;
+        els.hint.textContent = "Shield cooling down — tap red lines to block";
+      }
+
+      function blockRedPacket(p, now) {
+        if (p.kind !== "red" || p.dying) return false;
+        // Already blocked at the boundary (not a leaker)
+        if (p.resolved && !p.leaking) return false;
+
+        p.resolved = true;
+        p.leaking = false;
+        stats.unauthorizedBlocked++;
+        bumpRedStreak();
+        updateStats();
+        p.dying = true;
+        p.dieUntil = now + 280;
+        p.impactU = Math.min(1, Math.max(0, p.u));
+        p.u = p.impactU;
+        return true;
+      }
+
+      function tryShieldClick(now, pt) {
+        if (gameOver) return;
+
+        const onColumn = Math.abs(pt.x - BOUNDARY_X) <= COLUMN_HALF + 24;
+        const onCrest = hitShieldCrest(pt);
+
+        if (shieldMode === "ready") {
+          if (onColumn || onCrest) activateShield(now);
+          return;
+        }
+
+        if (shieldMode === "active") {
+          // Stay active until timer ends — ignore clicks (avoids accidental double-tap off)
+          return;
+        }
+
+        if (onColumn || onCrest) notReadyFlash = 1;
+      }
+
+      function hitShieldCrest(pt) {
+        const cx = BOUNDARY_X;
+        const cy = H * 0.5;
+        const sw = 52;
+        const sh = 64;
+        const dx = pt.x - cx;
+        const dy = pt.y - cy;
+        if (dy < -sh || dy > sh) return false;
+        // Approximate crest: wider near top flat, tapers to point at bottom
+        let halfW;
+        if (dy < -sh * 0.55) halfW = sw * 1.05;
+        else if (dy < sh * 0.2) halfW = sw;
+        else halfW = sw * (1 - ((dy - sh * 0.2) / (sh * 0.8)) * 0.85);
+        return Math.abs(dx) <= halfW;
+      }
+
+      function distToSegment(px, py, ax, ay, bx, by) {
+        const dx = bx - ax;
+        const dy = by - ay;
+        const len2 = dx * dx + dy * dy;
+        if (len2 < 0.01) return Math.hypot(px - ax, py - ay);
+        let t = ((px - ax) * dx + (py - ay) * dy) / len2;
+        t = Math.max(0, Math.min(1, t));
+        return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+      }
+
+      function hitRedPacket(pt) {
+        const hitR = HIT_RADIUS;
+        let best = null;
+        let bestD = hitR;
+        for (let i = packets.length - 1; i >= 0; i--) {
+          const p = packets[i];
+          if (p.kind !== "red" || p.dying) continue;
+          if (p.resolved && !p.leaking) continue;
+          const u = Math.min(1, p.u);
+          const tip = pointOnPolyline(p.pts, u);
+          const dTip = Math.hypot(pt.x - tip.x, pt.y - tip.y);
+          if (dTip < bestD) {
+            bestD = dTip;
+            best = p;
+          }
+          // Also test recent trail
+          const trail = trailSegment(p.pts, Math.max(0, u - 0.12), u);
+          for (let s = 1; s < trail.length; s++) {
+            const d = distToSegment(
+              pt.x, pt.y,
+              trail[s - 1].x, trail[s - 1].y,
+              trail[s].x, trail[s].y
+            );
+            if (d < bestD) {
+              bestD = d;
+              best = p;
+            }
+          }
+        }
+        return best;
+      }
+
+      function shieldIsActive(now) {
+        return shieldMode === "active" && now < shieldActiveUntil;
+      }
+
+      function endGame() {
+        if (gameOver) return;
+        gameOver = true;
+        // Keep packets frozen on the board under the overlay (death tableau)
+        shieldMode = "ready";
+        shieldActiveUntil = 0;
+        shieldCooldownUntil = 0;
+        const pct = stats.unauthorizedSent === 0
+          ? 100
+          : Math.round((stats.unauthorizedBlocked / stats.unauthorizedSent) * 100);
+        els.finalStats.innerHTML = `
+          <div class="final-score"><span>Actions</span><strong style="color:${SAFE_GREEN}">${stats.actions}</strong></div>
+          <div><span>Unauthorized sent</span><strong style="color:${THREAT}">${stats.unauthorizedSent}</strong></div>
+          <div><span>Unauthorized blocked</span><strong style="color:${SAFE_BLUE}">${stats.unauthorizedBlocked}</strong></div>
+          <div><span>Block rate</span><strong style="color:${els.blockedPct.style.color}">${pct}%</strong></div>
+          <div><span>Highest streak</span><strong style="color:#f6c36b">x${bestRedStreak}</strong></div>
+          <div><span>Difficulty</span><strong>${difficulty}</strong></div>
+        `;
+        els.startPanel.classList.remove("show");
+        els.endPanel.classList.add("show");
+        els.overlay.classList.add("show");
+        els.hint.textContent = "Game over";
+      }
+
+      function resetGame() {
+        awaitingStart = false;
+        gameOver = false;
+        // Drop every live packet from the previous run
+        while (packets.length) packets.pop();
+        spawnAcc = 0;
+        lineSeq = 0;
+        lastNow = performance.now();
+        runStartedAt = lastNow;
+        stats.actions = 0;
+        stats.unauthorizedSent = 0;
+        stats.unauthorizedBlocked = 0;
+        redStreak = 0;
+        bestRedStreak = 0;
+        updateStreakDisplay();
+        shieldMode = "ready";
+        shieldActiveUntil = 0;
+        shieldCooldownUntil = 0;
+        notReadyFlash = 0;
+        impactFlash = 0;
+        leakFlash = 0;
+        terminals.forEach((t) => {
+          t.threatUntil = 0;
+          t.barTint = "green";
+        });
+        buildWeb();
+        updateStats();
+        els.startPanel.classList.remove("show");
+        els.endPanel.classList.remove("show");
+        els.overlay.classList.remove("show");
+        els.hint.textContent = "Tap center column to activate shield · tap red lines to block";
+      }
+
+      function showStartScreen() {
+        awaitingStart = true;
+        gameOver = false;
+        runStartedAt = 0;
+        while (packets.length) packets.pop();
+        spawnAcc = 0;
+        lineSeq = 0;
+        lastNow = performance.now();
+        stats.actions = 0;
+        stats.unauthorizedSent = 0;
+        stats.unauthorizedBlocked = 0;
+        redStreak = 0;
+        bestRedStreak = 0;
+        updateStreakDisplay();
+        shieldMode = "ready";
+        shieldActiveUntil = 0;
+        shieldCooldownUntil = 0;
+        notReadyFlash = 0;
+        impactFlash = 0;
+        leakFlash = 0;
+        terminals.forEach((t) => {
+          t.threatUntil = 0;
+          t.barTint = "green";
+        });
+        buildWeb();
+        updateStats();
+        els.endPanel.classList.remove("show");
+        els.startPanel.classList.add("show");
+        els.overlay.classList.add("show");
+        els.hint.textContent = "Choose difficulty, then press Start";
+      }
+
+      // Expose for reliable restart (also used by overlay delegation)
+      window.__mandateGuardRestart = resetGame;
+
+      // ---- Drawing ----
+      function roundRect(c, x, y, w, h, r) {
+        const radii = typeof r === "number" ? { tl: r, tr: r, br: r, bl: r } : r;
+        c.moveTo(x + radii.tl, y);
+        c.lineTo(x + w - radii.tr, y);
+        c.quadraticCurveTo(x + w, y, x + w, y + radii.tr);
+        c.lineTo(x + w, y + h - radii.br);
+        c.quadraticCurveTo(x + w, y + h, x + w - radii.br, y + h);
+        c.lineTo(x + radii.bl, y + h);
+        c.quadraticCurveTo(x, y + h, x, y + h - radii.bl);
+        c.lineTo(x, y + radii.tl);
+        c.quadraticCurveTo(x, y, x + radii.tl, y);
+        c.closePath();
+      }
+
+      function drawTerminal(term, now) {
+        const { x, y, w, h } = term;
+        const isThreat = now < term.threatUntil;
+        const tint = isThreat ? "red" : term.barTint;
+        const barColor = tint === "red" ? THREAT : tint === "blue" ? SAFE_BLUE : SAFE_GREEN;
+        const barAlt = tint === "red" ? "#f08080" : tint === "blue" ? "#9bc5ff" : "#8be0c0";
+        const cursorColor = tint === "red" ? THREAT : tint === "blue" ? SAFE_BLUE : "rgba(244, 251, 255, 0.75)";
+
+        ctx.fillStyle = "rgba(18, 26, 34, 0.95)";
+        ctx.strokeStyle = isThreat ? THREAT : "rgba(220, 230, 238, 0.38)";
+        ctx.lineWidth = isThreat ? 2.4 : 1.5;
+        ctx.beginPath();
+        roundRect(ctx, x, y, w, h, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(244, 251, 255, 0.08)";
+        ctx.beginPath();
+        roundRect(ctx, x, y, w, 14, { tl: 8, tr: 8, br: 0, bl: 0 });
+        ctx.fill();
+
+        ["#9aa7b2", "#c5ced6", "#e8eef3"].forEach((c, i) => {
+          ctx.fillStyle = c;
+          ctx.beginPath();
+          ctx.arc(x + 10 + i * 9, y + 7, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        for (let r = 0; r < 4; r++) {
+          const phase = (now * 0.001 + term.id * 0.17 + r * 0.13) % 1;
+          const baseW = 18 + ((r * 17 + term.id * 11) % 40);
+          const pulse = 0.55 + 0.45 * Math.sin(phase * Math.PI * 2);
+          const barW = baseW * (0.7 + pulse * 0.45);
+          const by = y + 22 + r * 8;
+          ctx.fillStyle = "rgba(244, 251, 255, 0.07)";
+          ctx.fillRect(x + 8, by, w - 16, 3.5);
+          ctx.fillStyle = r % 2 === 0 ? barColor : barAlt;
+          ctx.globalAlpha = 0.55 + pulse * 0.45;
+          ctx.fillRect(x + 8, by, Math.min(barW, w - 16), 3.5);
+          ctx.globalAlpha = 1;
+          if (r === 3 && Math.sin(now * 0.012) > 0) {
+            ctx.fillStyle = cursorColor;
+            ctx.fillRect(x + 8 + Math.min(barW, w - 16) + 2, by - 0.5, 2, 4.5);
+          }
+        }
+      }
+
+      function shieldPath(c, sw, sh) {
+        c.moveTo(-sw, -sh * 0.62);
+        c.lineTo(-sw * 0.42, -sh);
+        c.lineTo(sw * 0.42, -sh);
+        c.lineTo(sw, -sh * 0.62);
+        c.lineTo(sw * 0.92, sh * 0.22);
+        c.quadraticCurveTo(sw * 0.62, sh * 0.72, 0, sh);
+        c.quadraticCurveTo(-sw * 0.62, sh * 0.72, -sw * 0.92, sh * 0.22);
+        c.closePath();
+      }
+
+      function drawShield(now) {
+        const cx = BOUNDARY_X;
+        const cy = H * 0.5;
+        const active = shieldIsActive(now);
+        const ready = shieldMode === "ready";
+        const onCd = shieldMode === "cooldown";
+        const pulse = 0.5 + 0.5 * Math.sin(now * 0.004);
+        const flash = impactFlash;
+        const nr = notReadyFlash;
+
+        // Field
+        const field = ctx.createLinearGradient(cx - 80, 0, cx + 80, 0);
+        field.addColorStop(0, "rgba(246, 195, 107, 0)");
+        field.addColorStop(0.45, active
+          ? `rgba(110, 176, 255, ${0.18 + pulse * 0.12})`
+          : `rgba(232, 90, 90, ${flash * 0.28})`);
+        field.addColorStop(0.5, active
+          ? `rgba(110, 176, 255, ${0.28 + pulse * 0.15})`
+          : `rgba(131, 227, 224, ${0.14 + flash * 0.25})`);
+        field.addColorStop(0.55, `rgba(246, 195, 107, ${0.05 + flash * 0.12})`);
+        field.addColorStop(1, "rgba(246, 195, 107, 0)");
+        ctx.fillStyle = field;
+        ctx.fillRect(cx - 80, 36, 160, H - 72);
+
+        // Vertical column stroke (blue when active)
+        if (active) {
+          ctx.strokeStyle = `rgba(110, 176, 255, ${0.75 + pulse * 0.25})`;
+          ctx.lineWidth = 4.5;
+          ctx.shadowColor = "rgba(110, 176, 255, 0.55)";
+          ctx.shadowBlur = 18;
+        } else {
+          ctx.strokeStyle = `rgba(246, 195, 107, ${0.4 + pulse * 0.25 + flash * 0.4})`;
+          ctx.lineWidth = 2.5 + flash * 2;
+          ctx.shadowBlur = 0;
+        }
+        ctx.beginPath();
+        ctx.moveTo(cx, 44);
+        ctx.lineTo(cx, H - 44);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Side rails when active
+        if (active) {
+          ctx.setLineDash([6, 8]);
+          ctx.strokeStyle = `rgba(110, 176, 255, ${0.35 + pulse * 0.2})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(cx - 18, 52);
+          ctx.lineTo(cx - 18, H - 52);
+          ctx.moveTo(cx + 18, 52);
+          ctx.lineTo(cx + 18, H - 52);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        const sw = 44 + pulse * 1.5 + flash * 3 + nr * 4;
+        const sh = 54 + pulse * 1.5 + flash * 2 + nr * 3;
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        ctx.beginPath();
+        shieldPath(ctx, sw, sh);
+        ctx.fillStyle = "rgba(7, 19, 29, 0.94)";
+        ctx.fill();
+
+        // Crest outline = readiness / cooldown indicator (blue language)
+        let outline = "rgba(110, 176, 255, 0.22)";
+        let outlineW = 2.2;
+        if (ready) {
+          outline = `rgba(110, 176, 255, ${0.85 + pulse * 0.15})`;
+          outlineW = 3;
+        } else if (active) {
+          outline = `rgba(110, 176, 255, ${0.7 + pulse * 0.2})`;
+          outlineW = 3.2;
+        } else if (onCd) {
+          outline = "rgba(140, 155, 170, 0.35)";
+          outlineW = 2.2;
+        }
+        if (nr > 0.05) {
+          outline = `rgba(110, 176, 255, ${0.35 + nr * 0.65})`;
+          outlineW = 3.5;
+        }
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = outlineW;
+        ctx.stroke();
+
+        // Gold inner when not using shield blue emphasis
+        ctx.beginPath();
+        shieldPath(ctx, sw * 0.78, sh * 0.78);
+        ctx.strokeStyle = active ? "rgba(110, 176, 255, 0.35)" : "rgba(131, 227, 224, 0.28)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        const logoSize = 52;
+        if (logoEl.complete && logoEl.naturalWidth > 0) {
+          ctx.drawImage(logoEl, -logoSize / 2, -logoSize / 2 - 1, logoSize, logoSize);
+        }
+
+        // Cooldown arc around crest
+        if (onCd && shieldCooldownUntil > now) {
+          const c = cfg();
+          const left = Math.max(0, shieldCooldownUntil - now);
+          const p = 1 - left / (c.cooldownSec * 1000);
+          ctx.beginPath();
+          ctx.arc(0, 0, Math.max(sw, sh) * 1.15, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p);
+          ctx.strokeStyle = "rgba(110, 176, 255, 0.45)";
+          ctx.lineWidth = 3;
+          ctx.lineCap = "round";
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function drawCloud(x, y, scale, alpha) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = "#7ec8ff";
+        ctx.beginPath();
+        ctx.arc(-6, 2, 5, 0, Math.PI * 2);
+        ctx.arc(1, -1, 6.5, 0, Math.PI * 2);
+        ctx.arc(8, 2, 4.8, 0, Math.PI * 2);
+        ctx.rect(-10, 2, 20, 6);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+
+      function drawWifi(x, y, scale, alpha, now) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        const pulse = 0.5 + 0.5 * Math.sin(now * 0.004 + x * 0.01);
+        ctx.strokeStyle = "#7ec8ff";
+        ctx.fillStyle = "#7ec8ff";
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = "round";
+        for (let i = 1; i <= 3; i++) {
+          ctx.globalAlpha = alpha * (0.35 + pulse * 0.25) * (i / 3);
+          ctx.beginPath();
+          ctx.arc(0, 4, 3 + i * 3.6, -Math.PI * 0.75, -Math.PI * 0.25);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(0, 4, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+
+      function drawInternet(now) {
+        webLinks.forEach(([a, b]) => {
+          let ax, ay, bx, by, za, zb;
+          if (b === -1) {
+            if (!webNodes[a].alive) return;
+            ax = projected[a].x; ay = projected[a].y;
+            bx = NET_HUB.x; by = NET_HUB.y;
+            za = webNodes[a].z; zb = 1;
+          } else {
+            if (!webNodes[a].alive || !webNodes[b].alive) return;
+            ax = projected[a].x; ay = projected[a].y;
+            bx = projected[b].x; by = projected[b].y;
+            za = webNodes[a].z; zb = webNodes[b].z;
+          }
+          const zAvg = (za + zb) * 0.5;
+          const pulse = 0.2 + 0.2 * Math.sin(now * 0.002 + a);
+          const hurt = leakFlash * 0.4;
+          ctx.strokeStyle = hurt
+            ? `rgba(232, 90, 90, ${0.2 + zAvg * 0.3})`
+            : `rgba(126, 200, 255, ${0.12 + zAvg * 0.35 + pulse * 0.1})`;
+          ctx.lineWidth = 0.7 + zAvg * 0.9;
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.stroke();
+        });
+
+        const order = projected
+          .map((p, i) => ({ p, i, z: webNodes[i].z }))
+          .filter((o) => webNodes[o.i].alive)
+          .sort((a, b) => a.z - b.z);
+
+        order.forEach(({ p, i }) => {
+          const tw = 0.55 + 0.45 * Math.sin(now * 0.004 + i);
+          const sc = 0.55 + p.z * 0.55;
+          if (p.kind === "cloud") drawCloud(p.x, p.y, sc * 0.7, p.alpha * (0.55 + tw * 0.25));
+          else if (p.kind === "wifi") drawWifi(p.x, p.y, sc * 0.75, p.alpha * (0.55 + tw * 0.25), now);
+          else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * (0.85 + tw * 0.2), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(126, 200, 255, ${p.alpha})`;
+            ctx.fill();
+          }
+        });
+
+        const { x: gx, y: gy, r: gr } = GLOBE;
+        const globePulse = 0.5 + 0.5 * Math.sin(now * 0.002);
+        ctx.strokeStyle = leakFlash > 0.1
+          ? `rgba(232, 90, 90, ${0.35 + leakFlash * 0.4})`
+          : `rgba(131, 227, 224, ${0.42 + globePulse * 0.2})`;
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.arc(gx, gy, gr, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let i = -3; i <= 3; i++) {
+          ctx.beginPath();
+          ctx.ellipse(gx, gy, Math.max(3, 9 + i * 6.5), gr, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(131, 227, 224, ${0.12 + Math.abs(i) * 0.03})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        for (let i = -3; i <= 3; i++) {
+          const yy = gy + i * 9;
+          const rr = Math.sqrt(Math.max(0, gr * gr - (i * 9) * (i * 9)));
+          ctx.beginPath();
+          ctx.ellipse(gx, yy, rr, 3.2 + Math.abs(i) * 0.35, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(246, 195, 107, 0.2)";
+          ctx.stroke();
+        }
+      }
+
+      function strokeTrail(ptsSample, color, width, alphaMul) {
+        if (ptsSample.length < 2) return;
+        ctx.beginPath();
+        ctx.moveTo(ptsSample[0].x, ptsSample[0].y);
+        for (let i = 1; i < ptsSample.length; i++) ctx.lineTo(ptsSample[i].x, ptsSample[i].y);
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = Math.max(0, Math.min(1, alphaMul));
+        ctx.lineWidth = width;
+        ctx.lineCap = "butt";
+        ctx.lineJoin = "miter";
+        ctx.miterLimit = 4;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      function drawImpact(x, y, burst) {
+        const fade = 1 - burst;
+        const core = ctx.createRadialGradient(x, y, 0, x, y, 18 + burst * 40);
+        core.addColorStop(0, `rgba(255, 230, 220, ${0.9 * fade})`);
+        core.addColorStop(0.35, `rgba(232, 90, 90, ${0.7 * fade})`);
+        core.addColorStop(1, "rgba(232, 90, 90, 0)");
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.arc(x, y, 18 + burst * 40, 0, Math.PI * 2);
+        ctx.fill();
+        for (let r = 0; r < 3; r++) {
+          ctx.globalAlpha = fade * (0.7 - r * 0.18);
+          ctx.strokeStyle = r === 0 ? "#fff5f0" : THREAT;
+          ctx.lineWidth = 2.5 - r * 0.5;
+          ctx.beginPath();
+          ctx.arc(x, y, 10 + burst * (28 + r * 22), 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        for (let i = 0; i < 14; i++) {
+          const a = (Math.PI * 2 * i) / 14 + burst * 0.4;
+          const dist = 10 + burst * (36 + (i % 3) * 14);
+          ctx.globalAlpha = fade * 0.95;
+          ctx.strokeStyle = i % 2 === 0 ? "#ff8a8a" : "#ffffff";
+          ctx.lineWidth = 2.2;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(x + Math.cos(a) * (dist * 0.35), y + Math.sin(a) * (dist * 0.35));
+          ctx.lineTo(x + Math.cos(a) * dist, y + Math.sin(a) * dist);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function updatePackets(now, dt) {
+        for (let i = packets.length - 1; i >= 0; i--) {
+          const p = packets[i];
+          if (p.dying) {
+            if (now >= p.dieUntil) packets.splice(i, 1);
+            continue;
+          }
+
+          p.u += dt / p.travel;
+
+          // Red reaches boundary — resolve shield
+          if (p.kind === "red" && !p.resolved && p.u >= p.boundaryU) {
+            if (shieldIsActive(now)) {
+              // blockRedPacket sets resolved + dying (do not set resolved first)
+              p.u = p.boundaryU;
+              if (blockRedPacket(p, now)) impactFlash = 1;
+            } else {
+              p.resolved = true;
+              p.leaking = true;
+              loseNode();
+            }
+          }
+
+          // Safe / leaking red finish — dissolve into internet
+          if (!p.dying && (p.kind !== "red" || p.leaking) && p.u >= 1) {
+            if (p.kind === "red" && p.leaking) resetRedStreak();
+            p.dying = true;
+            p.dieUntil = now + 200;
+            p.u = 1;
+          }
+        }
+      }
+
+      function drawPackets(now) {
+        packets.forEach((p) => {
+          const trailLen = 0.16;
+          let alpha = 1;
+          let u = Math.min(1, p.u);
+
+          if (p.dying && p.kind === "red" && !p.leaking) {
+            const burst = Math.min(1, Math.max(0, 1 - (p.dieUntil - now) / 280));
+            const hitU = p.impactU ?? p.boundaryU ?? 1;
+            const hit = pointOnPolyline(p.pts, hitU);
+            drawImpact(hit.x, hit.y, burst);
+            strokeTrail(
+              trailSegment(p.pts, Math.max(0, hitU - trailLen), hitU),
+              p.color,
+              p.width,
+              0.45 * (1 - burst)
+            );
+            return;
+          }
+
+          if (p.dying || u > 0.72) {
+            const eat = p.dying
+              ? 1 - Math.max(0, (p.dieUntil - now) / 200)
+              : (u - 0.72) / 0.28;
+            alpha = 1 - eat * eat;
+          }
+          if (alpha <= 0.02) return;
+
+          const u0 = Math.max(0, u - trailLen * (p.dying ? 0.4 : 1));
+          strokeTrail(trailSegment(p.pts, u0, u), p.color, p.width, alpha);
+
+          const tip = pointOnPolyline(p.pts, u);
+          ctx.fillStyle = p.kind === "red" ? "#fff" : p.color;
+          ctx.globalAlpha = alpha * 0.9;
+          ctx.fillRect(tip.x - 1.5, tip.y - 1.5, 3, 3);
+          ctx.globalAlpha = 1;
+        });
+      }
+
+      function drawLegend() {
+        ctx.font = "600 11px 'DM Sans', sans-serif";
+        ctx.fillStyle = "rgba(229, 239, 247, 0.45)";
+        ctx.fillText("SAFE", 28, H - 18);
+        ctx.strokeStyle = SAFE_GREEN;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(62, H - 22);
+        ctx.lineTo(82, H - 22);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(229, 239, 247, 0.45)";
+        ctx.fillText("BLUE", 98, H - 18);
+        ctx.strokeStyle = SAFE_BLUE;
+        ctx.beginPath();
+        ctx.moveTo(132, H - 22);
+        ctx.lineTo(152, H - 22);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(229, 239, 247, 0.45)";
+        ctx.fillText("THREAT", 168, H - 18);
+        ctx.strokeStyle = THREAT;
+        ctx.beginPath();
+        ctx.moveTo(218, H - 22);
+        ctx.lineTo(238, H - 22);
+        ctx.stroke();
+      }
+
+      // ---- Input ----
+      function canvasPoint(evt) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        return {
+          x: ((clientX - rect.left) / rect.width) * W,
+          y: ((clientY - rect.top) / rect.height) * H,
+        };
+      }
+
+      let aimPos = null; // canvas-space aim reticle while pointer is over the stage
+
+      function drawAim() {
+        if (!aimPos || gameOver || awaitingStart) return;
+        const { x, y } = aimPos;
+        const r = HIT_RADIUS;
+
+        ctx.save();
+        // Outer ring = click / hit area
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(229, 239, 247, 0.55)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(131, 227, 224, 0.35)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Center aim dot
+        ctx.beginPath();
+        ctx.arc(x, y, 2.4, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(244, 251, 255, 0.92)";
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function onPointer(evt) {
+        if (gameOver || awaitingStart) return;
+        evt.preventDefault();
+        const now = performance.now();
+        const pt = canvasPoint(evt);
+        aimPos = pt;
+
+        // Prefer tapping a red line to stop it manually
+        const red = hitRedPacket(pt);
+        if (red) {
+          blockRedPacket(red, now);
+          return;
+        }
+
+        tryShieldClick(now, pt);
+      }
+
+      function onPointerMove(evt) {
+        if (gameOver || awaitingStart) {
+          aimPos = null;
+          return;
+        }
+        aimPos = canvasPoint(evt);
+      }
+
+      function onPointerLeave() {
+        aimPos = null;
+      }
+
+      canvas.addEventListener("pointerdown", onPointer);
+      canvas.addEventListener("pointermove", onPointerMove);
+      canvas.addEventListener("pointerleave", onPointerLeave);
+      canvas.addEventListener("pointercancel", onPointerLeave);
+
+      const restartBtn = document.getElementById("restartBtn");
+      const startBtn = document.getElementById("startBtn");
+      function onRestart(e) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        resetGame();
+      }
+      function onStart(e) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        resetGame();
+      }
+      restartBtn.addEventListener("click", onRestart);
+      startBtn.addEventListener("click", onStart);
+      // Capture phase on overlay so start/restart always wins over anything underneath
+      els.overlay.addEventListener("click", (e) => {
+        if (e.target === restartBtn || restartBtn.contains(e.target)) onRestart(e);
+        if (e.target === startBtn || startBtn.contains(e.target)) onStart(e);
+      }, true);
+
+      els.btnEasy.addEventListener("click", () => {
+        difficulty = "easy";
+        els.btnEasy.classList.add("active");
+        els.btnHard.classList.remove("active");
+        if (awaitingStart) return;
+        resetGame();
+      });
+      els.btnHard.addEventListener("click", () => {
+        difficulty = "hard";
+        els.btnHard.classList.add("active");
+        els.btnEasy.classList.remove("active");
+        if (awaitingStart) return;
+        resetGame();
+      });
+
+      // ---- Frame ----
+      function frame(now) {
+        const dt = Math.min(0.05, (now - lastNow) / 1000);
+        lastNow = now;
+
+        if (!gameOver && !awaitingStart) {
+          // Shield timers
+          if (shieldMode === "active" && now >= shieldActiveUntil) {
+            startCooldown(now);
+          } else if (shieldMode === "cooldown" && now >= shieldCooldownUntil) {
+            shieldMode = "ready";
+            shieldCooldownUntil = 0;
+            els.hint.textContent = "Shield ready — tap center · tap reds to stop";
+          }
+
+          // Spawn
+          spawnAcc += cfg().spawnPerSec * paceFactor(now) * dt;
+          while (spawnAcc >= 1) {
+            spawnPacket(now);
+            spawnAcc -= 1;
+          }
+
+          updatePackets(now, dt);
+        }
+
+        impactFlash *= 0.88;
+        leakFlash *= 0.9;
+        notReadyFlash *= 0.9;
+
+        ctx.clearRect(0, 0, W, H);
+        const g = ctx.createLinearGradient(0, 0, W, 0);
+        g.addColorStop(0, "rgba(78, 145, 255, 0.06)");
+        g.addColorStop(0.5, "rgba(246, 195, 107, 0.04)");
+        g.addColorStop(1, "rgba(131, 227, 224, 0.06)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+
+        terminals.forEach((t) => drawTerminal(t, now));
+        drawInternet(now);
+        drawPackets(now);
+        drawShield(now);
+        drawLegend();
+        drawAim();
+
+        requestAnimationFrame(frame);
+      }
+
+      showStartScreen();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>
