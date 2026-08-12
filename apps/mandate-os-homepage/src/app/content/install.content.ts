@@ -123,7 +123,7 @@ const sharedCompletion = {
   title: 'You now have MandateOS running in your repository!',
   body: 'With MandateOS your agents can still move fast, but risky actions no longer run unchecked. You already did the hard part — the hooks are installed. Sign up to replace the demo credentials with your own workspace, attach real mandates, and start protecting every guarded action from day one.',
   ctaLabel: 'Sign up',
-  ctaHref: 'https://app.getmandateos.com',
+  ctaHref: 'https://app.getmandateos.com/signup',
 } as const;
 
 const codexCompletion: HostCompletion = {
