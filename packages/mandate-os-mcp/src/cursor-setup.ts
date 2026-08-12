@@ -460,7 +460,10 @@ function buildMandateOsHookEntry(input: {
   return {
     command,
     timeout: DEFAULT_HOOK_TIMEOUT_SECONDS,
-    failClosed: true,
+    // Fail open when the gateway crashes, times out, or returns invalid JSON so
+    // installers are not hard-blocked from routine work (for example git push)
+    // if MandateOS is unreachable. Explicit policy denials still deny.
+    failClosed: false,
   };
 }
 

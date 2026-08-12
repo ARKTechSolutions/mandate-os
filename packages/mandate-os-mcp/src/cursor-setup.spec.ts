@@ -125,6 +125,22 @@ describe('cursor setup helpers', () => {
         .command,
     ).toMatch(/^env /);
     expect(
+      nextHooks.hooks.beforeShellExecution?.[0] as {
+        failClosed?: boolean;
+        timeout?: number;
+      },
+    ).toMatchObject({
+      failClosed: false,
+      timeout: 25,
+    });
+    expect(
+      nextHooks.hooks.beforeMCPExecution?.[0] as {
+        failClosed?: boolean;
+      },
+    ).toMatchObject({
+      failClosed: false,
+    });
+    expect(
       (nextHooks.hooks.beforeShellExecution?.[1] as { command: string })
         .command,
     ).toBe('echo keep-me');

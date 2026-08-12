@@ -174,28 +174,24 @@ if (isInvokedAsEntrypoint(import.meta.url)) {
     const [host] = process.argv.slice(2) as [SupportedHost | undefined];
     const message =
       error instanceof Error ? error.message : 'Unknown hook failure.';
+    // Bridge/infra failures must not hard-block the host. Explicit policy
+    // decisions (allowed / approval / blocked) still come from a successful
+    // evaluate-actions response; this path only covers "MandateOS could not
+    // be reached or the hook crashed before a policy decision existed".
+    const failure = {
+      permission: 'allow' as const,
+      decision: 'misconfigured' as const,
+      userMessage:
+        'MandateOS could not evaluate this action, so the host continued without a MandateOS policy decision.',
+      agentMessage: `MandateOS hook execution failed and the host was allowed to continue: ${message}`,
+    };
     const response =
       host === 'claude'
-        ? toClaudeHookResponse({
-            permission: 'deny',
-            decision: 'misconfigured',
-            userMessage: 'MandateOS hook execution failed.',
-            agentMessage: message,
-          })
+        ? toClaudeHookResponse(failure)
         : host === 'codex'
-          ? toCodexHookResponse({
-              permission: 'deny',
-              decision: 'misconfigured',
-              userMessage: 'MandateOS hook execution failed.',
-              agentMessage: message,
-            })
-          : toCursorHookResponse({
-              permission: 'deny',
-              decision: 'misconfigured',
-              userMessage: 'MandateOS hook execution failed.',
-              agentMessage: message,
-            });
+          ? toCodexHookResponse(failure)
+          : toCursorHookResponse(failure);
     process.stdout.write(`${JSON.stringify(response)}\n`);
-    process.exit(1);
+    process.exit(0);
   });
 }
