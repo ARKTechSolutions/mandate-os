@@ -177,7 +177,7 @@ export MANDATE_OS_MCP_DEFAULT_SOURCE="cursor.mandateos.project"`,
     number: '03',
     title: 'Run the Cursor installer',
     body: 'This installs the MandateOS MCP server and Cursor hooks for the current repository. The default setup includes the bundled starter risk presets.',
-    help: 'The installer updates ~/.cursor/mcp.json, .cursor/mcp.json, and .cursor/hooks.json. The hooks use beforeShellExecution and beforeMCPExecution with failClosed enabled.',
+    help: 'The installer updates ~/.cursor/mcp.json, .cursor/mcp.json, and .cursor/hooks.json. The hooks use beforeShellExecution and beforeMCPExecution and fail open if MandateOS is unreachable, so routine host work is not hard-blocked by a bridge failure.',
     tip: { body: statusCheckTipBody },
     codeTabs: [
       {
