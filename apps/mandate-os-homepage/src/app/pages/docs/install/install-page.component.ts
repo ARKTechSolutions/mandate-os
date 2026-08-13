@@ -163,9 +163,9 @@ export class InstallPageComponent implements OnInit {
       case 'allowed':
         return 'Expect the command to run without an approval prompt.';
       case 'approval':
-        return 'Expect MandateOS to pause and ask for approval. Approve it, then confirm the action completed.';
+        return 'Expect MandateOS to pause and ask for approval. Approve it, then confirm the dry-run publish completed.';
       case 'blocked':
-        return 'Expect MandateOS to refuse the action even if you consent. Nothing destructive should change in the repo.';
+        return 'Expect MandateOS to refuse the destructive delete even if you consent. Nothing should be removed from the repo.';
     }
   }
 

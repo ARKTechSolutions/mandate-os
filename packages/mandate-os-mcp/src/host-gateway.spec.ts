@@ -235,12 +235,6 @@ describe('MandateOsHostGateway', () => {
       .mockResolvedValueOnce({
         data: {
           batchId: 'sim_123',
-          receipts: [receipt('allowed')],
-        },
-      })
-      .mockResolvedValueOnce({
-        data: {
-          batchId: 'sim_123',
           receipts: [receipt('approval')],
         },
       })
@@ -254,16 +248,6 @@ describe('MandateOsHostGateway', () => {
 
     await expect(
       gateway.evaluateShellCommand({
-        command: 'mkdir -p .mandateos-demo',
-      }),
-    ).resolves.toMatchObject({
-      permission: 'allow',
-      decision: 'policy_allowed',
-      ruleId: 'local.directory.create.command',
-    });
-
-    await expect(
-      gateway.evaluateShellCommand({
         command: 'pnpm publish --dry-run',
       }),
     ).resolves.toMatchObject({
@@ -274,7 +258,7 @@ describe('MandateOsHostGateway', () => {
 
     await expect(
       gateway.evaluateShellCommand({
-        command: 'rm -rf .mandateos-demo',
+        command: 'rm -rf .mandateos-blocked',
       }),
     ).resolves.toMatchObject({
       permission: 'deny',
@@ -287,15 +271,15 @@ describe('MandateOsHostGateway', () => {
       expect.objectContaining({
         actions: [
           expect.objectContaining<ActionScenario>({
-            tool: 'shell.exec',
-            zone: 'domestic',
-            riskLevel: 'medium',
+            tool: 'deploy.prod',
+            zone: 'oecd',
+            riskLevel: 'high',
           }),
         ],
       }),
     );
     expect(evaluateActions).toHaveBeenNthCalledWith(
-      3,
+      2,
       expect.objectContaining({
         actions: [
           expect.objectContaining<ActionScenario>({
@@ -308,7 +292,7 @@ describe('MandateOsHostGateway', () => {
     );
   });
 
-  it('classifies the installation demo mkdir as high risk so the demo mandate requires approval', async () => {
+  it('classifies the installation demo publish dry-run as a production publish that requires approval', async () => {
     const evaluateActions = vi.fn().mockResolvedValue({
       data: {
         batchId: 'sim_123',
@@ -324,20 +308,20 @@ describe('MandateOsHostGateway', () => {
 
     await expect(
       gateway.evaluateShellCommand({
-        command: 'mkdir -p .mandateos-demo',
+        command: 'pnpm publish --dry-run',
       }),
     ).resolves.toMatchObject({
       permission: 'ask',
       decision: 'policy_approval',
-      ruleId: 'local.directory.create.command',
+      ruleId: 'release.publish.command',
     });
 
     expect(evaluateActions).toHaveBeenCalledWith(
       expect.objectContaining({
         actions: [
           expect.objectContaining<ActionScenario>({
-            tool: 'shell.exec',
-            zone: 'domestic',
+            tool: 'deploy.prod',
+            zone: 'oecd',
             riskLevel: 'high',
           }),
         ],
@@ -361,7 +345,7 @@ describe('MandateOsHostGateway', () => {
 
     await expect(
       gateway.evaluateShellCommand({
-        command: 'rm -rf .mandateos-demo',
+        command: 'rm -rf .mandateos-blocked',
       }),
     ).resolves.toMatchObject({
       permission: 'deny',
@@ -371,7 +355,7 @@ describe('MandateOsHostGateway', () => {
 
     await expect(
       gateway.evaluateShellCommand({
-        command: 'Remove-Item .mandateos-demo -Recurse -Force',
+        command: 'Remove-Item .mandateos-blocked -Recurse -Force',
       }),
     ).resolves.toMatchObject({
       permission: 'deny',
@@ -381,6 +365,55 @@ describe('MandateOsHostGateway', () => {
 
     expect(evaluateActions).toHaveBeenNthCalledWith(
       1,
+      expect.objectContaining({
+        actions: [
+          expect.objectContaining<ActionScenario>({
+            tool: 'shell.exec',
+            zone: 'restricted',
+            riskLevel: 'high',
+          }),
+        ],
+      }),
+    );
+  });
+
+  it('forces the starter-bundle rm demo delete onto the restricted surface under the demo mandate', async () => {
+    const evaluateActions = vi.fn().mockResolvedValue({
+      data: {
+        batchId: 'sim_123',
+        receipts: [receipt('blocked')],
+      },
+    });
+    const localWorkspaceRules = parseHostGatewayRules(
+      JSON.parse(
+        readFileSync(
+          path.resolve(
+            rootDir,
+            '../rules/starter-bundles/local-workspace.json',
+          ),
+          'utf8',
+        ),
+      ),
+    );
+    const gateway = createGateway(evaluateActions, {
+      client: {
+        evaluateActions,
+      } as never,
+      defaultMandateId: 'mdt_demo_repo_guard_v1',
+      rules: localWorkspaceRules,
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'rm -rf .mandateos-blocked',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'policy_blocked',
+      ruleId: 'workspace.fs.delete.command',
+    });
+
+    expect(evaluateActions).toHaveBeenCalledWith(
       expect.objectContaining({
         actions: [
           expect.objectContaining<ActionScenario>({
@@ -404,7 +437,7 @@ describe('MandateOsHostGateway', () => {
 
     await expect(
       gateway.evaluateShellCommand({
-        command: 'Remove-Item .mandateos-demo -Recurse -Force',
+        command: 'Remove-Item .mandateos-blocked -Recurse -Force',
       }),
     ).resolves.toMatchObject({
       permission: 'deny',

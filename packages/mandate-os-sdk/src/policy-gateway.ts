@@ -401,6 +401,12 @@ export const openClawPolicyGatewayRules: MandateOsPolicyGatewayRule[] = [
 ] as const;
 
 export const DEMO_INSTALL_MANDATE_ID = 'mdt_demo_repo_guard_v1';
+export const DEMO_INSTALL_BLOCKED_PATH_MARKER = '.mandateos-blocked';
+
+const DEMO_INSTALL_BLOCKED_DELETE_RULE_IDS = new Set([
+  'destructive.file.delete.command',
+  'workspace.fs.delete.command',
+]);
 
 export class MandateOsPolicyGateway {
   private readonly defaultMandateId?: string;
@@ -507,12 +513,15 @@ export class MandateOsPolicyGateway {
     }
 
     let action = createActionScenario(input.rule, input.subject, input.context);
+    // Starter local-workspace rules classify `rm` as domestic/high (approval).
+    // Force the install-demo blocked path onto the restricted surface so the
+    // demo mandate hard-denies it on every host OS.
     if (
       this.defaultMandateId === DEMO_INSTALL_MANDATE_ID &&
-      input.rule.id === 'local.directory.create.command' &&
-      input.subject.toLowerCase().includes('.mandateos-demo')
+      DEMO_INSTALL_BLOCKED_DELETE_RULE_IDS.has(input.rule.id) &&
+      input.subject.toLowerCase().includes(DEMO_INSTALL_BLOCKED_PATH_MARKER)
     ) {
-      action = { ...action, riskLevel: 'high' };
+      action = { ...action, zone: 'restricted', riskLevel: 'high' };
     }
     const evaluation = await this.options.client.evaluateActions({
       mandateId,
