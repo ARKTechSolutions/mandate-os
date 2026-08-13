@@ -26,22 +26,24 @@ describe('DemoInstallService', () => {
           },
           tests: [
             {
-              id: 'demo-directory-create',
+              id: 'package-publish-dry-run',
               decision: 'approval',
-              description: 'Create the .mandateos-demo directory.',
+              description:
+                'A dry-run package publish requires human approval before the agent runs it.',
               commands: {
-                macOsLinux: 'mkdir .mandateos-demo',
-                windowsPowerShell: 'mkdir .mandateos-demo',
+                macOsLinux: 'pnpm publish --dry-run',
+                windowsPowerShell: 'pnpm publish --dry-run',
               },
             },
             {
-              id: 'demo-directory-delete',
+              id: 'destructive-delete',
               decision: 'blocked',
-              description: 'Delete the .mandateos-demo directory.',
+              description:
+                'Destructive deletion of .mandateos-blocked is outside the demo safety boundary and is blocked.',
               commands: {
-                macOsLinux: 'rm -rf .mandateos-demo',
+                macOsLinux: 'rm -rf .mandateos-blocked',
                 windowsPowerShell:
-                  'Remove-Item .mandateos-demo -Recurse -Force',
+                  'Remove-Item .mandateos-blocked -Recurse -Force',
               },
             },
           ],
@@ -62,21 +64,23 @@ describe('DemoInstallService', () => {
       },
       tests: [
         {
-          id: 'demo-directory-create',
+          id: 'package-publish-dry-run',
           decision: 'approval',
-          description: 'Create the .mandateos-demo directory.',
+          description:
+            'A dry-run package publish requires human approval before the agent runs it.',
           commands: {
-            macOsLinux: 'mkdir .mandateos-demo',
-            windowsPowerShell: 'mkdir .mandateos-demo',
+            macOsLinux: 'pnpm publish --dry-run',
+            windowsPowerShell: 'pnpm publish --dry-run',
           },
         },
         {
-          id: 'demo-directory-delete',
+          id: 'destructive-delete',
           decision: 'blocked',
-          description: 'Delete the .mandateos-demo directory.',
+          description:
+            'Destructive deletion of .mandateos-blocked is outside the demo safety boundary and is blocked.',
           commands: {
-            macOsLinux: 'rm -rf .mandateos-demo',
-            windowsPowerShell: 'Remove-Item .mandateos-demo -Recurse -Force',
+            macOsLinux: 'rm -rf .mandateos-blocked',
+            windowsPowerShell: 'Remove-Item .mandateos-blocked -Recurse -Force',
           },
         },
       ],
