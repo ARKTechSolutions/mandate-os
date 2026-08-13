@@ -113,7 +113,7 @@ const DEFAULT_IDENTIFIER = 'mandateos';
 const DEFAULT_HOOKS_SOURCE = 'codex.mandateos.hooks';
 const DEFAULT_PROJECT_SOURCE = 'codex.mandateos.project';
 const CODEX_BASH_MATCHER = 'Bash';
-const DEFAULT_HOOK_TIMEOUT_SECONDS = 25;
+const DEFAULT_HOOK_TIMEOUT_SECONDS = 35;
 
 export function installMandateOsIntoCodex(
   options: MandateOsCodexInstallOptions,

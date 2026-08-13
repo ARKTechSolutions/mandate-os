@@ -131,7 +131,7 @@ describe('cursor setup helpers', () => {
       },
     ).toMatchObject({
       failClosed: false,
-      timeout: 25,
+      timeout: 35,
     });
     expect(
       nextHooks.hooks.beforeMCPExecution?.[0] as {
