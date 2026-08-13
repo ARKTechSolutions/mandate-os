@@ -242,7 +242,7 @@ For example:
 - `terraform apply` becomes an infrastructure mutation action proposal
 - an unknown but side-effecting command can fall back to a coarse action like `shell.command.execute` and require approval or deny-by-default
 
-Cursor's hooks docs currently describe `beforeShellExecution` and `beforeMCPExecution` as running before any shell command or MCP tool call, and they support `failClosed: true`, which is the right default for security-sensitive MandateOS hooks:
+Cursor's hooks docs currently describe `beforeShellExecution` and `beforeMCPExecution` as running before any shell command or MCP tool call. MandateOS defaults to `failClosed: false` so a gateway crash, timeout, or invalid JSON does not hard-block the host when MandateOS is unreachable. Explicit policy decisions from a successful evaluation still allow, ask, or deny as usual. Teams that prefer hard-fail when MandateOS is down can set `failClosed: true` after install.
 
 - [Cursor Hooks](https://cursor.com/docs/hooks)
 
@@ -263,14 +263,14 @@ Example `hooks.json`:
       {
         "command": "node /absolute/path/to/dist/packages/mandate-os-mcp/hook-gateway.js cursor before-shell",
         "timeout": 5,
-        "failClosed": true
+        "failClosed": false
       }
     ],
     "beforeMCPExecution": [
       {
         "command": "node /absolute/path/to/dist/packages/mandate-os-mcp/hook-gateway.js cursor before-mcp",
         "timeout": 5,
-        "failClosed": true
+        "failClosed": false
       }
     ]
   }
