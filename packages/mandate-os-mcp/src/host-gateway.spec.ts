@@ -4,11 +4,12 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ActionScenario } from '@mandate-os/sdk';
+import { MandateOsAgentClientError, type ActionScenario } from '@mandate-os/sdk';
 
 import {
   createMandateOsHostGateway,
   parseHostGatewayRules,
+  readHostGatewayFailureMode,
   readHostGatewayRulesFromEnv,
   readHostGatewayUnmatchedPermission,
   toClaudeHookResponse,
@@ -582,6 +583,99 @@ describe('MandateOsHostGateway', () => {
 
     expect(evaluateActions).not.toHaveBeenCalled();
   });
+
+  it('fails open on low/medium-risk actions and asks on high-risk actions when MandateOS is unreachable (risk_based default)', async () => {
+    const outage = new MandateOsAgentClientError(
+      'MandateOS request timed out after 20000 ms.',
+      408,
+      'timeout',
+    );
+    const evaluateActions = vi.fn().mockRejectedValue(outage);
+    const gateway = createGateway(evaluateActions);
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'git push origin main',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'allow',
+      decision: 'service_unavailable',
+      ruleId: 'git.push.command',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'terraform apply -auto-approve',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'ask',
+      decision: 'service_unavailable',
+      ruleId: 'terraform.mutation.command',
+    });
+  });
+
+  it('always denies on service outage when failureMode is closed', async () => {
+    const outage = new MandateOsAgentClientError(
+      'fetch failed',
+      0,
+      'network_error',
+    );
+    const evaluateActions = vi.fn().mockRejectedValue(outage);
+    const gateway = createGateway(evaluateActions, {
+      client: {
+        evaluateActions,
+      } as never,
+      failureMode: 'closed',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'git push origin main',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'deny',
+      decision: 'service_unavailable',
+    });
+  });
+
+  it('always allows on service outage when failureMode is open, even for high-risk actions', async () => {
+    const outage = new MandateOsAgentClientError(
+      'Internal Server Error',
+      500,
+    );
+    const evaluateActions = vi.fn().mockRejectedValue(outage);
+    const gateway = createGateway(evaluateActions, {
+      client: {
+        evaluateActions,
+      } as never,
+      failureMode: 'open',
+    });
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'terraform apply -auto-approve',
+      }),
+    ).resolves.toMatchObject({
+      permission: 'allow',
+      decision: 'service_unavailable',
+    });
+  });
+
+  it('does not fail open on non-transport errors, such as a real API rejection', async () => {
+    const rejection = new MandateOsAgentClientError(
+      'Invalid bearer token.',
+      401,
+      'unauthorized',
+    );
+    const evaluateActions = vi.fn().mockRejectedValue(rejection);
+    const gateway = createGateway(evaluateActions);
+
+    await expect(
+      gateway.evaluateShellCommand({
+        command: 'git push origin main',
+      }),
+    ).rejects.toThrow('Invalid bearer token.');
+  });
 });
 
 describe('host gateway helpers', () => {
@@ -611,6 +705,12 @@ describe('host gateway helpers', () => {
         MANDATE_OS_HOST_GATEWAY_UNMATCHED_PERMISSION: 'deny',
       }),
     ).toBe('deny');
+    expect(readHostGatewayFailureMode({})).toBe('risk_based');
+    expect(
+      readHostGatewayFailureMode({
+        MANDATE_OS_HOOK_FAILURE_MODE: 'open',
+      }),
+    ).toBe('open');
     expect(
       toCursorHookResponse({ permission: 'ask', decision: 'unmatched' }),
     ).toEqual({

@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { createMandateOsClient } from './handlers.js';
 import {
   createMandateOsHostGateway,
+  readHostGatewayFailureMode,
   readHostGatewayRulesFromEnv,
   readHostGatewayUnmatchedPermission,
   toClaudeHookResponse,
@@ -58,6 +59,7 @@ export async function runHookGatewayCommand(
     defaultSource: config.defaultSource,
     hostName: host,
     unmatchedPermission: readHostGatewayUnmatchedPermission(env),
+    failureMode: readHostGatewayFailureMode(env),
     rules: readHostGatewayRulesFromEnv(env),
   });
   const rawInput = stdinText.trim();

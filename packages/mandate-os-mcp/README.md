@@ -244,6 +244,11 @@ For example:
 
 Cursor's hooks docs currently describe `beforeShellExecution` and `beforeMCPExecution` as running before any shell command or MCP tool call. MandateOS defaults to `failClosed: false` so a gateway crash, timeout, or invalid JSON does not hard-block the host when MandateOS is unreachable. Explicit policy decisions from a successful evaluation still allow, ask, or deny as usual. Teams that prefer hard-fail when MandateOS is down can set `failClosed: true` after install.
 
+There are two layers here worth distinguishing:
+
+- The `failClosed` field above is Cursor's own hook-level setting: it decides what Cursor does if the hook process itself crashes, times out, or returns invalid output before ever producing a decision.
+- `MANDATE_OS_HOOK_FAILURE_MODE` (below) controls what the hook gateway itself decides when it runs successfully but can't reach the MandateOS API (network error, timeout, 5xx). By default (`risk_based`) it allows low/medium-risk actions like `git push` through with a warning, but still requires manual approval (`ask`) for high-risk actions such as deployments or payments, so an outage doesn't silently disable protection on the actions that matter most. Set it to `open` to always allow, or `closed` to always deny, when MandateOS is unreachable. Actual policy denials and misconfiguration (for example a missing mandate id) are unaffected by this setting and still behave as before.
+
 - [Cursor Hooks](https://cursor.com/docs/hooks)
 
 Example `hooks.json`:
@@ -284,6 +289,7 @@ That built hook gateway reads:
 - `MANDATE_OS_MCP_DEFAULT_MANDATE_ID`
 - `MANDATE_OS_MCP_DEFAULT_SOURCE` (optional)
 - `MANDATE_OS_HOST_GATEWAY_UNMATCHED_PERMISSION` with `ask` by default
+- `MANDATE_OS_HOOK_FAILURE_MODE` (`open` | `closed` | `risk_based`) with `risk_based` by default, controlling the decision when MandateOS itself is unreachable
 - `MANDATE_OS_HOST_GATEWAY_RULES_FILES` for a comma-separated list of starter or custom bundle files
 - `MANDATE_OS_HOST_GATEWAY_RULES_JSON` or `MANDATE_OS_HOST_GATEWAY_RULES_FILE` for custom domain rules
 

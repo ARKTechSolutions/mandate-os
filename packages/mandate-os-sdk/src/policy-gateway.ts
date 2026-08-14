@@ -3,7 +3,10 @@ import { createHash } from 'node:crypto';
 import type { ReceiptRecord, RuntimeSimulationBatch } from './contracts.js';
 import type { ActionScenario, RiskLevel, ToolId, Zone } from './mandates.js';
 import { isRiskLevel, isToolId, isZone } from './mandates.js';
-import type { MandateOsAgentClient } from './agent-client.js';
+import {
+  MandateOsAgentClientError,
+  type MandateOsAgentClient,
+} from './agent-client.js';
 import {
   isPolicyGatewayRoute,
   recommendedToolForRoute,
@@ -11,6 +14,7 @@ import {
 } from './enforced-capabilities.js';
 
 export type PolicyGatewayPermission = 'allow' | 'ask' | 'deny';
+export type PolicyGatewayFailureMode = 'open' | 'closed' | 'risk_based';
 export type PolicyGatewayChannel =
   | 'shell'
   | 'mcp'
@@ -40,6 +44,7 @@ export type MandateOsPolicyGatewayOptions = {
   defaultSource?: string;
   hostName?: string;
   unmatchedPermission?: PolicyGatewayPermission;
+  failureMode?: PolicyGatewayFailureMode;
   rules: MandateOsPolicyGatewayRule[];
 };
 
@@ -50,7 +55,8 @@ export type PolicyGatewayDecision =
   | 'policy_blocked'
   | 'redirect_enforced'
   | 'unmatched'
-  | 'misconfigured';
+  | 'misconfigured'
+  | 'service_unavailable';
 
 export type PolicyGatewayEvaluationResult = {
   permission: PolicyGatewayPermission;
@@ -413,6 +419,7 @@ export class MandateOsPolicyGateway {
   private readonly defaultSource?: string;
   private readonly hostName: string;
   private readonly unmatchedPermission: PolicyGatewayPermission;
+  private readonly failureMode: PolicyGatewayFailureMode;
   private readonly rules: ResolvedPolicyGatewayRule[];
 
   constructor(private readonly options: MandateOsPolicyGatewayOptions) {
@@ -423,6 +430,7 @@ export class MandateOsPolicyGateway {
       options.unmatchedPermission,
       'ask',
     );
+    this.failureMode = normalizeFailureMode(options.failureMode, 'risk_based');
     this.rules = options.rules.map(resolvePolicyGatewayRule);
   }
 
@@ -480,6 +488,37 @@ export class MandateOsPolicyGateway {
     };
   }
 
+  private createServiceUnavailableResult(
+    rule: ResolvedPolicyGatewayRule,
+    action: ActionScenario,
+    error: unknown,
+  ): PolicyGatewayEvaluationResult {
+    const permission = resolveFailurePermission(
+      this.failureMode,
+      rule.riskLevel,
+    );
+    const reason = describeServiceError(error);
+
+    return {
+      permission,
+      decision: 'service_unavailable',
+      ruleId: rule.id,
+      route: rule.route || 'generic',
+      action,
+      userMessage: buildServiceUnavailableUserMessage(
+        permission,
+        rule.riskLevel,
+        reason,
+      ),
+      agentMessage: buildServiceUnavailableAgentMessage(
+        permission,
+        rule.riskLevel,
+        reason,
+        rule.id,
+      ),
+    };
+  }
+
   private findRule(channel: PolicyGatewayChannel, subject: string) {
     return this.rules.find(
       (rule) => rule.channel === channel && rule.pattern.test(subject),
@@ -523,21 +562,35 @@ export class MandateOsPolicyGateway {
     ) {
       action = { ...action, zone: 'restricted', riskLevel: 'high' };
     }
-    const evaluation = await this.options.client.evaluateActions({
-      mandateId,
-      source:
-        normalizeOptionalText(input.source) ||
-        this.defaultSource ||
-        `${input.host || this.hostName}.${input.channel}`,
-      details: {
-        host: input.host || this.hostName,
-        channel: input.channel,
-        matchedRuleId: input.rule.id,
-        subject: truncate(input.subject, 500),
-        ...(input.details || {}),
-      },
-      actions: [action],
-    });
+
+    let evaluation: Awaited<
+      ReturnType<MandateOsPolicyGatewayOptions['client']['evaluateActions']>
+    >;
+
+    try {
+      evaluation = await this.options.client.evaluateActions({
+        mandateId,
+        source:
+          normalizeOptionalText(input.source) ||
+          this.defaultSource ||
+          `${input.host || this.hostName}.${input.channel}`,
+        details: {
+          host: input.host || this.hostName,
+          channel: input.channel,
+          matchedRuleId: input.rule.id,
+          subject: truncate(input.subject, 500),
+          ...(input.details || {}),
+        },
+        actions: [action],
+      });
+    } catch (error) {
+      if (!isServiceUnavailableError(error)) {
+        throw error;
+      }
+
+      return this.createServiceUnavailableResult(input.rule, action, error);
+    }
+
     const receipt = evaluation.data.receipts[0];
 
     if (!receipt) {
@@ -801,6 +854,90 @@ export function normalizePermission(
   return value === 'allow' || value === 'ask' || value === 'deny'
     ? value
     : fallback;
+}
+
+export function normalizeFailureMode(
+  value: unknown,
+  fallback: PolicyGatewayFailureMode,
+): PolicyGatewayFailureMode {
+  return value === 'open' || value === 'closed' || value === 'risk_based'
+    ? value
+    : fallback;
+}
+
+/**
+ * Whether a MandateOS API failure looks like the service being unreachable
+ * (network error, timeout, 5xx) rather than a real policy or auth problem
+ * (4xx). Only service-unavailable failures are eligible for the configured
+ * failureMode fallback; anything else still throws, so misconfiguration
+ * stays fail-closed.
+ */
+function isServiceUnavailableError(error: unknown): boolean {
+  if (!(error instanceof MandateOsAgentClientError)) {
+    return false;
+  }
+
+  return (
+    error.status === 0 ||
+    error.status === 408 ||
+    error.status >= 500 ||
+    error.code === 'timeout' ||
+    error.code === 'network_error'
+  );
+}
+
+function resolveFailurePermission(
+  failureMode: PolicyGatewayFailureMode,
+  riskLevel: RiskLevel,
+): PolicyGatewayPermission {
+  if (failureMode === 'open') {
+    return 'allow';
+  }
+
+  if (failureMode === 'closed') {
+    return 'deny';
+  }
+
+  // risk_based: keep the door open for low/medium-risk actions so an outage
+  // doesn't block routine work, but require a human in the loop for
+  // high-risk actions instead of silently allowing them unverified.
+  return riskLevel === 'high' ? 'ask' : 'allow';
+}
+
+function describeServiceError(error: unknown): string {
+  return error instanceof Error ? error.message : 'unknown error';
+}
+
+function buildServiceUnavailableUserMessage(
+  permission: PolicyGatewayPermission,
+  riskLevel: RiskLevel,
+  reason: string,
+): string {
+  if (permission === 'allow') {
+    return `MandateOS is currently unreachable (${reason}). This ${riskLevel}-risk action was allowed automatically by the fail-open policy and was not verified or logged by MandateOS.`;
+  }
+
+  if (permission === 'ask') {
+    return `MandateOS is currently unreachable (${reason}). This action is high-risk, so it requires manual approval instead of being auto-allowed while MandateOS is down.`;
+  }
+
+  return `MandateOS is currently unreachable (${reason}). The action was blocked because the fail-closed policy is active.`;
+}
+
+function buildServiceUnavailableAgentMessage(
+  permission: PolicyGatewayPermission,
+  riskLevel: RiskLevel,
+  reason: string,
+  ruleId: string,
+): string {
+  const outcome =
+    permission === 'allow'
+      ? `allowed under the fail-open policy for ${riskLevel}-risk rule ${ruleId}`
+      : permission === 'ask'
+        ? `held for manual approval because rule ${ruleId} is high-risk`
+        : `blocked because the fail-closed policy is active for rule ${ruleId}`;
+
+  return `MandateOS could not be reached (${reason}), so this action was ${outcome}. This is a MandateOS service outage, not a policy denial or sandbox/plugin startup failure.`;
 }
 
 export function normalizeOptionalText(value: unknown) {

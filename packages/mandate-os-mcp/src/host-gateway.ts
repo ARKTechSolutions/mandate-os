@@ -8,6 +8,7 @@ import {
   defaultHostGatewayRules,
   isMandateOsToolName,
   isReadOnlyShellCommand,
+  normalizeFailureMode,
   normalizeMcpToolName,
   normalizeOptionalText,
   normalizePermission,
@@ -17,6 +18,7 @@ import {
   type ActionScenario,
   type MandateOsPolicyGatewayRule,
   type PolicyGatewayChannel,
+  type PolicyGatewayFailureMode,
   type PolicyGatewayPermission,
   type PolicyGatewayRoute,
 } from '@mandate-os/sdk';
@@ -41,6 +43,7 @@ export type MandateOsHostGatewayOptions = {
   defaultSource?: string;
   hostName?: string;
   unmatchedPermission?: HostGatewayPermission;
+  failureMode?: PolicyGatewayFailureMode;
   rules?: MandateOsHostGatewayRule[];
 };
 
@@ -72,7 +75,8 @@ export type HostGatewayDecision =
   | 'policy_blocked'
   | 'redirect_enforced'
   | 'unmatched'
-  | 'misconfigured';
+  | 'misconfigured'
+  | 'service_unavailable';
 
 export type HostGatewayEvaluationResult = {
   permission: HostGatewayPermission;
@@ -97,6 +101,7 @@ export class MandateOsHostGateway {
       defaultSource: options.defaultSource,
       hostName: options.hostName || 'host-gateway',
       unmatchedPermission: options.unmatchedPermission,
+      failureMode: options.failureMode,
       rules: [...(options.rules || []), ...defaultHostGatewayRules],
     });
   }
@@ -222,6 +227,15 @@ export function readHostGatewayUnmatchedPermission(
     normalizeOptionalText(env.MANDATE_OS_HOST_GATEWAY_UNMATCHED_PERMISSION) ||
       'ask',
     'ask',
+  );
+}
+
+export function readHostGatewayFailureMode(
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  return normalizeFailureMode(
+    normalizeOptionalText(env.MANDATE_OS_HOOK_FAILURE_MODE) || 'risk_based',
+    'risk_based',
   );
 }
 
