@@ -152,9 +152,7 @@ export class InstallPageComponent implements OnInit {
       case 'allowed':
         return 'Allowed';
       case 'approval':
-        return this.activeHostId === 'cursor'
-          ? 'Approval required (simulated)'
-          : 'Approval required';
+        return 'Approval required';
       case 'blocked':
         return 'Blocked';
     }
@@ -166,19 +164,19 @@ export class InstallPageComponent implements OnInit {
         return 'Expect the command to run without an approval prompt.';
       case 'approval':
         return this.activeHostId === 'cursor'
-          ? 'Expect Cursor to stop the command. The agent should say MandateOS approval is required (not a permanent hard block). You cannot finish that approval in this public demo without the MandateOS dashboard.'
+          ? 'Expect the agent to be blocked. The agent should say MandateOS approval is required (not a permanent hard block). You cannot finish that approval in this public demo without the MandateOS dashboard'
           : 'Expect MandateOS to pause and ask for approval. Approve it, then confirm the dry-run publish completed.';
       case 'blocked':
-        return 'Expect MandateOS to refuse the destructive delete even if you consent. Nothing should be removed from the repo.';
+        return 'Expect MandateOS to refuse the action. Nothing should be removed from the repo.';
     }
   }
 
   protected demoTestNote(): string {
     if (this.activeHostId === 'cursor') {
-      return 'The commands run for real in your repository. On Cursor, approval-required actions are stopped with a distinct agent message (simulated approval), because Cursor cannot complete MandateOS approval inline in this public demo. Hard-blocked commands stay refused with no approval path. These are public, rate-limited demo credentials (30 evaluations per minute) — no MandateOS account required. The blocked delete targets a disposable path (.mandateos-blocked) that does not need to exist for the refusal to work.';
+      return 'Both demo commands should stop the agent. Public demo credentials only — no MandateOS account required.';
     }
 
-    return 'The commands run for real in your repository. Blocked commands are refused even if you consent. These are public, rate-limited demo credentials (30 evaluations per minute) — no MandateOS account required. The blocked delete targets a disposable path (.mandateos-blocked) that does not need to exist for the refusal to work.';
+    return 'The commands run for real in your repository. Blocked commands are refused even if you consent. These are public, rate-limited demo credentials (30 evaluations per minute) — no MandateOS account required.';
   }
 
   protected codeFor(code: string): string {
