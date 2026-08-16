@@ -240,6 +240,31 @@ export function readHostGatewayFailureMode(
 }
 
 export function toCursorHookResponse(result: HostGatewayEvaluationResult) {
+  // Cursor currently ignores hook permission "ask" and runs the tool anyway.
+  // Map MandateOS approval decisions to deny so the action stops, while keeping
+  // distinct messaging so the agent can tell approval-required from hard deny.
+  if (
+    result.permission === 'ask' &&
+    result.decision === 'policy_approval'
+  ) {
+    const reasons = result.agentMessage || result.userMessage;
+    return {
+      continue: true,
+      permission: 'deny' as const,
+      user_message:
+        'MandateOS requires approval in the MandateOS control panel before this action can continue. This is not a permanent hard block.',
+      agent_message: [
+        'MandateOS requires operator approval before this action can continue.',
+        'Cursor cannot complete that approval inline, so MandateOS denied this attempt to stop it.',
+        'Tell the user this is an approval-required pause, not a permanent policy denial.',
+        'They need to approve it in the MandateOS dashboard/control panel, then ask you to retry.',
+        reasons ? `MandateOS details: ${reasons}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(' '),
+    };
+  }
+
   return {
     continue: true,
     permission: result.permission,

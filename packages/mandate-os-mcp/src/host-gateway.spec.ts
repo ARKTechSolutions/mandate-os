@@ -718,6 +718,32 @@ describe('host gateway helpers', () => {
       permission: 'ask',
     });
     expect(
+      toCursorHookResponse({
+        permission: 'ask',
+        decision: 'policy_approval',
+        agentMessage: 'Approval is required before continuing.',
+      }),
+    ).toEqual({
+      continue: true,
+      permission: 'deny',
+      user_message:
+        'MandateOS requires approval in the MandateOS control panel before this action can continue. This is not a permanent hard block.',
+      agent_message: expect.stringContaining(
+        'approval-required pause, not a permanent policy denial',
+      ),
+    });
+    expect(
+      toCursorHookResponse({
+        permission: 'deny',
+        decision: 'policy_blocked',
+        agentMessage: 'Hard policy denial.',
+      }),
+    ).toEqual({
+      continue: true,
+      permission: 'deny',
+      agent_message: 'Hard policy denial.',
+    });
+    expect(
       toClaudeHookResponse({
         permission: 'deny',
         decision: 'redirect_enforced',
